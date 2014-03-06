@@ -9,7 +9,7 @@ public:
   Real cellw, cellh;
   int pxw, pxh;
 
-  virtual Ray5Intersection intersectsUnit(const Vect4& O, const Vect4& D) { }//uf what?
+  virtual Ray5Intersection intersectsUnit(const Vect4& O, const Vect4& D) {return Ray5Intersection();}//Useless, but necessary override.
 
   Ray5Camera() {setScreen(100, 100, 1, 1, PI / 2);}
 
