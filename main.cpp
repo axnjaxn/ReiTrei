@@ -3,7 +3,6 @@
 //#define NO_GRID
 
 #include <ctime>
-#include "circlelist.h"
 #include "ray5screen.h"
 #include "ray5parser.h"
 #include "ray5shapes.h"
