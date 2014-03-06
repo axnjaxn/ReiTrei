@@ -19,7 +19,6 @@ Ray5Screen& Ray5Screen::operator=(const Ray5Screen& screen) {
   ambient = diffuse = NULL;
   setTargetSurface(screen.target);
   setDimensions(screen.w, screen.h);
-  setBrightness(screen.getBrightness());
   for (int i = 0; i < w * h; i++) {
     ambient[i] = screen.ambient[i];
     diffuse[i] = screen.diffuse[i];
@@ -56,7 +55,7 @@ void Ray5Screen::drawScanline(int r) {
   Uint32* bufp = (Uint32*)target->pixels;
   Vect4 color;
   for (int c = 0; c < w; c++) {
-    color = getBrightness() * diffuse[r * w + c] + ambient[r * w + c];
+    color = diffuse[r * w + c] + ambient[r * w + c];
     bufp[r * target->w + c] = SDL_MapRGB(target->format, toByte(color[0]), toByte(color[1]), toByte(color[2]));
   } 
 

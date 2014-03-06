@@ -20,7 +20,6 @@ class Ray5Screen {
   
   Ray5Screen& operator=(const Ray5Screen& screen);
 
-  inline Real getBrightness() const {return 1.0;}//deprecated
   inline int width() const {return w;}
   inline int height() const {return h;}
   inline SDL_Surface* getTarget() const {return target;}//deprecated
@@ -29,7 +28,6 @@ class Ray5Screen {
   void setDimensions(int w, int h);
   void setAmbient(int r, int c, const Vect4& color);
   void setDiffuse(int r, int c, const Vect4& color);
-  void setBrightness(Real brightness) { }//deprecated
 
   void drawScanline(int r);
   void drawSurface();
