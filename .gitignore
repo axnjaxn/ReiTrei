@@ -1,0 +1,7 @@
+ReiTrei5
+*~
+*.o
+*.stackdump
+Thumbs.db
+*.ray
+*.bmp
