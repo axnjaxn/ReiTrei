@@ -160,8 +160,6 @@ int main(int argc, char* argv[]) {
 
   SDL_Event event;
   bool exitflag = 0;
-  char mapname[200];
-  int j;
   while (!exitflag) {
     while (SDL_PollEvent(&event))
       if (event.type == SDL_QUIT || (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)) exitflag = 1;
