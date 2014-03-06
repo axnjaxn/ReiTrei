@@ -371,9 +371,9 @@ Ray4Light* parseLight(TokenStream* ts) {
   return light;
 }
 
-Ray4Camera parseCamera(TokenStream* ts) {
+Ray5Camera parseCamera(TokenStream* ts) {
   ts->expectToken("{");
-  Ray4Camera camera;
+  Ray5Camera camera;
   parseModifiers(ts, &camera); 
   ts->expectToken("}");
   return camera;

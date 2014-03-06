@@ -13,8 +13,6 @@
 #include "ray4shapes.h"
 #include <vector>
 
-REAL exposure = 0.1;
-
 Vect4 traceAmbientRay(const Ray4Scene& scene, const Vect4& O, const Vect4& D, int nrecurse = 0) {
   Vect4 color;
 
@@ -38,7 +36,7 @@ Vect4 traceAmbientRay(const Ray4Scene& scene, const Vect4& O, const Vect4& D, in
 }
 
 //uf need to change this function
-Vect4 tracePhotonRay(const Ray4Scene& scene, const Vect4& O, const Vect4& D, int nrecurse = 0) {
+Vect4 traceDiffuseRay(const Ray4Scene& scene, const Vect4& O, const Vect4& D, int nrecurse = 0) {
   Vect4 color;
   
   if (nrecurse >= MAX_RECURSE) return color;
@@ -51,7 +49,7 @@ Vect4 tracePhotonRay(const Ray4Scene& scene, const Vect4& O, const Vect4& D, int
   if (nonzero(nearest.obj->material.reflective)) {
     Vect4 _D = D + (2 * nearest.N * -dot(nearest.N, D));
     Vect4 _O = nearest.P + EPS * _D;
-    color += nearest.obj->material.reflective.multComp(tracePhotonRay(scene, _O, _D, nrecurse + 1));
+    color += nearest.obj->material.reflective.multComp(traceDiffuseRay(scene, _O, _D, nrecurse + 1));
   }
 
   //uf Where's the nonreflective lighting?
@@ -72,7 +70,7 @@ void traceAt(Ray4Scene& scene, Ray5Screen& screen, int r, int c) {
   Vect4 D = scene.camera.getDirection(r, c);
       
   screen.setAmbient(r, c, traceAmbientRay(scene, O, D));
-  screen.setDiffuse(r, c, tracePhotonRay(scene, O, D));
+  screen.setDiffuse(r, c, traceDiffuseRay(scene, O, D));
 }
 
 int stripExtension(char* str) {

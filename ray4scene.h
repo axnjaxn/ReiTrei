@@ -3,7 +3,7 @@
 
 #include <cstdio>
 #include <vector>
-#include "ray4camera.h"
+#include "ray5camera.h"
 #include "ray4light.h"
 #include "ray4grid.h"
 
@@ -16,7 +16,7 @@ class Ray4Scene {
   Ray4Grid grid;
 
 public:
-  Ray4Camera camera;
+  Ray5Camera camera;
   Vect4 bgcolor;
 
   Ray4Scene() { }

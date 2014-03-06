@@ -1,17 +1,17 @@
-#ifndef _BPJ_REITREI4_CAMERA_H
-#define _BPJ_REITREI4_CAMERA_H
+#ifndef _BPJ_REITREI5_CAMERA_H
+#define _BPJ_REITREI5_CAMERA_H
 
-#include "ray4object.h"
+#include "ray5object.h"
 #include <cmath>
 
-class Ray4Camera : public Ray4Object {
+class Ray5Camera : public Ray5Object {
 public:
-  REAL cellw, cellh;
+  Real cellw, cellh;
   int pxw, pxh;
 
   virtual Ray4Intersection intersectsUnit(const Vect4& O, const Vect4& D) { }
 
-  Ray4Camera() {setScreen(100, 100, 1, 1, PI / 2);}
+  Ray5Camera() {setScreen(100, 100, 1, 1, PI / 2);}
 
   void setScreen(int pxw, int pxh, REAL xrange, REAL yrange, REAL fov) {
     this->pxw = pxw;

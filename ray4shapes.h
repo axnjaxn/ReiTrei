@@ -1,7 +1,7 @@
 #ifndef _BPJ_REITREI4_SHAPES_H
 #define _BPJ_REITREI4_SHAPES_H
 
-#include "ray4object.h"
+#include "ray5object.h"
 #include <cmath>
 
 class Ray4Sphere : public Ray4Object {

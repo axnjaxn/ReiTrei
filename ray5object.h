@@ -1,18 +1,13 @@
-#ifndef _BPJ_REITREI4_OBJECT_H
-#define _BPJ_REITREI4_OBJECT_H
+#ifndef _BPJ_REITREI5_OBJECT_H
+#define _BPJ_REITREI5_OBJECT_H
 
 #include "mat4.h"
 #include <cstdlib>
 
-typedef Real REAL;//del
-
 class Ray4Material {
  public:
-  bool shadowless;
-  bool twosided;
-  Vect4 ambient;
-  Vect4 reflective;
-  Vect4 diffuse;
+  bool shadowless, twosided;
+  Vect4 ambient, reflective, diffuse;
   Real specular, shininess;
 
   Ray4Material() {
@@ -22,33 +17,29 @@ class Ray4Material {
   Ray4Material(const Ray4Material& m) {*this = m;}
 };
 
-class Ray4Object;
+class Ray5Object;
 
 class Ray4Intersection {
  public:
-  Ray4Object* obj;
+  Ray5Object* obj;
   Real t;
   Vect4 P, N;
 
   Ray4Intersection() {obj = NULL; t = -1;}
-
-  Ray4Intersection(Ray4Object* obj, Real t, const Vect4& P, const Vect4& N) {
-    this->obj = obj;
-    this->t = t;
-    this->P = P;
-    this->N = N;
+  Ray4Intersection(Ray5Object* obj, Real t, const Vect4& P, const Vect4& N) {
+    this->obj = obj; this->t = t; this->P = P; this->N = N;
   }
   inline bool nearerThan(const Ray4Intersection& hit) {return (t > 0 && (hit.t < 0 || t < hit.t));}
 };
 
-class Ray4Object {
+class Ray5Object {
 protected:
   Mat4 M, N;
 
 public:
   Ray4Material material;
   
-  inline Ray4Object() {M = N = identity();}
+  inline Ray5Object() {M = N = identity();}
 
   Ray4Intersection intersects(const Vect4& O, const Vect4& D) {
     Ray4Intersection result = intersectsUnit(transformPoint(N, O), transformDirection(N, D));
@@ -107,17 +98,17 @@ public:
 
 #include <vector>
 
-class Ray4ObjectSet {
+class Ray5ObjectSet {
  protected:
-  std::vector<Ray4Object*> objects;
+  std::vector<Ray5Object*> objects;
 
  public:
   void release() {
     for (int i = 0; i < count(); i++) delete (*this)[i];
     objects.clear();
   }
-  inline void add(Ray4Object* obj) {objects.push_back(obj);}
-  inline Ray4Object* operator[](int i) const {return objects[i];}
+  inline void add(Ray5Object* obj) {objects.push_back(obj);}
+  inline Ray5Object* operator[](int i) const {return objects[i];}
   int count() const {return objects.size();}
   int countBounded() const {
     int sum = 0;
@@ -156,5 +147,9 @@ class Ray4ObjectSet {
     *U = u;
   }
 };
+
+typedef Real REAL;//del
+typedef Ray5Object Ray4Object;//del
+typedef Ray5ObjectSet Ray4ObjectSet;//del
 
 #endif
