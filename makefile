@@ -10,8 +10,8 @@ LFLAGS = `sdl-config --libs`
 
 OBJECT_FILES = \
 	mat4.o \
-	ray4grid.o \
-	ray4parser.o \
+	ray5grid.o \
+	ray5parser.o \
 	ray5screen.o \
 	main.o
 
@@ -33,11 +33,3 @@ debug: $(APP)
 
 run: $(APP) test.ray
 	./$(APP) test.ray
-
-tricol.bmp: $(APP) tricol.ray
-	./$(APP) -b 0.1 -e 0.25 -n 1e6 tricol.ray
-	mv out.bmp tricol.bmp
-
-test.bmp: $(APP) test.ray
-	./$(APP) -b 0.1 -e 0.25 -n 1e6 test.ray
-	mv out.bmp test.bmp

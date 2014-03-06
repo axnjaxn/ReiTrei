@@ -4,32 +4,32 @@
 #include "mat4.h"
 #include <cstdlib>
 
-class Ray4Material {
+class Ray5Material {
  public:
   bool shadowless, twosided;
   Vect4 ambient, reflective, diffuse;
   Real specular, shininess;
 
-  Ray4Material() {
+  Ray5Material() {
     shadowless = twosided = 0;
     specular = shininess = 0.0;
   }
-  Ray4Material(const Ray4Material& m) {*this = m;}
+  Ray5Material(const Ray5Material& m) {*this = m;}
 };
 
 class Ray5Object;
 
-class Ray4Intersection {
+class Ray5Intersection {
  public:
   Ray5Object* obj;
   Real t;
   Vect4 P, N;
 
-  Ray4Intersection() {obj = NULL; t = -1;}
-  Ray4Intersection(Ray5Object* obj, Real t, const Vect4& P, const Vect4& N) {
+  Ray5Intersection() {obj = NULL; t = -1;}
+  Ray5Intersection(Ray5Object* obj, Real t, const Vect4& P, const Vect4& N) {
     this->obj = obj; this->t = t; this->P = P; this->N = N;
   }
-  inline bool nearerThan(const Ray4Intersection& hit) {return (t > 0 && (hit.t < 0 || t < hit.t));}
+  inline bool nearerThan(const Ray5Intersection& hit) {return (t > 0 && (hit.t < 0 || t < hit.t));}
 };
 
 class Ray5Object {
@@ -37,19 +37,19 @@ protected:
   Mat4 M, N;
 
 public:
-  Ray4Material material;
+  Ray5Material material;
   
   inline Ray5Object() {M = N = identity();}
 
-  Ray4Intersection intersects(const Vect4& O, const Vect4& D) {
-    Ray4Intersection result = intersectsUnit(transformPoint(N, O), transformDirection(N, D));
+  Ray5Intersection intersects(const Vect4& O, const Vect4& D) {
+    Ray5Intersection result = intersectsUnit(transformPoint(N, O), transformDirection(N, D));
     if (result.t > 0) {
       result.P = transformPoint(M, result.P);
       result.N = transformDirection(N.transpose(), result.N);
     }
     return result;
   }
-  virtual Ray4Intersection intersectsUnit(const Vect4& O, const Vect4& D) = 0;
+  virtual Ray5Intersection intersectsUnit(const Vect4& O, const Vect4& D) = 0;
   virtual inline bool infBounds() {return 0;}
   virtual void getBounds(Vect4* lower, Vect4* upper) {
     Vect4 corners[8];
@@ -116,8 +116,8 @@ class Ray5ObjectSet {
     return sum;
   }
 
-  Ray4Intersection intersect(const Vect4& O, const Vect4& D) const {
-    Ray4Intersection nearest, next;
+  Ray5Intersection intersect(const Vect4& O, const Vect4& D) const {
+    Ray5Intersection nearest, next;
     
     for (int i = 0; i < count(); i++) {
       next = objects[i]->intersects(O, D);
@@ -147,9 +147,5 @@ class Ray5ObjectSet {
     *U = u;
   }
 };
-
-typedef Real REAL;//del
-typedef Ray5Object Ray4Object;//del
-typedef Ray5ObjectSet Ray4ObjectSet;//del
 
 #endif

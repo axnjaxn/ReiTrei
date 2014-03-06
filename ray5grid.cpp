@@ -1,21 +1,19 @@
-#include "ray4grid.h"
+#include "ray5grid.h"
 
-bool isDebug;
-
-void Ray4Grid::getGridBounds(Vect4* L, Vect4* U) const {
+void Ray5Grid::getGridBounds(Vect4* L, Vect4* U) const {
   *L = *U = Cn;
   for (int i = 0; i < 3; i++)
     (*U)[i] += (n[i] + 1) * Sz[i];
 }
 
-bool Ray4Grid::escaped(int cellno[3]) const {
+bool Ray5Grid::escaped(int cellno[3]) const {
   for (int i = 0; i < 3; i++)
     if (cellno[i] < 0 || cellno[i] >= n[i]) return 1;
   return 0;
 }
 
-void Ray4Grid::getCellNo(const Vect4& v, int* cellno) const {
-  REAL x;
+void Ray5Grid::getCellNo(const Vect4& v, int* cellno) const {
+  Real x;
   for (int i = 0; i < 3; i++) {
     x = v[i] - Cn[i];
     x = x - fmod(x, Sz[i]);
@@ -23,28 +21,28 @@ void Ray4Grid::getCellNo(const Vect4& v, int* cellno) const {
   }
 }
 
-void Ray4Grid::getCellBounds(int cellno[3], Vect4* L, Vect4* U) const {
+void Ray5Grid::getCellBounds(int cellno[3], Vect4* L, Vect4* U) const {
   *L = Vect4();
   for (int i = 0; i < 3; i++)
     (*L)[i] = Cn[i] + Sz[i] * cellno[i];
   *U = *L + Sz;
 }
 
-Ray4ObjectSet& Ray4Grid::getSet(int cellno[3]) const {
+Ray5ObjectSet& Ray5Grid::getSet(int cellno[3]) const {
   return sets[cellno[2] * n[0] * n[1] + cellno[1] * n[0] + cellno[0]];
 }
 
-Ray4Grid::Ray4Grid() {
+Ray5Grid::Ray5Grid() {
   sets = NULL;
   box = NULL;
 }
 
-Ray4Grid::~Ray4Grid() {
+Ray5Grid::~Ray5Grid() {
   if (sets) delete [] sets;
   if (box) delete box;
 }
 
-void Ray4Grid::setup(const Ray4ObjectSet& objects) {
+void Ray5Grid::setup(const Ray5ObjectSet& objects) {
   //Get grid dimensions
   Vect4 L, U;
   objects.getBounds(&L, &U);
@@ -53,7 +51,7 @@ void Ray4Grid::setup(const Ray4ObjectSet& objects) {
   U = U + Vect4(1, 1, 1) * EPS;
 
   //Memoize for faster initial collision
-  box = new Ray4Box();
+  box = new Ray5Box();
   box->scale((U - L) / 2);
   box->translate((U + L) / 2);
   
@@ -67,13 +65,13 @@ void Ray4Grid::setup(const Ray4ObjectSet& objects) {
   int N = objects.countBounded();
 
   if (N) {
-    REAL s = pow(Sz[0] * Sz[1] * Sz[2] / N, 1.0 / 3);
+    Real s = pow(Sz[0] * Sz[1] * Sz[2] / N, 1.0 / 3);
     for (int i = 0; i < 3; i++) n[i] = int(Sz[i] / s + 0.5);
     
     for (int i = 0; i < 3; i++) Sz[i] = Sz[i] / n[i];
   }
   else n[0] = n[1] = n[2] = 1;
-  sets = new Ray4ObjectSet [n[0] * n[1] * n[2]];
+  sets = new Ray5ObjectSet [n[0] * n[1] * n[2]];
 
   //Bin objects
   Vect4 Lobj, Uobj;
@@ -92,26 +90,17 @@ void Ray4Grid::setup(const Ray4ObjectSet& objects) {
 	for (c[0] = c0[0]; c[0] <= c1[0]; c[0]++) 
 	  getSet(c).add(objects[i]);
   }
-
-  /*
-#ifdef VERBOSE
-  for (int i = 0; i < n[0] * n[1] * n[2]; i++)
-    printf("Set %d: %d objects.\n", i, sets[i].count());
-  printf("Outer: %d objects.\n", outer.count());
-  fflush(0);
-#endif
-  */
 }
 
-Ray4Intersection Ray4Grid::intersect(const Vect4& O, const Vect4& D) const {
-  Ray4Intersection hit = outer.intersect(O, D), test;
+Ray5Intersection Ray5Grid::intersect(const Vect4& O, const Vect4& D) const {
+  Ray5Intersection hit = outer.intersect(O, D), test;
   Vect4 v = O, L, U;
   int cellno[3];
   getCellNo(v, cellno);
-  REAL t0, t1;
+  Real t0, t1;
   
   if (escaped(cellno)) {
-    Ray4Intersection in = box->intersects(O, D);
+    Ray5Intersection in = box->intersects(O, D);
     t1 = in.t;
     if (t1 < 0) return hit;
 
@@ -120,7 +109,7 @@ Ray4Intersection Ray4Grid::intersect(const Vect4& O, const Vect4& D) const {
   }
 
 
-  REAL t;
+  Real t;
   int d = 0;
   do {
     t0 = t1;

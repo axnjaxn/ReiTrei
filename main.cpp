@@ -1,24 +1,20 @@
-//#define NTHREADS 64
 #define MAX_RECURSE 10
 #define TITLE "ReiTrei5"
-//#define AA_THRESHOLD 0.125
 //#define NO_GRID
-#define BOX_REPLACES_TENT
-//#define HIGHLIGHT_EDGES
 
 #include <ctime>
 #include "circlelist.h"
 #include "ray5screen.h"
-#include "ray4parser.h"
-#include "ray4shapes.h"
+#include "ray5parser.h"
+#include "ray5shapes.h"
 #include <vector>
 
-Vect4 traceAmbientRay(const Ray4Scene& scene, const Vect4& O, const Vect4& D, int nrecurse = 0) {
+Vect4 traceAmbientRay(const Ray5Scene& scene, const Vect4& O, const Vect4& D, int nrecurse = 0) {
   Vect4 color;
 
   if (nrecurse >= MAX_RECURSE) return color;
  
-  Ray4Intersection nearest = scene.intersect(O, D);
+  Ray5Intersection nearest = scene.intersect(O, D);
 
   if (nearest.t <= 0) return scene.bgcolor;
 
@@ -36,12 +32,12 @@ Vect4 traceAmbientRay(const Ray4Scene& scene, const Vect4& O, const Vect4& D, in
 }
 
 //uf need to change this function
-Vect4 traceDiffuseRay(const Ray4Scene& scene, const Vect4& O, const Vect4& D, int nrecurse = 0) {
+Vect4 traceDiffuseRay(const Ray5Scene& scene, const Vect4& O, const Vect4& D, int nrecurse = 0) {
   Vect4 color;
   
   if (nrecurse >= MAX_RECURSE) return color;
  
-  Ray4Intersection nearest = scene.intersect(O, D);
+  Ray5Intersection nearest = scene.intersect(O, D);
 
   if (nearest.t <= 0) return color;
   
@@ -65,7 +61,7 @@ inline void segFault(int param) {
 }
 
 
-void traceAt(Ray4Scene& scene, Ray5Screen& screen, int r, int c) {
+void traceAt(Ray5Scene& scene, Ray5Screen& screen, int r, int c) {
   Vect4 O = scene.camera.getOrigin();
   Vect4 D = scene.camera.getDirection(r, c);
       
@@ -82,7 +78,7 @@ int stripExtension(char* str) {
   return -1;
 }
 
-int render(Ray4Scene& scene, Ray5Screen& screen) {
+int render(Ray5Scene& scene, Ray5Screen& screen) {
   char titlebuf[200];
   sprintf(titlebuf, "%s",TITLE);
   SDL_WM_SetCaption(titlebuf, NULL);
@@ -136,7 +132,7 @@ int main(int argc, char* argv[]) {
   
   srand(time(NULL));
 
-  Ray4Scene scene;
+  Ray5Scene& scene = *Ray5Scene::getInstance();
   Ray5Screen r_screen;
   for (int i = 1; i < argc - 1; i++) {
     /* else */ {

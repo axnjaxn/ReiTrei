@@ -1,9 +1,9 @@
-#include "ray4parser.h"
+#include "ray5parser.h"
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
 #include <cctype>
-#include "ray4shapes.h"
+#include "ray5shapes.h"
 
 /*
  * Token
@@ -173,15 +173,15 @@ public:
  * Parser
  */
 
-REAL parseReal(TokenStream*);
+Real parseReal(TokenStream*);
 
-REAL parseNumber(TokenStream* ts) {
+Real parseNumber(TokenStream* ts) {
   Token token = ts->getToken();
 
   if (token == "-") return -parseNumber(ts);
   else if (token == "+") return parseNumber(ts);
   else if (token == "(") {
-    REAL r = parseReal(ts);
+    Real r = parseReal(ts);
     ts->expectToken(")");
     return r;
   }
@@ -195,13 +195,13 @@ REAL parseNumber(TokenStream* ts) {
     }
     else if (!isdigit(token[i])) ts->parseError("_Real_", token);
 
-  REAL r;
+  Real r;
   sscanf(token.str, "%lf", &r);
   return r;
 }
 
-REAL parseTerm(TokenStream* ts) {
-  REAL r = parseNumber(ts);
+Real parseTerm(TokenStream* ts) {
+  Real r = parseNumber(ts);
   for (;;) {
     Token token = ts->getToken();
     if (token == "*" && ts->peekToken() != "<") r = r * parseNumber(ts);
@@ -214,8 +214,8 @@ REAL parseTerm(TokenStream* ts) {
   return r;
 }
 
-REAL parseReal(TokenStream* ts) {
-  REAL r = parseTerm(ts);
+Real parseReal(TokenStream* ts) {
+  Real r = parseTerm(ts);
   for (;;) {
     Token token = ts->getToken();
     if (token == "+") r = r + parseTerm(ts);
@@ -241,7 +241,7 @@ Vect4 parseTriplet(TokenStream* ts) {
 }
 
 Vect4 parseVectorTerm(TokenStream* ts) {
-  REAL coef = 1.0;
+  Real coef = 1.0;
   Vect4 v;
   if (ts->peekToken() != "<") {
     coef = parseReal(ts);
@@ -277,8 +277,8 @@ Vect4 parseVector(TokenStream* ts) {
   return v;
 }
 
-Ray4Material parseMaterial(TokenStream* ts) {
-  Ray4Material material;
+Ray5Material parseMaterial(TokenStream* ts) {
+  Ray5Material material;
   ts->expectToken("{");
   for (;;) {
     Token token = ts->getToken();
@@ -298,7 +298,7 @@ Ray4Material parseMaterial(TokenStream* ts) {
   return material;
 }
 
-void parseModifiers(TokenStream* ts, Ray4Object* obj) {
+void parseModifiers(TokenStream* ts, Ray5Object* obj) {
   for (;;) {
     Token token = ts->getToken();
     if (token == "translate") obj->translate(parseVector(ts));
@@ -318,11 +318,11 @@ void parseModifiers(TokenStream* ts, Ray4Object* obj) {
   }
 }
 
-Ray4Box* parseBox(TokenStream* ts) {
+Ray5Box* parseBox(TokenStream* ts) {
   ts->expectToken("{");
   Vect4 upper = parseVector(ts);
   Vect4 lower = parseVector(ts);
-  Ray4Box* box = new Ray4Box();
+  Ray5Box* box = new Ray5Box();
   box->scale((upper - lower) / 2);
   box->translate((upper + lower) / 2);
   parseModifiers(ts, box);
@@ -330,11 +330,11 @@ Ray4Box* parseBox(TokenStream* ts) {
   return box;
 }
 
-Ray4Sphere* parseSphere(TokenStream* ts) {
+Ray5Sphere* parseSphere(TokenStream* ts) {
   ts->expectToken("{");
   Vect4 center = parseVector(ts);
-  REAL radius = parseReal(ts);
-  Ray4Sphere* sphere = new Ray4Sphere();
+  Real radius = parseReal(ts);
+  Ray5Sphere* sphere = new Ray5Sphere();
   sphere->scale(Vect4(radius, radius, radius));
   sphere->translate(center);
   parseModifiers(ts, sphere);
@@ -342,13 +342,13 @@ Ray4Sphere* parseSphere(TokenStream* ts) {
   return sphere;
 }
 
-Ray4Cone* parseCone(TokenStream* ts) {
+Ray5Cone* parseCone(TokenStream* ts) {
   //uf
 }
 
-Ray4Plane* parsePlane(TokenStream* ts) {
+Ray5Plane* parsePlane(TokenStream* ts) {
   ts->expectToken("{");
-  Ray4Plane* plane = new Ray4Plane();
+  Ray5Plane* plane = new Ray5Plane();
   plane->A = parseVector(ts);
   plane->N = parseVector(ts);
   parseModifiers(ts, plane);
@@ -356,9 +356,9 @@ Ray4Plane* parsePlane(TokenStream* ts) {
   return plane;
 }
 
-Ray4Light* parseLight(TokenStream* ts) {
+Ray5Light* parseLight(TokenStream* ts) {
   ts->expectToken("{");
-  Ray4Light* light = new Ray4Light();
+  Ray5Light* light = new Ray5Light();
   light->position = parseVector(ts);
   light->color = parseVector(ts);
   while (ts->peekToken() != "}") {
@@ -398,7 +398,7 @@ void parseDefine(TokenStream* ts) {
   ts->addDefine(define);
 }
 
-void parseSceneItem(TokenStream* ts, Ray4Scene* scene) {
+void parseSceneItem(TokenStream* ts, Ray5Scene* scene) {
   Token token = ts->getToken();
 
   if (ts->eof()) return;
@@ -424,11 +424,11 @@ void parseSceneItem(TokenStream* ts, Ray4Scene* scene) {
   else ts->parseError("_SceneItem_", token);
 }
 
-void parseScene(TokenStream* ts, Ray4Scene* scene) {
+void parseScene(TokenStream* ts, Ray5Scene* scene) {
   while (!ts->eof() && !(ts->peekToken() == "EOF")) parseSceneItem(ts, scene);
 }
 
-void parseScene(const char* fn, Ray4Scene* scene) {
+void parseScene(const char* fn, Ray5Scene* scene) {
   TokenStream ts;
   if (ts.open(fn))
     printf("Couldn't open scene file.\n");
