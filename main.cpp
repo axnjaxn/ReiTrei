@@ -8,15 +8,7 @@
 #include "ray5shapes.h"
 #include <vector>
 
-float traceDepthRay(const Ray5Scene& scene, const Vect4& O, const Vect4& D) {
-  Ray5Intersection nearest = scene.intersect(O, D);
-
-  if (nearest.t <= 0) return 1e99;
-
-  return nearest.t;
-}
-
-Vect4 traceColorRay(const Ray5Scene& scene, const Vect4& O, const Vect4& D, int nrecurse = 0) {
+Vect4 traceRay(const Ray5Scene& scene, const Vect4& O, const Vect4& D, int nrecurse = 0) {
   Vect4 color;
   
   if (nrecurse >= MAX_RECURSE) return color;
@@ -32,7 +24,7 @@ Vect4 traceColorRay(const Ray5Scene& scene, const Vect4& O, const Vect4& D, int 
   if (nonzero(nearest.obj->material.reflective)) {
     Vect4 _D = D + (2 * nearest.N * -dot(nearest.N, D));
     Vect4 _O = nearest.P + EPS * _D;
-    color += nearest.obj->material.reflective.multComp(traceColorRay(scene, _O, _D, nrecurse + 1));
+    color += nearest.obj->material.reflective.multComp(traceRay(scene, _O, _D, nrecurse + 1));
   }
 
   //Lighting-dependent color
@@ -75,8 +67,7 @@ void traceAt(Ray5Scene& scene, Ray5Screen& screen, int r, int c) {
   Vect4 O = scene.camera.getOrigin();
   Vect4 D = scene.camera.getDirection(r, c);
       
-  screen.setColor(r, c, traceColorRay(scene, O, D));
-  screen.setDepth(r, c, traceDepthRay(scene, O, D));
+  screen.setColor(r, c, traceRay(scene, O, D));
 }
 
 int stripExtension(char* str) {

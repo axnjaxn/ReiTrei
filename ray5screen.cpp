@@ -18,7 +18,7 @@ Ray5Screen& Ray5Screen::operator=(const Ray5Screen& screen) {
   buffer = NULL;
   setTargetSurface(screen.target);
   setDimensions(screen.w, screen.h);
-  memcpy(buffer, screen.buffer, w * h * sizeof(BufferEntry));
+  memcpy(buffer, screen.buffer, w * h * sizeof(Vect4));
 }
 
 void Ray5Screen::setTargetSurface(SDL_Surface* target) {this->target = target;}
@@ -27,7 +27,7 @@ void Ray5Screen::setDimensions(int w, int h) {
   if (buffer) delete [] buffer;
 
   this->w = w; this->h = h;
-  buffer = new BufferEntry [w * h];
+  buffer = new Vect4 [w * h];
 }
 
 inline Uint8 toByte(Real r) {
@@ -41,7 +41,7 @@ void Ray5Screen::drawScanline(int r) {
   Uint32* bufp = (Uint32*)target->pixels;
   Vect4 color;
   for (int c = 0; c < w; c++) {
-    color = buffer[r * w + c].color;
+    color = buffer[r * w + c];
     bufp[r * target->w + c] = SDL_MapRGB(target->format, toByte(color[0]), toByte(color[1]), toByte(color[2]));
   } 
 
