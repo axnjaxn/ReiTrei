@@ -3,7 +3,7 @@
 Ray5Screen::Ray5Screen() {
   target = NULL;
   w = h = 0;
-  ambient = diffuse = NULL;
+  buffer = NULL;
 }
 
 Ray5Screen::Ray5Screen(const Ray5Screen& screen) {
@@ -11,37 +11,23 @@ Ray5Screen::Ray5Screen(const Ray5Screen& screen) {
 }
 
 Ray5Screen::~Ray5Screen() {
-  if (ambient) delete [] ambient;
-  if (diffuse) delete [] diffuse;
+  if (buffer) delete [] buffer;
 }
 
 Ray5Screen& Ray5Screen::operator=(const Ray5Screen& screen) {
-  ambient = diffuse = NULL;
+  buffer = NULL;
   setTargetSurface(screen.target);
   setDimensions(screen.w, screen.h);
-  for (int i = 0; i < w * h; i++) {
-    ambient[i] = screen.ambient[i];
-    diffuse[i] = screen.diffuse[i];
-  }
+  memcpy(buffer, screen.buffer, w * h * sizeof(BufferEntry));
 }
 
 void Ray5Screen::setTargetSurface(SDL_Surface* target) {this->target = target;}
 
 void Ray5Screen::setDimensions(int w, int h) {
-  if (ambient) delete [] ambient;
-  if (diffuse) delete [] ambient;
+  if (buffer) delete [] buffer;
 
   this->w = w; this->h = h;
-  ambient = new Vect4 [w * h];
-  diffuse = new Vect4 [w * h];
-}
-
-void Ray5Screen::setAmbient(int r, int c, const Vect4& color) {
-  ambient[r * w + c] = color;
-}
-
-void Ray5Screen::setDiffuse(int r, int c, const Vect4& color) {
-  diffuse[r * w + c] = color;
+  buffer = new BufferEntry [w * h];
 }
 
 inline Uint8 toByte(Real r) {
@@ -55,7 +41,7 @@ void Ray5Screen::drawScanline(int r) {
   Uint32* bufp = (Uint32*)target->pixels;
   Vect4 color;
   for (int c = 0; c < w; c++) {
-    color = diffuse[r * w + c] + ambient[r * w + c];
+    color = buffer[r * w + c].color;
     bufp[r * target->w + c] = SDL_MapRGB(target->format, toByte(color[0]), toByte(color[1]), toByte(color[2]));
   } 
 

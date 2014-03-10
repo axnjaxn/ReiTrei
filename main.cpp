@@ -8,9 +8,17 @@
 #include "ray5shapes.h"
 #include <vector>
 
-Vect4 traceAmbientRay(const Ray5Scene& scene, const Vect4& O, const Vect4& D, int nrecurse = 0) {
-  Vect4 color;
+float traceDepthRay(const Ray5Scene& scene, const Vect4& O, const Vect4& D) {
+  Ray5Intersection nearest = scene.intersect(O, D);
 
+  if (nearest.t <= 0) return 1e99;
+
+  return nearest.t;
+}
+
+Vect4 traceColorRay(const Ray5Scene& scene, const Vect4& O, const Vect4& D, int nrecurse = 0) {
+  Vect4 color;
+  
   if (nrecurse >= MAX_RECURSE) return color;
  
   Ray5Intersection nearest = scene.intersect(O, D);
@@ -18,33 +26,13 @@ Vect4 traceAmbientRay(const Ray5Scene& scene, const Vect4& O, const Vect4& D, in
   if (nearest.t <= 0) return scene.bgcolor;
 
   //Ambient lighting
-  color += nearest.obj->material.ambient;
-  
+  color += nearest.obj->material.ambient;  
+
   //Reflective lighting
   if (nonzero(nearest.obj->material.reflective)) {
     Vect4 _D = D + (2 * nearest.N * -dot(nearest.N, D));
     Vect4 _O = nearest.P + EPS * _D;
-    color += nearest.obj->material.reflective.multComp(traceAmbientRay(scene, _O, _D, nrecurse + 1));
-  }
-
-  return color;
-}
-
-//uf need to change this function
-Vect4 traceDiffuseRay(const Ray5Scene& scene, const Vect4& O, const Vect4& D, int nrecurse = 0) {
-  Vect4 color;
-  
-  if (nrecurse >= MAX_RECURSE) return color;
- 
-  Ray5Intersection nearest = scene.intersect(O, D);
-
-  if (nearest.t <= 0) return color;
-  
-  //Reflective lighting
-  if (nonzero(nearest.obj->material.reflective)) {
-    Vect4 _D = D + (2 * nearest.N * -dot(nearest.N, D));
-    Vect4 _O = nearest.P + EPS * _D;
-    color += nearest.obj->material.reflective.multComp(traceDiffuseRay(scene, _O, _D, nrecurse + 1));
+    color += nearest.obj->material.reflective.multComp(traceColorRay(scene, _O, _D, nrecurse + 1));
   }
 
   //Lighting-dependent color
@@ -87,9 +75,8 @@ void traceAt(Ray5Scene& scene, Ray5Screen& screen, int r, int c) {
   Vect4 O = scene.camera.getOrigin();
   Vect4 D = scene.camera.getDirection(r, c);
       
-  //uf consolidate this stuff
-  screen.setAmbient(r, c, traceAmbientRay(scene, O, D));
-  screen.setDiffuse(r, c, traceDiffuseRay(scene, O, D));
+  screen.setColor(r, c, traceColorRay(scene, O, D));
+  screen.setDepth(r, c, traceDepthRay(scene, O, D));
 }
 
 int stripExtension(char* str) {

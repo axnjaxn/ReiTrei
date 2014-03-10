@@ -8,10 +8,18 @@
 
 class Ray5Screen {
  protected:
+  class BufferEntry {
+  public:
+    Vect4 color;
+    float depth;
+
+    BufferEntry() {depth = 0.0;}
+  };
+
   //uf move to ByteImage
   SDL_Surface* target;
   int w, h;
-  Vect4 *ambient, *diffuse;
+  BufferEntry* buffer;
 
  public:
   Ray5Screen();
@@ -26,8 +34,8 @@ class Ray5Screen {
 
   void setTargetSurface(SDL_Surface* target);//deprecated
   void setDimensions(int w, int h);
-  void setAmbient(int r, int c, const Vect4& color);
-  void setDiffuse(int r, int c, const Vect4& color);
+  inline void setColor(int r, int c, const Vect4& color) {buffer[r * w + c].color = color;}
+  inline void setDepth(int r, int c, float depth) {buffer[r * w + c].depth = depth;}
 
   void drawScanline(int r);
   void drawSurface();
