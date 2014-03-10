@@ -79,30 +79,41 @@ int stripExtension(char* str) {
   return -1;
 }
 
-int render(Ray5Scene& scene, Ray5Screen& screen) {
+inline Uint8 toByte(Real r) {return (r > 1.0)? 255 : (Uint8)(255 * r);}
+
+int render(Ray5Scene& scene, Ray5Screen& r_screen) {
   char titlebuf[200];
   sprintf(titlebuf, "%s",TITLE);
   SDL_WM_SetCaption(titlebuf, NULL);
 
   Uint32 started = SDL_GetTicks();
 
+  SDL_Surface* screen = SDL_GetVideoSurface();
+  if (SDL_MUSTLOCK(screen)) SDL_LockSurface(screen);
+
+  Uint32* bufp = (Uint32*)screen->pixels;
+  Vect4 color;
   bool exitflag = 0;
-  for (int r = 0; r < screen.height(); r++) {
+  for (int r = 0; r < r_screen.height(); r++) {
     SDL_Event event;
       while (SDL_PollEvent(&event))
 	if (event.type == SDL_QUIT || (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)) exit(0);
 	else if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_RETURN) exitflag = 1;
       if (exitflag) break;
 
-      for (int c = 0; c < screen.width(); c++)
-	traceAt(scene, screen, r, c);
+      for (int c = 0; c < r_screen.width(); c++) {
+	traceAt(scene, r_screen, r, c);
+	color = r_screen.getColor(r, c);
+	bufp[r * screen->w + c] = SDL_MapRGB(screen->format, toByte(color[0]), toByte(color[1]), toByte(color[2]));
+      }
 
-      sprintf(titlebuf, "%s [%d / %d]",TITLE, r + 1, screen.height());
+      sprintf(titlebuf, "%s [%d / %d]",TITLE, r + 1, r_screen.height());
       SDL_WM_SetCaption(titlebuf, NULL);
 
-      screen.drawScanline(r);
-      SDL_Flip(SDL_GetVideoSurface());
+      SDL_Flip(screen);
   }
+
+  if (SDL_MUSTLOCK(screen)) SDL_UnlockSurface(screen);
 
   printf("Tracing complete:\n");
   printf("\tTotal time elapsed: %.3fs\n", 0.001 * (SDL_GetTicks() - started));
@@ -154,7 +165,6 @@ int main(int argc, char* argv[]) {
   atexit(SDL_Quit);
   SDL_Surface* screen = SDL_SetVideoMode(scene.camera.pxw, scene.camera.pxh, 32, SDL_HWSURFACE|SDL_DOUBLEBUF);
 
-  r_screen.setTargetSurface(screen);
   r_screen.setDimensions(screen->w, screen->h);
 
   render(scene, r_screen);
