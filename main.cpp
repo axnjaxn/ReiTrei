@@ -146,8 +146,14 @@ int main(int argc, char* argv[]) {
 
   Ray5Scene& scene = *Ray5Scene::getInstance();
   Ray5Screen r_screen;
+  int w = 300, h = 300;
+  float aspect;
   for (int i = 1; i < argc - 1; i++) {
-    /* else */ {
+    if (!strcmp(argv[i], "--size")) {
+      sscanf(argv[++i], "%d", &w);
+      sscanf(argv[++i], "%d", &h);
+    }
+    else {
       printf("Unrecognized token \"%s\".\n", argv[i]);
       exit(0);
     }
@@ -159,7 +165,8 @@ int main(int argc, char* argv[]) {
   /*
    * Set up scene
    */
-  scene.camera.setScreen(300, 300, 1, 1, PI / 2);
+  aspect = (float)w / h;
+  scene.camera.setScreen(w, h, aspect, 1, PI / 2);
 
   if (SDL_Init(SDL_INIT_VIDEO) < 0) exit(1);
   atexit(SDL_Quit);
