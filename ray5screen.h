@@ -1,10 +1,8 @@
 #ifndef _BPJ_REITREI5_SCREEN_H
 #define _BPJ_REITREI5_SCREEN_H
 
-//uf audit
-
-#include <SDL/SDL.h>
 #include "mat4.h"
+#include <vector>
 
 class Ray5Screen {
  protected:
@@ -13,6 +11,7 @@ class Ray5Screen {
 
  public:
   Ray5Screen();
+  Ray5Screen(const std::vector<Ray5Screen>& v);
   Ray5Screen(const Ray5Screen& screen);
   ~Ray5Screen();
   
