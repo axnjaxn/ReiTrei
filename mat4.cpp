@@ -14,7 +14,7 @@ Vect4::Vect4(Real x, Real y, Real z, Real w) {
 
 Vect4::Vect4(const Vect4& v) {*this = v;}
 
-Vect4& Vect4::operator=(const Vect4& v) {memcpy(entries, v.entries, 4 * sizeof(Real));}
+Vect4& Vect4::operator=(const Vect4& v) {memcpy(entries, v.entries, 4 * sizeof(Real)); return *this;}
 
 Vect4 Vect4::operator+(const Vect4& v) const {
   Vect4 r;
