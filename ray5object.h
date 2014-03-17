@@ -104,7 +104,7 @@ class Ray5ObjectSet {
 
  public:
   void release() {
-    for (int i = 0; i < count(); i++) delete (*this)[i];
+    for (int i = 0; i < objects.size(); i++) delete objects[i];
     objects.clear();
   }
   inline void add(Ray5Object* obj) {objects.push_back(obj);}
