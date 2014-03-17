@@ -97,7 +97,7 @@ Ray5Intersection Ray5Grid::intersect(const Vect4& O, const Vect4& D) const {
   Vect4 v = O, L, U;
   int cellno[3];
   getCellNo(v, cellno);
-  Real t0, t1;
+  Real t0, t1;//uf t1 may not be initialized here!
   
   if (escaped(cellno)) {
     Ray5Intersection in = box->intersects(O, D);
