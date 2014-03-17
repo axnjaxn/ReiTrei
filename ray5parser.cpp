@@ -344,6 +344,7 @@ Ray5Sphere* parseSphere(TokenStream* ts) {
 
 Ray5Cone* parseCone(TokenStream* ts) {
   //uf
+  return NULL;
 }
 
 Ray5Plane* parsePlane(TokenStream* ts) {

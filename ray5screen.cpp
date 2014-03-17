@@ -34,6 +34,7 @@ Ray5Screen& Ray5Screen::operator=(const Ray5Screen& screen) {
   buffer = NULL;
   setDimensions(screen.w, screen.h);
   memcpy(buffer, screen.buffer, w * h * sizeof(Vect4));
+  return *this;
 }
 
 void Ray5Screen::setDimensions(int w, int h) {
