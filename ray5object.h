@@ -39,7 +39,8 @@ protected:
 public:
   Ray5Material material;
   
-  inline Ray5Object() {M = N = identity();}
+  inline Ray5Object() {M = N = Mat4::identity();}
+  inline virtual ~Ray5Object() { }
 
   Ray5Intersection intersects(const Vect4& O, const Vect4& D) {
     Ray5Intersection result = intersectsUnit(transformPoint(N, O), transformDirection(N, D));
@@ -75,24 +76,24 @@ public:
   }
 
   inline void scale(const Vect4& v) {
-    M = scaling(v) * M;
-    N = N * scaling(v.reciprocal());
+    M = Mat4::scaling(v) * M;
+    N = N * Mat4::scaling(v.reciprocal());
   }
   inline void xrotate(Real th) {
-    M = xrotation(th) * M;
-    N = N * xrotation(th).transpose();
+    M = Mat4::xrotation(th) * M;
+    N = N * Mat4::xrotation(th).transpose();
   }
   inline void yrotate(Real th) {
-    M = yrotation(th) * M;
-    N = N * yrotation(th).transpose();
+    M = Mat4::yrotation(th) * M;
+    N = N * Mat4::yrotation(th).transpose();
   }
   inline void zrotate(Real th) {
-    M = zrotation(th) * M;
-    N = N * zrotation(th).transpose();
+    M = Mat4::zrotation(th) * M;
+    N = N * Mat4::zrotation(th).transpose();
   }
   inline void translate(const Vect4& v) {
-    M = translation(v) * M;
-    N = N * translation(-v);
+    M = Mat4::translation(v) * M;
+    N = N * Mat4::translation(-v);
   }
 };
 

@@ -1,20 +1,18 @@
 #ifndef _BPJ_REITREI5_MAT4_H
 #define _BPJ_REITREI5_MAT4_H
 
-//uf audit this code
-
 #include <cstdlib>
 #include <cmath>
 
-#define PI 3.14159265358979
-#define EPS 1e-10
 typedef double Real;
+const Real PI = 3.14159265358979;
+const Real EPS = 1e-10;
 
 class Vect4 {
- protected:
+protected:
   Real entries[4];
 
- public:
+public:
   Vect4();
   Vect4(Real, Real, Real, Real = 0);
   Vect4(const Vect4&);
@@ -22,7 +20,7 @@ class Vect4 {
   Vect4& operator=(const Vect4&);
 
   inline Vect4 operator-() const {return *this * -1;}
-  Real operator*(const Vect4&) const;
+  Real operator*(const Vect4&) const;//Dot product
   Vect4 operator+(const Vect4&) const;
   inline Vect4& operator+=(const Vect4& v) {*this = *this + v; return *this;}
   Vect4 operator-(const Vect4&) const;
@@ -32,7 +30,8 @@ class Vect4 {
   inline Real& operator[](int i) {return entries[i];}
   inline Real operator[](int i) const {return entries[i];}
 
-  inline Real length() const {return sqrt(*this * *this);}
+  inline Real length() const {return sqrt(sqLength());}
+  inline Real sqLength() const {return *this * *this;}
   inline Vect4 unit() const {return *this / length();}
   Vect4 multComp(const Vect4&) const;
   Vect4 reciprocal() const;
@@ -43,12 +42,13 @@ inline Vect4 operator*(Real r, const Vect4& v) {return v * r;}
 inline bool nonzero(const Vect4& v) {return v[0] || v[1] || v[2] || v[3];}
 Vect4 randomVect4();
 inline Real distance(const Vect4& a, const Vect4& b) {return (b - a).length();}
+inline Real sqDistance(const Vect4& a, const Vect4& b) {return (b - a).sqLength();}
 
 class Mat4 {
- protected:
+protected:
   Real entries[16];
 
- public:
+public:
   Mat4();
   Mat4(const Mat4&);
 
@@ -69,21 +69,24 @@ class Mat4 {
 
   Mat4 transpose() const;
   Mat4 reciprocal() const;
+  
+  static Mat4 identity();  
+  static Mat4 xrotation(Real);
+  static Mat4 yrotation(Real);
+  static Mat4 zrotation(Real);
+  static Mat4 translation(Real, Real, Real);
+  static Mat4 scaling(Real, Real, Real);
 
-  friend Mat4 identity();
+  inline static Mat4 translation(const Vect4& v) {return translation(v[0], v[1], v[2]);}
+  inline static Mat4 scaling(const Vect4& v) {return scaling(v[0], v[1], v[2]);}
 };
 
 inline Mat4 operator*(Real f, const Mat4& m) {return m * f;}
 
-Mat4 xrotation(Real);
-Mat4 yrotation(Real);
-Mat4 zrotation(Real);
-Mat4 translation(Real, Real, Real);
-Mat4 scaling(Real, Real, Real);
-Mat4 identity();
-
-inline Mat4 translation(const Vect4& v) {return translation(v[0], v[1], v[2]);}
-inline Mat4 scaling(const Vect4& v) {return scaling(v[0], v[1], v[2]);}
+/*
+ * This does not create an orthonormal basis.
+ * It really only constructs a matrix from three vectors.
+ */
 Mat4 ONB(const Vect4&, const Vect4&, const Vect4&);
 
 inline Vect4 transformPoint(const Mat4& M, Vect4 v) {

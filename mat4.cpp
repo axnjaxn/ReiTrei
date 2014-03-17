@@ -1,5 +1,3 @@
-//uf audit this code
-
 #include "mat4.h"
 #include <cstring>
 
@@ -160,14 +158,14 @@ Mat4 Mat4::reciprocal() const {
   return result;
 }
 
-Mat4 identity() {
+Mat4 Mat4::identity() {
   Mat4 m;
   m.entries[0] = m.entries[5] = m.entries[10] = m.entries[15] = 1.0;
   return m;
 }
  
-Mat4 xrotation(Real th) {
-  Mat4 Rx = identity();
+Mat4 Mat4::xrotation(Real th) {
+  Mat4 Rx = Mat4::identity();
   Rx.at(1, 1) = cos(th);
   Rx.at(2, 2) = cos(th);
   Rx.at(1, 2) = -sin(th);
@@ -175,8 +173,8 @@ Mat4 xrotation(Real th) {
   return Rx;
 }
 
-Mat4 yrotation(Real th) {
-  Mat4 Ry = identity();
+Mat4 Mat4::yrotation(Real th) {
+  Mat4 Ry = Mat4::identity();
   Ry.at(0, 0) = cos(th);
   Ry.at(2, 2) = cos(th);
   Ry.at(2, 0) = -sin(th);
@@ -184,8 +182,8 @@ Mat4 yrotation(Real th) {
   return Ry;
 }
 
-Mat4 zrotation(Real th) {
-  Mat4 Rz = identity();
+Mat4 Mat4::zrotation(Real th) {
+  Mat4 Rz = Mat4::identity();
   Rz.at(0, 0) = cos(th);
   Rz.at(1, 1) = cos(th);
   Rz.at(0, 1) = -sin(th);
@@ -193,16 +191,16 @@ Mat4 zrotation(Real th) {
   return  Rz;
 }
 
-Mat4 translation(Real tx, Real ty, Real tz) {
-  Mat4 result = identity();
+Mat4 Mat4::translation(Real tx, Real ty, Real tz) {
+  Mat4 result = Mat4::identity();
   result.at(0, 3) = tx;
   result.at(1, 3) = ty;
   result.at(2, 3) = tz;
   return result;
 }
 
-Mat4 scaling(Real sx, Real sy, Real sz) {
-  Mat4 result = identity();
+Mat4 Mat4::scaling(Real sx, Real sy, Real sz) {
+  Mat4 result = Mat4::identity();
   result.at(0, 0) = sx;
   result.at(1, 1) = sy;
   result.at(2, 2) = sz;
@@ -210,7 +208,7 @@ Mat4 scaling(Real sx, Real sy, Real sz) {
 }
 
 Mat4 ONB(const Vect4& u, const Vect4& v, const Vect4& w) {
-  Mat4 result = identity();
+  Mat4 result = Mat4::identity();
   for (int i = 0; i < 3; i++) {
     result.at(i, 0) = u[i];
     result.at(i, 1) = v[i];
