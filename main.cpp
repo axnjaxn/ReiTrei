@@ -100,7 +100,7 @@ void redraw(const Ray5Screen& r_screen) {
   SDL_Flip(screen);
 }
 
-void render(Ray5Scene& scene, Ray5Screen& r_screen) {
+void render(Ray5Scene& scene, Ray5Screen& r_screen, int renderno = 0, int outof = 1) {
   char titlebuf[200];
   sprintf(titlebuf, "%s",TITLE);
   SDL_WM_SetCaption(titlebuf, NULL);
@@ -124,7 +124,10 @@ void render(Ray5Scene& scene, Ray5Screen& r_screen) {
 	bufp[r * screen->w + c] = SDL_MapRGB(screen->format, toByte(color[0]), toByte(color[1]), toByte(color[2]));
       }
 
-      sprintf(titlebuf, "%s [%d / %d]",TITLE, r + 1, r_screen.height());
+      if (outof)
+	sprintf(titlebuf, "%s [%d / %d, %d of %d]",TITLE, r + 1, r_screen.height(), renderno, outof);
+      else
+	sprintf(titlebuf, "%s [%d / %d]",TITLE, r + 1, r_screen.height());
       SDL_WM_SetCaption(titlebuf, NULL);
 
       SDL_Flip(screen);
@@ -137,7 +140,11 @@ inline float uniform() {return (rand() & 0x7FFF) / 32768.0;}
 
 void printUsage() {
   printf("ReiTrei5 by Brian Jackson\n");
-  printf("Usage: ReiTrei5 [options] [scene.ray]\n");
+  printf("Usage: ReiTrei5 [options] scene-file\n");
+  printf("Options:\n");
+  printf("\t--size width height : Give the size of the desired output image\n");
+  printf("\t--renders : Turn on multirendering for statistical effects\n");
+  printf("\t--dof_degrees degrees: Allow depth of field to rotate around the focal point\n");
 }
 
 int main(int argc, char* argv[]) {
@@ -207,7 +214,7 @@ int main(int argc, char* argv[]) {
     else {rx = ry = 0.0;}
     scene.camera.xrotate(rx);
     scene.camera.yrotate(ry);
-    render(scene, r_screen);
+    render(scene, r_screen, i + 1, nrenders);
     scene.camera.yrotate(-ry);
     scene.camera.xrotate(-rx);
     screens.push_back(r_screen);
