@@ -10,6 +10,21 @@
 #include <ctime>
 #include <cstdlib>
 
+class RenderSettings {
+public:
+  int nsamples;
+  int nrenders;
+  bool coherence;
+  int coherent_index;
+  float dof_range;
+
+  RenderSettings() {
+    nsamples = nrenders = coherent_index = 1;
+    coherence = 0;
+    dof_range = 0.0;
+  }
+} settings;
+
 Vect4 traceRay(const Ray5Scene& scene, const Vect4& O, const Vect4& D, int nrecurse = 0) {
   Vect4 color;
   
@@ -64,12 +79,32 @@ inline void segFault(int param) {
   exit(0);
 }
 
+inline float uniform() {return (rand() & 0x7FFF) / 32768.0;}
 
 void traceAt(Ray5Scene& scene, Ray5Screen& screen, int r, int c) {
-  Vect4 O = scene.camera.getOrigin();
-  Vect4 D = scene.camera.getDirection(r, c);
+  if (settings.coherence) srand(settings.coherent_index);
+
+  Vect4 O, D, color;
+  float rmag, rth, rx, ry;
+  for (int i = 0; i < settings.nsamples; i++) {    
+    if (settings.dof_range > 0.0) {
+      rmag = uniform() * settings.dof_range; 
+      rth = uniform() * 2 * PI;
+      rx = rmag * cos(rth);
+      ry = rmag * sin(rth);
+    }
+    else {rx = ry = 0.0;}
+
+    scene.camera.xrotate(rx);
+    scene.camera.yrotate(ry);    
+    O = scene.camera.getOrigin();
+    D = scene.camera.getDirection(r, c);
+    color += traceRay(scene, O, D);
+    scene.camera.yrotate(-ry);
+    scene.camera.xrotate(-rx);
+  }
       
-  screen.setColor(r, c, traceRay(scene, O, D));
+  screen.setColor(r, c, color / settings.nsamples);
 }
 
 int stripExtension(char* str) {
@@ -124,7 +159,7 @@ void render(Ray5Scene& scene, Ray5Screen& r_screen, int renderno = 0, int outof 
 	bufp[r * screen->w + c] = SDL_MapRGB(screen->format, toByte(color[0]), toByte(color[1]), toByte(color[2]));
       }
 
-      if (outof)
+      if (outof > 1)
 	sprintf(titlebuf, "%s [%d / %d, %d of %d]",TITLE, r + 1, r_screen.height(), renderno, outof);
       else
 	sprintf(titlebuf, "%s [%d / %d]",TITLE, r + 1, r_screen.height());
@@ -136,15 +171,15 @@ void render(Ray5Scene& scene, Ray5Screen& r_screen, int renderno = 0, int outof 
   if (SDL_MUSTLOCK(screen)) SDL_UnlockSurface(screen);
 }
 
-inline float uniform() {return (rand() & 0x7FFF) / 32768.0;}
-
 void printUsage() {
   printf("ReiTrei5 by Brian Jackson\n");
   printf("Usage: ReiTrei5 [options] scene-file\n");
   printf("Options:\n");
   printf("\t--size width height : Give the size of the desired output image\n");
   printf("\t--renders : Turn on multirendering for statistical effects\n");
+  printf("\t--samples : Turn on multisampling for statistical effects\n");
   printf("\t--dof_degrees degrees: Allow depth of field to rotate around the focal point\n");
+  printf("\t--coherence: Turn on coherent rendering mode\n");
 }
 
 int main(int argc, char* argv[]) {
@@ -165,19 +200,23 @@ int main(int argc, char* argv[]) {
   Ray5Scene& scene = *Ray5Scene::getInstance();
   Ray5Screen r_screen;
   int w = 300, h = 300;
-  int nrenders = 1;
-  float dof_range = 0.0;
   for (int i = 1; i < argc - 1; i++) {
     if (!strcmp(argv[i], "--size")) {
       sscanf(argv[++i], "%d", &w);
       sscanf(argv[++i], "%d", &h);
     }
     else if (!strcmp(argv[i], "--renders")) {
-      sscanf(argv[++i], "%d", &nrenders);
+      sscanf(argv[++i], "%d", &settings.nrenders);
+    }
+    else if (!strcmp(argv[i], "--samples")) {
+      sscanf(argv[++i], "%d", &settings.nsamples);
+    }
+    else if (!strcmp(argv[i], "--coherent")) {
+      settings.coherence = 1;
     }
     else if (!strcmp(argv[i], "--dof_degrees")) {
-      sscanf(argv[++i], "%f", &dof_range);
-      dof_range *= PI / 180.0;
+      sscanf(argv[++i], "%f", &settings.dof_range);
+      settings.dof_range *= PI / 180.0;
     }
     else {
       printf("Unrecognized token \"%s\".\n", argv[i]);
@@ -204,25 +243,15 @@ int main(int argc, char* argv[]) {
   std::vector<Ray5Screen> screens;
 
   float rmag, rth, rx, ry;
-  for (int i = 0; i < nrenders; i++) {    
-    if (dof_range > 0.0) {
-      rmag = uniform() * dof_range; 
-      rth = uniform() * 2 * PI;
-      rx = rmag * cos(rth);
-      ry = rmag * sin(rth);
-    }
-    else {rx = ry = 0.0;}
-    scene.camera.xrotate(rx);
-    scene.camera.yrotate(ry);
-    render(scene, r_screen, i + 1, nrenders);
-    scene.camera.yrotate(-ry);
-    scene.camera.xrotate(-rx);
+  for (int i = 0; i < settings.nrenders; i++) {
+    render(scene, r_screen, i + 1, settings.nrenders); 
     screens.push_back(r_screen);
+    settings.coherent_index++;
   }
 
   r_screen = Ray5Screen(screens);
   redraw(r_screen);
-
+  
   printf("Tracing complete:\n");
   printf("\tTotal time elapsed: %.3fs\n", 0.001 * (SDL_GetTicks() - started));
   fflush(0);
