@@ -57,7 +57,7 @@ Vect4 traceRay(const Ray5Scene& scene, const Vect4& O, const Vect4& D, int nrecu
 	Vect4 R = D + (2 * nearest.N * -dot(nearest.N, D));
 	Real coef = dot(shadow_direction, R);
 	if (coef > 0.0)
-	  color += nearest.obj->material.diffuse.multComp(nearest.obj->material.specular * pow(coef, nearest.obj->material.shininess) * scene.getLight(l)->color);
+	  color += nearest.obj->material.diffuse.multComp(nearest.obj->material.specular * pow(coef, nearest.obj->material.shininess) * scene.getLight(l)->getColor());
       }
       
       //Diffuse
@@ -66,7 +66,7 @@ Vect4 traceRay(const Ray5Scene& scene, const Vect4& O, const Vect4& D, int nrecu
 	if (nearest.obj->material.twosided) diffuse_coefficient = -diffuse_coefficient;
 	else diffuse_coefficient = 0;
       }
-      color += nearest.obj->material.diffuse.multComp(diffuse_coefficient * scene.getLight(l)->color);
+      color += nearest.obj->material.diffuse.multComp(diffuse_coefficient * scene.getLight(l)->getColor());
     }    
   }
   

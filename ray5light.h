@@ -6,9 +6,10 @@
 class Ray5Light {
 public:
   Vect4 position, color;
-  Real intensity, radius;
+  Real intensity;
 
-  Ray5Light() {color = Vect4(1, 1, 1); intensity = 1.0; radius = 0.0;}
+  Ray5Light() {color = Vect4(1, 1, 1); intensity = 1.0;}
+  Vect4 getColor() const {return color * intensity;}
 };
 
 #endif
