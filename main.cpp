@@ -45,26 +45,35 @@ Vect4 traceRay(const Ray5Scene& scene, const Vect4& O, const Vect4& D, int nrecu
 
   //Lighting-dependent color
   for (int l = 0; l < scene.countLights(); l++) {
-    Vect4 shadow_ray = scene.getLight(l)->position - nearest.P;
-    Vect4 shadow_direction = shadow_ray.unit();
-    Ray5Intersection shadow = scene.intersect(nearest.P + EPS * shadow_ray, shadow_direction, TRACE_SHADOW);
-    if (shadow.t > 0 && shadow.t < shadow_ray.length()) continue;
+    Vect4 lv, shadow_ray;
+    Real power = 0.0;
+    for (int s = 0; s < settings.nshadows; s++) {
+      lv = scene.getLight(l)->position + randomizer.randomSpherical(scene.getLight(l)->radius) - nearest.P;
+      shadow_ray = lv.unit();
+      Ray5Intersection shadow = scene.intersect(nearest.P + EPS * shadow_ray, shadow_ray, TRACE_SHADOW);
+      if (shadow.t < 0 || shadow.t >= lv.length()) power++;
+    }
+    power /= settings.nshadows;
+    if (power == 0.0) continue;
+
+    lv = scene.getLight(l)->position - nearest.P;
+    shadow_ray = lv.unit();
     
     //Specular
     if (nearest.obj->material.specular > 0 && nearest.obj->material.shininess > 0) {
       Vect4 R = D + (2 * nearest.N * -dot(nearest.N, D));
-      Real coef = dot(shadow_direction, R);
+      Real coef = dot(shadow_ray, R);
       if (coef > 0.0)
-	  color += nearest.obj->material.diffuse.multComp(nearest.obj->material.specular * pow(coef, nearest.obj->material.shininess) * scene.getLight(l)->getColor());
+	color += nearest.obj->material.diffuse.multComp(nearest.obj->material.specular * pow(coef, nearest.obj->material.shininess) * scene.getLight(l)->getColor() * power);
     }
     
     //Diffuse
-    Real diffuse_coefficient = dot(shadow_direction, nearest.N);
+    Real diffuse_coefficient = dot(shadow_ray, nearest.N);
     if (diffuse_coefficient < 0) {
       if (nearest.obj->material.twosided) diffuse_coefficient = -diffuse_coefficient;
       else diffuse_coefficient = 0;
     }
-    color += nearest.obj->material.diffuse.multComp(diffuse_coefficient * scene.getLight(l)->getColor());
+    color += nearest.obj->material.diffuse.multComp(diffuse_coefficient * scene.getLight(l)->getColor() * power);
   }
   
   return color;
@@ -173,6 +182,7 @@ void printUsage() {
   printf("\t--size width height : Give the size of the desired output image\n");
   printf("\t--renders : Turn on multirendering for statistical effects\n");
   printf("\t--samples : Turn on multisampling for statistical effects\n");
+  printf("\t--shadows : Set soft-shadow sampling rate\n");
   printf("\t--dof_degrees degrees: Allow depth of field to rotate around the focal point\n");
   printf("\t--coherence: Turn on coherent rendering mode\n");
 }
@@ -205,6 +215,9 @@ int main(int argc, char* argv[]) {
     }
     else if (!strcmp(argv[i], "--samples")) {
       sscanf(argv[++i], "%d", &settings.nsamples);
+    }
+    else if (!strcmp(argv[i], "--shadows")) {
+      sscanf(argv[++i], "%d", &settings.nshadows);
     }
     else if (!strcmp(argv[i], "--coherent")) {
       settings.coherence = 1;

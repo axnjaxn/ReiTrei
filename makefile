@@ -32,5 +32,5 @@ clean:
 debug: $(APP)
 	gdb $(APP)
 
-run: $(APP) test.ray
-	./$(APP) test.ray
+run: $(APP) tricol.ray
+	./$(APP) tricol.ray
