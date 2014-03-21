@@ -43,11 +43,11 @@ public:
 
   inline void init() {grid.setup(objects);}
   
-  inline Ray5Intersection intersect(const Vect4& O, const Vect4& D) const {
+  inline Ray5Intersection intersect(const Vect4& O, const Vect4& D, TraceMode mode = TRACE_NORMAL) const {
 #ifdef NO_GRID
-    return objects.intersect(O, D);
+    return objects.intersect(O, D, mode);
 #else
-    return grid.intersect(O, D);
+    return grid.intersect(O, D, mode);
 #endif
   }
 };

@@ -92,8 +92,8 @@ void Ray5Grid::setup(const Ray5ObjectSet& objects) {
   }
 }
 
-Ray5Intersection Ray5Grid::intersect(const Vect4& O, const Vect4& D) const {
-  Ray5Intersection hit = outer.intersect(O, D), test;
+Ray5Intersection Ray5Grid::intersect(const Vect4& O, const Vect4& D, TraceMode mode) const {
+  Ray5Intersection hit = outer.intersect(O, D, mode), test;
   Vect4 v = O, L, U;
   int cellno[3];
   getCellNo(v, cellno);
@@ -116,7 +116,7 @@ Ray5Intersection Ray5Grid::intersect(const Vect4& O, const Vect4& D) const {
   do {
     t0 = t1;
     
-    test = getSet(cellno).intersect(O, D);
+    test = getSet(cellno).intersect(O, D, mode);
 
     getCellBounds(cellno, &L, &U);
     t1 = -1;

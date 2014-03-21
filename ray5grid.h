@@ -22,7 +22,7 @@ class Ray5Grid {
   Ray5Grid();
   ~Ray5Grid();
   void setup(const Ray5ObjectSet& objects);
-  Ray5Intersection intersect(const Vect4& O, const Vect4& D) const;
+  Ray5Intersection intersect(const Vect4& O, const Vect4& D, TraceMode mode = TRACE_NORMAL) const;
 };
 
 #endif

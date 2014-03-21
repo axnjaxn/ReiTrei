@@ -4,6 +4,11 @@
 #include "mat4.h"
 #include <cstdlib>
 
+typedef enum {
+  TRACE_NORMAL = 0,
+  TRACE_SHADOW
+} TraceMode;
+
 class Ray5Material {
  public:
   bool shadowless, twosided;
@@ -117,16 +122,20 @@ class Ray5ObjectSet {
     return sum;
   }
 
-  Ray5Intersection intersect(const Vect4& O, const Vect4& D) const {
+  Ray5Intersection intersect(const Vect4& O, const Vect4& D, TraceMode mode = TRACE_NORMAL) const {
     Ray5Intersection nearest, next;
     
     for (int i = 0; i < count(); i++) {
       next = objects[i]->intersects(O, D);
-      if (next.nearerThan(nearest)) nearest = next;
+      if (next.nearerThan(nearest)) {
+	if (mode == TRACE_NORMAL 
+	    || (mode == TRACE_SHADOW && !objects[i]->material.shadowless)) nearest = next;
+      }
     }
     
     return nearest;
   }
+
   void getBounds(Vect4* L, Vect4* U) const {
     Vect4 l, u, li, ui;
     bool initial = 1;
