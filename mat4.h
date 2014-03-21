@@ -40,7 +40,6 @@ public:
 inline Real dot(const Vect4& v1, const Vect4& v2) {return v1 * v2;}
 inline Vect4 operator*(Real r, const Vect4& v) {return v * r;}
 inline bool nonzero(const Vect4& v) {return v[0] || v[1] || v[2] || v[3];}
-Vect4 randomVect4();
 inline Real distance(const Vect4& a, const Vect4& b) {return (b - a).length();}
 inline Real sqDistance(const Vect4& a, const Vect4& b) {return (b - a).sqLength();}
 

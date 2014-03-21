@@ -5,21 +5,19 @@
 #include "ray5screen.h"
 #include "ray5parser.h"
 #include "ray5shapes.h"
+#include "randomizer.h"
 #include <SDL/SDL.h>
 #include <vector>
-#include <ctime>
-#include <cstdlib>
 
 class RenderSettings {
 public:
   int nsamples;
   int nrenders;
   bool coherence;
-  int coherent_index;
   float dof_range;
 
   RenderSettings() {
-    nsamples = nrenders = coherent_index = 1;
+    nsamples = nrenders = 1;
     coherence = 0;
     dof_range = 0.0;
   }
@@ -79,17 +77,15 @@ inline void segFault(int param) {
   exit(0);
 }
 
-inline float uniform() {return (rand() & 0x7FFF) / 32768.0;}
-
 void traceAt(Ray5Scene& scene, Ray5Screen& screen, int r, int c) {
-  if (settings.coherence) srand(settings.coherent_index);
+  if (settings.coherence) randomizer.reseed();
 
   Vect4 O, D, color;
   float rmag, rth, rx, ry;
   for (int i = 0; i < settings.nsamples; i++) {    
     if (settings.dof_range > 0.0) {
-      rmag = uniform() * settings.dof_range; 
-      rth = uniform() * 2 * PI;
+      rmag = randomizer.uniform() * settings.dof_range; 
+      rth = randomizer.uniform() * 2 * PI;
       rx = rmag * cos(rth);
       ry = rmag * sin(rth);
     }
@@ -195,7 +191,7 @@ int main(int argc, char* argv[]) {
   fflush(0); 
 #endif
   
-  srand(time(NULL));
+  randomizer.timeSeed();
 
   Ray5Scene& scene = *Ray5Scene::getInstance();
   Ray5Screen r_screen;
@@ -246,7 +242,7 @@ int main(int argc, char* argv[]) {
   for (int i = 0; i < settings.nrenders; i++) {
     render(scene, r_screen, i + 1, settings.nrenders); 
     screens.push_back(r_screen);
-    settings.coherent_index++;
+    randomizer.advanceSeed();
   }
 
   r_screen = Ray5Screen(screens);

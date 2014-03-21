@@ -10,6 +10,7 @@ LFLAGS = `sdl-config --libs`
 
 OBJECT_FILES = \
 	mat4.o \
+	randomizer.o \
 	ray5grid.o \
 	ray5parser.o \
 	ray5screen.o \

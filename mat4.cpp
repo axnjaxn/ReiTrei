@@ -61,17 +61,6 @@ Vect4 Vect4::reciprocal() const {
   return r;
 }
 
-inline Real randomAngle() {
-  return 2 * PI * ((rand() % 32768) / 32768.0);
-}
-
-Vect4 randomVect4() {
-  Real theta = randomAngle(), phi = randomAngle() * 0.5;
-  Real ct = cos(theta), st = sin(theta), cp = cos(phi), sp = sin(phi);
-
-  return Vect4(st * cp, st * sp, ct, 0.0);
-}
-
 Mat4::Mat4() {
   memset(entries, 0, sizeof(Real) * 16);
 }
