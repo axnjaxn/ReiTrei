@@ -257,6 +257,19 @@ void printUsage() {
   printf("\t--shadows : Set soft-shadow sampling rate\n");
   printf("\t--dof_degrees degrees: Allow depth of field to rotate around the focal point\n");
   printf("\t--coherence: Turn on coherent rendering mode\n");
+  printf("\t--no-aa: Turn off anti-aliasing\n");
+  printf("\t--aa-threshold: Set threshold (1-norm) for anti-aliasing\n");
+}
+
+void drawPattern(Ray5Screen& r_screen) {
+  //Vect4 gray(0.875, 0.875, 0.875), white(1.0, 1.0, 1.0);
+  Vect4 gray(0.0, 0.0, 0.0), white(0.125, 0.125, 0.125);
+  for (int r = 0; r < r_screen.height(); r++)
+    for (int c = 0; c < r_screen.width(); c++) {
+      if (((r + c) / 5) % 2) r_screen.setColor(r, c, white);
+      else r_screen.setColor(r, c, gray);
+    }      
+  
 }
 
 int main(int argc, char* argv[]) {
@@ -298,6 +311,12 @@ int main(int argc, char* argv[]) {
       sscanf(argv[++i], "%f", &settings.dof_range);
       settings.dof_range *= PI / 180.0;
     }
+    else if (!strcmp(argv[i], "--no-aa")) {
+      settings.aa_enabled = 0;
+    }
+    else if (!strcmp(argv[i], "--aa-threshold")) {
+      sscanf(argv[++i], "%f", &settings.aa_threshold);
+    }
     else {
       printf("Unrecognized token \"%s\".\n", argv[i]);
       exit(0);
@@ -306,7 +325,7 @@ int main(int argc, char* argv[]) {
 
   parseScene(argv[argc - 1], &scene);
   scene.init();
-
+  
   /*
    * Set up scene
    */
@@ -317,6 +336,9 @@ int main(int argc, char* argv[]) {
   SDL_Surface* screen = SDL_SetVideoMode(scene.camera.pxw, scene.camera.pxh, 32, SDL_HWSURFACE|SDL_DOUBLEBUF);
 
   r_screen.setDimensions(screen->w, screen->h);
+
+  drawPattern(r_screen);
+  redraw(r_screen);
 
   Uint32 started = SDL_GetTicks();
   
