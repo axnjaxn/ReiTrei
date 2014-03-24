@@ -23,6 +23,8 @@ class Ray5Screen {
   void setDimensions(int w, int h);
   inline void setColor(int r, int c, const Vect4& color) {buffer[r * w + c] = color;}
   inline const Vect4& getColor(int r, int c) const {return buffer[r * w + c];}
+
+  Ray5Screen differenceMap() const;
 };
 
 #endif

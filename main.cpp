@@ -1,6 +1,7 @@
 #define MAX_RECURSE 10
 #define TITLE "ReiTrei5"
 //#define NO_GRID
+//#define SHOW_AA
 
 #include "ray5screen.h"
 #include "ray5parser.h"
@@ -16,11 +17,15 @@ public:
   int nshadows;
   bool coherence;
   float dof_range;
+  bool aa_enabled;
+  float aa_threshold;
 
   RenderSettings() {
     nsamples = nrenders = nshadows = 1;
     coherence = 0;
     dof_range = 0.0;
+    aa_enabled = 1;
+    aa_threshold = 0.25;
   }
 } settings;
 
@@ -111,6 +116,37 @@ void traceAt(Ray5Scene& scene, Ray5Screen& screen, int r, int c) {
   screen.setColor(r, c, color / settings.nsamples);
 }
 
+void traceAt_AA(Ray5Scene& scene, Ray5Screen& screen, int r, int c) {
+  if (settings.coherence) randomizer.reseed();
+
+  Vect4 O, D, color;
+  float rmag, rth, rx, ry;
+  for (int i = 0; i < settings.nsamples; i++) {    
+    if (settings.dof_range > 0.0) {
+      rmag = randomizer.uniform() * settings.dof_range; 
+      rth = randomizer.uniform() * 2 * PI;
+      rx = rmag * cos(rth);
+      ry = rmag * sin(rth);
+    }
+    else {rx = ry = 0.0;}
+
+    scene.camera.xrotate(rx);
+    scene.camera.yrotate(ry);
+    
+    O = scene.camera.getOrigin();
+    for (Real r1 = -0.5; r1 <= 0.5; r1 += 0.5)
+      for (Real c1 = -0.5; c1 <= 0.5; c1 += 0.5) {
+	D = scene.camera.getDirection(r + r1, c + c1);
+	color += traceRay(scene, O, D) / 9.0;
+      }
+
+    scene.camera.yrotate(-ry);
+    scene.camera.xrotate(-rx);
+  }
+      
+  screen.setColor(r, c, color / settings.nsamples);
+}
+
 int stripExtension(char* str) {
   for (int i = strlen(str) - 1; i >= 0; i--)
     if (str[i] == '.') {
@@ -145,34 +181,70 @@ void render(Ray5Scene& scene, Ray5Screen& r_screen, int renderno = 0, int outof 
   SDL_WM_SetCaption(titlebuf, NULL);
 
   SDL_Surface* screen = SDL_GetVideoSurface();
-  if (SDL_MUSTLOCK(screen)) SDL_LockSurface(screen);
 
   Uint32* bufp = (Uint32*)screen->pixels;
   Vect4 color;
   bool exitflag = 0;
   for (int r = 0; r < r_screen.height(); r++) {
     SDL_Event event;
-      while (SDL_PollEvent(&event))
-	if (event.type == SDL_QUIT || (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)) exit(0);
-	else if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_RETURN) exitflag = 1;
-      if (exitflag) break;
+    while (SDL_PollEvent(&event))
+      if (event.type == SDL_QUIT || (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)) exit(0);
+      else if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_RETURN) exitflag = 1;
+    if (exitflag) break;
 
-      for (int c = 0; c < r_screen.width(); c++) {
-	traceAt(scene, r_screen, r, c);
-	color = r_screen.getColor(r, c);
-	bufp[r * screen->w + c] = SDL_MapRGB(screen->format, toByte(color[0]), toByte(color[1]), toByte(color[2]));
-      }
 
-      if (outof > 1)
-	sprintf(titlebuf, "%s [%d / %d, %d of %d]",TITLE, r + 1, r_screen.height(), renderno, outof);
-      else
-	sprintf(titlebuf, "%s [%d / %d]",TITLE, r + 1, r_screen.height());
-      SDL_WM_SetCaption(titlebuf, NULL);
+    if (SDL_MUSTLOCK(screen)) SDL_LockSurface(screen);
+    for (int c = 0; c < r_screen.width(); c++) {
+      traceAt(scene, r_screen, r, c);
+      color = r_screen.getColor(r, c);
+      bufp[r * screen->w + c] = SDL_MapRGB(screen->format, toByte(color[0]), toByte(color[1]), toByte(color[2]));
+    }
 
-      SDL_Flip(screen);
+    if (outof > 1)
+      sprintf(titlebuf, "%s [%d / %d, %d of %d]",TITLE, r + 1, r_screen.height(), renderno, outof);
+    else
+      sprintf(titlebuf, "%s [%d / %d]",TITLE, r + 1, r_screen.height());
+    SDL_WM_SetCaption(titlebuf, NULL);
+
+    if (SDL_MUSTLOCK(screen)) SDL_UnlockSurface(screen);
+    SDL_Flip(screen);
   }
 
-  if (SDL_MUSTLOCK(screen)) SDL_UnlockSurface(screen);
+  if (!settings.aa_enabled) return;
+
+  Ray5Screen dmap = r_screen.differenceMap();
+  float d;
+  for (int r = 0; r < r_screen.height(); r++) {
+    SDL_Event event;
+    while (SDL_PollEvent(&event))
+      if (event.type == SDL_QUIT || (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)) exit(0);
+      else if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_RETURN) exitflag = 1;
+    if (exitflag) break;
+
+    if (SDL_MUSTLOCK(screen)) SDL_LockSurface(screen);
+    for (int c = 0; c < r_screen.width(); c++) {
+      d = dot(dmap.getColor(r, c), Vect4(1, 1, 1, 0));
+      if (d > settings.aa_threshold) {
+#ifdef SHOW_AA
+	color = Vect4(0.0, 1.0, 0.0);
+#else
+	traceAt_AA(scene, r_screen, r, c);
+	color = r_screen.getColor(r, c);
+#endif
+	bufp[r * screen->w + c] = SDL_MapRGB(screen->format, toByte(color[0]), toByte(color[1]), toByte(color[2]));
+      }
+    }
+
+    if (outof > 1)
+      sprintf(titlebuf, "%s [AA: %d / %d, %d of %d]",TITLE, r + 1, r_screen.height(), renderno, outof);
+    else
+      sprintf(titlebuf, "%s [AA: %d / %d]",TITLE, r + 1, r_screen.height());
+    SDL_WM_SetCaption(titlebuf, NULL);
+
+    if (SDL_MUSTLOCK(screen)) SDL_UnlockSurface(screen);
+    SDL_Flip(screen);
+  }
+
 }
 
 void printUsage() {
@@ -258,7 +330,9 @@ int main(int argc, char* argv[]) {
   }
 
   r_screen = Ray5Screen(screens);
+#ifndef SHOW_AA
   redraw(r_screen);
+#endif
   
   printf("Tracing complete:\n");
   printf("\tTotal time elapsed: %.3fs\n", 0.001 * (SDL_GetTicks() - started));
