@@ -26,13 +26,6 @@ Vect4 Vect4::operator-(const Vect4& v) const {
   return r;
 }
 
-Real Vect4::operator*(const Vect4& v) const {
-  Real r = 0.0;
-  for (int i = 0; i < 4; i++)
-    r += entries[i] * v.entries[i];
-  return r;
-}
-
 Vect4 Vect4::operator*(Real r) const {
   Vect4 v;
   for (int i = 0; i < 4; i++)
@@ -45,6 +38,18 @@ Vect4 Vect4::operator/(Real r) const {
   for (int i = 0; i < 4; i++)
     v[i] = entries[i] / r;
   return v;
+}
+
+Real dot(const Vect4& a, const Vect4& b) {
+  Real r = 0.0;
+  for (int i = 0; i < 4; i++) r += a[i] * b[i];
+  return r;
+}
+
+Vect4 cross(const Vect4& a, const Vect4& b) {
+  return Vect4(a[1] * b[2] - a[2] * b[1],
+	       a[2] * b[0] - a[0] * b[2],
+	       a[0] * b[1] - a[1] * b[0]);
 }
 
 Vect4 Vect4::multComp(const Vect4& v) const {
@@ -193,15 +198,5 @@ Mat4 Mat4::scaling(Real sx, Real sy, Real sz) {
   result.at(0, 0) = sx;
   result.at(1, 1) = sy;
   result.at(2, 2) = sz;
-  return result;
-}
-
-Mat4 ONB(const Vect4& u, const Vect4& v, const Vect4& w) {
-  Mat4 result = Mat4::identity();
-  for (int i = 0; i < 3; i++) {
-    result.at(i, 0) = u[i];
-    result.at(i, 1) = v[i];
-    result.at(i, 2) = w[i];
-  }
   return result;
 }
