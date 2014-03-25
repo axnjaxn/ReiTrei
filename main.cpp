@@ -51,34 +51,33 @@ Vect4 traceRay(const Ray5Scene& scene, const Vect4& O, const Vect4& D, int nrecu
   //Lighting-dependent color
   for (int l = 0; l < scene.countLights(); l++) {
     Vect4 lv, shadow_ray;
-    Real power = 0.0;
+    Real diffuse_power = 0.0, specular_power = 0.0, coef;
     for (int s = 0; s < settings.nshadows; s++) {
       lv = scene.getLight(l)->position + randomizer.randomSpherical(scene.getLight(l)->radius) - nearest.P;
       shadow_ray = lv.unit();
-      Ray5Intersection shadow = scene.intersect(nearest.P + EPS * shadow_ray, shadow_ray, TRACE_SHADOW);
-      if (shadow.t < 0 || shadow.t >= lv.length()) power++;
-    }
-    power /= settings.nshadows;
-    if (power == 0.0) continue;
 
-    lv = scene.getLight(l)->position - nearest.P;
-    shadow_ray = lv.unit();
+      Ray5Intersection shadow = scene.intersect(nearest.P + EPS * shadow_ray, shadow_ray, TRACE_SHADOW);
+      if (shadow.t >= 0 && shadow.t < lv.length()) continue;
+
+      //Specular
+      if (nearest.obj->material.specular > 0 && nearest.obj->material.shininess > 0) {
+	Vect4 R = D + (2 * nearest.N * -dot(nearest.N, D));
+	coef = dot(shadow_ray, R);
+	if (coef < 0.0 && nearest.obj->material.twosided) coef = -coef;
+	if (coef > 0.0) specular_power += pow(coef, nearest.obj->material.shininess);
+      }
     
-    //Specular
-    if (nearest.obj->material.specular > 0 && nearest.obj->material.shininess > 0) {
-      Vect4 R = D + (2 * nearest.N * -dot(nearest.N, D));
-      Real coef = dot(shadow_ray, R);
-      if (coef > 0.0)
-	color += nearest.obj->material.diffuse.multComp(nearest.obj->material.specular * pow(coef, nearest.obj->material.shininess) * scene.getLight(l)->getColor() * power);
+      //Diffuse
+      coef = dot(shadow_ray, nearest.N);
+      if (coef < 0.0 && nearest.obj->material.twosided) coef = -coef;
+      if (coef > 0.0) diffuse_power += coef;
     }
-    
-    //Diffuse
-    Real diffuse_coefficient = dot(shadow_ray, nearest.N);
-    if (diffuse_coefficient < 0) {
-      if (nearest.obj->material.twosided) diffuse_coefficient = -diffuse_coefficient;
-      else diffuse_coefficient = 0;
-    }
-    color += nearest.obj->material.diffuse.multComp(diffuse_coefficient * scene.getLight(l)->getColor() * power);
+
+    diffuse_power /= settings.nshadows;
+    specular_power /= settings.nshadows;
+
+    color += nearest.obj->material.diffuse.multComp(scene.getLight(l)->getColor() * diffuse_power);
+    color += nearest.obj->material.diffuse.multComp(nearest.obj->material.specular * scene.getLight(l)->getColor() * specular_power);
   }
   
   return color;
