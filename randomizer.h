@@ -6,7 +6,7 @@
 class Randomizer {
 private:
   inline Randomizer(const Randomizer&) { }
-  inline Randomizer& operator=(const Randomizer&) { }
+  inline Randomizer& operator=(const Randomizer&) {return *this;}
 
   int seedno;
   
