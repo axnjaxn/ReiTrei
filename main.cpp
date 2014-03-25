@@ -7,7 +7,7 @@
 #include "ray5parser.h"
 #include "ray5shapes.h"
 #include "randomizer.h"
-#include <SDL/SDL.h>
+#include <SDL2/SDL.h>
 #include <vector>
 
 class RenderSettings {
@@ -157,31 +157,29 @@ int stripExtension(char* str) {
 
 inline Uint8 toByte(Real r) {return (r > 1.0)? 255 : (Uint8)(255 * r);}
 
-void redraw(const Ray5Screen& r_screen) {
-  SDL_Surface* screen = SDL_GetVideoSurface();
-  if (SDL_MUSTLOCK(screen)) SDL_LockSurface(screen);
+#include "pixelrenderer.h"
 
-  Uint32* bufp = (Uint32*)screen->pixels;
+SDL_Window* window = NULL;
+PixelRenderer* px = NULL;
+
+void redraw(const Ray5Screen& r_screen) {
   Vect4 color;
   for (int r = 0; r < r_screen.height(); r++) {
     for (int c = 0; c < r_screen.width(); c++) {
       color = r_screen.getColor(r, c);
-      bufp[r * screen->w + c] = SDL_MapRGB(screen->format, toByte(color[0]), toByte(color[1]), toByte(color[2]));
+      px->set(r, c, toByte(color[0]), toByte(color[1]), toByte(color[2]));
     }
   }
-  
-  if (SDL_MUSTLOCK(screen)) SDL_UnlockSurface(screen);
-  SDL_Flip(screen);
+
+  px->redraw();
+  SDL_RenderPresent(px->getRenderer());
 }
 
 void render(Ray5Scene& scene, Ray5Screen& r_screen, int renderno = 0, int outof = 1) {
   char titlebuf[200];
   sprintf(titlebuf, "%s",TITLE);
-  SDL_WM_SetCaption(titlebuf, NULL);
+  SDL_SetWindowTitle(window, titlebuf);
 
-  SDL_Surface* screen = SDL_GetVideoSurface();
-
-  Uint32* bufp = (Uint32*)screen->pixels;
   Vect4 color;
   bool exitflag = 0;
   for (int r = 0; r < r_screen.height(); r++) {
@@ -192,21 +190,20 @@ void render(Ray5Scene& scene, Ray5Screen& r_screen, int renderno = 0, int outof 
     if (exitflag) break;
 
 
-    if (SDL_MUSTLOCK(screen)) SDL_LockSurface(screen);
     for (int c = 0; c < r_screen.width(); c++) {
       traceAt(scene, r_screen, r, c);
       color = r_screen.getColor(r, c);
-      bufp[r * screen->w + c] = SDL_MapRGB(screen->format, toByte(color[0]), toByte(color[1]), toByte(color[2]));
+      px->set(r, c, toByte(color[0]), toByte(color[1]), toByte(color[2]));
     }
 
     if (outof > 1)
       sprintf(titlebuf, "%s [%d / %d, %d of %d]",TITLE, r + 1, r_screen.height(), renderno, outof);
     else
       sprintf(titlebuf, "%s [%d / %d]",TITLE, r + 1, r_screen.height());
-    SDL_WM_SetCaption(titlebuf, NULL);
+    SDL_SetWindowTitle(window, titlebuf);
 
-    if (SDL_MUSTLOCK(screen)) SDL_UnlockSurface(screen);
-    SDL_Flip(screen);
+    px->redraw();
+    SDL_RenderPresent(px->getRenderer());
   }
 
   if (!settings.aa_enabled) return;
@@ -219,8 +216,7 @@ void render(Ray5Scene& scene, Ray5Screen& r_screen, int renderno = 0, int outof 
       if (event.type == SDL_QUIT || (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)) exit(0);
       else if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_RETURN) exitflag = 1;
     if (exitflag) break;
-
-    if (SDL_MUSTLOCK(screen)) SDL_LockSurface(screen);
+    
     for (int c = 0; c < r_screen.width(); c++) {
       d = dot(dmap.getColor(r, c), Vect4(1, 1, 1, 0));
       if (d > settings.aa_threshold) {
@@ -230,7 +226,7 @@ void render(Ray5Scene& scene, Ray5Screen& r_screen, int renderno = 0, int outof 
 	traceAt_AA(scene, r_screen, r, c);
 	color = r_screen.getColor(r, c);
 #endif
-	bufp[r * screen->w + c] = SDL_MapRGB(screen->format, toByte(color[0]), toByte(color[1]), toByte(color[2]));
+	px->set(r, c, toByte(color[0]), toByte(color[1]), toByte(color[2]));
       }
     }
 
@@ -238,10 +234,10 @@ void render(Ray5Scene& scene, Ray5Screen& r_screen, int renderno = 0, int outof 
       sprintf(titlebuf, "%s [AA: %d / %d, %d of %d]",TITLE, r + 1, r_screen.height(), renderno, outof);
     else
       sprintf(titlebuf, "%s [AA: %d / %d]",TITLE, r + 1, r_screen.height());
-    SDL_WM_SetCaption(titlebuf, NULL);
-
-    if (SDL_MUSTLOCK(screen)) SDL_UnlockSurface(screen);
-    SDL_Flip(screen);
+    SDL_SetWindowTitle(window, titlebuf);
+    
+    px->redraw();
+    SDL_RenderPresent(px->getRenderer());
   }
 
 }
@@ -332,9 +328,15 @@ int main(int argc, char* argv[]) {
 
   if (SDL_Init(SDL_INIT_VIDEO) < 0) exit(1);
   atexit(SDL_Quit);
-  SDL_Surface* screen = SDL_SetVideoMode(scene.camera.pxw, scene.camera.pxh, 32, SDL_HWSURFACE|SDL_DOUBLEBUF);
 
-  r_screen.setDimensions(screen->w, screen->h);
+  window = SDL_CreateWindow(TITLE,
+			    SDL_WINDOWPOS_CENTERED,
+			    SDL_WINDOWPOS_CENTERED,
+			    scene.camera.pxw, scene.camera.pxh,
+			    0);
+  px = new PixelRenderer(SDL_CreateRenderer(window, -1, 0), scene.camera.pxw, scene.camera.pxh);
+
+  r_screen.setDimensions(scene.camera.pxw, scene.camera.pxh);
 
   drawPattern(r_screen);
   redraw(r_screen);
@@ -359,7 +361,9 @@ int main(int argc, char* argv[]) {
   printf("\tTotal time elapsed: %.3fs\n", 0.001 * (SDL_GetTicks() - started));
   fflush(0);
 
-  SDL_SaveBMP(SDL_GetVideoSurface(), "out.bmp");
+  SDL_Surface* surf = px->getSurface();
+  SDL_SaveBMP(surf, "out.bmp");
+  SDL_FreeSurface(surf);
 
   SDL_Event event;
   bool exitflag = 0;
@@ -368,6 +372,10 @@ int main(int argc, char* argv[]) {
       if (event.type == SDL_QUIT || (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)) exitflag = 1;
     SDL_Delay(100);
   }
+
+  SDL_DestroyRenderer(px->getRenderer());
+  delete px;
+  SDL_DestroyWindow(window);
 
   return 0;
 }

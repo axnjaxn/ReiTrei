@@ -6,7 +6,7 @@ EXT = .exe
 endif
 APP = $(APPNAME)$(EXT)
 DFLAGS = -O2 -DDEBUG -DVERBOSE
-LFLAGS = `sdl-config --libs`
+LFLAGS = `sdl2-config --libs`
 
 OBJECT_FILES = \
 	mat4.o \
@@ -14,6 +14,7 @@ OBJECT_FILES = \
 	ray5grid.o \
 	ray5parser.o \
 	ray5screen.o \
+	pixelrenderer.o \
 	main.o
 
 all: $(APP)
