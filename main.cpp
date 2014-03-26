@@ -87,7 +87,7 @@ inline void segFault(int param) {
   exit(0);
 }
 
-void traceAt(Ray5Scene& scene, Ray5Screen& screen, int r, int c) {
+void traceAt(const Ray5Scene& scene, Ray5Screen& screen, int r, int c) {
   if (settings.coherence) randomizer.reseed();
 
   Vect4 O, D, color;
@@ -113,7 +113,7 @@ void traceAt(Ray5Scene& scene, Ray5Screen& screen, int r, int c) {
   screen.setColor(r, c, color / settings.nsamples);
 }
 
-void traceAt_AA(Ray5Scene& scene, Ray5Screen& screen, int r, int c) {
+void traceAt_AA(const Ray5Scene& scene, Ray5Screen& screen, int r, int c) {
   if (settings.coherence) randomizer.reseed();
 
   Vect4 O, D, color;
