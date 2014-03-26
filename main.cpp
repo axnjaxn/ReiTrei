@@ -1,7 +1,6 @@
 #define MAX_RECURSE 10
 #define TITLE "ReiTrei5"
 //#define NO_GRID
-//#define SHOW_AA
 
 #include "ray5screen.h"
 #include "ray5parser.h"
@@ -175,6 +174,85 @@ void redraw(const Ray5Screen& r_screen) {
   SDL_RenderPresent(px->getRenderer());
 }
 
+#include <queue>
+class RenderQueue {
+public:
+  class Point {
+  public:
+    int r, c;
+    Point() {r = c = 0;}
+    Point(int r, int c) {this->r = r; this->c = c;}
+  };
+
+  Ray5Scene* scene;
+  Ray5Screen* screen;
+  SDL_mutex* mutex;
+  
+  std::queue<Point> queue;
+
+  RenderQueue(Ray5Scene* scene = NULL, Ray5Screen* screen = NULL) {
+    this->scene = scene;
+    this->screen = screen;
+    mutex = SDL_CreateMutex();
+  }
+  ~RenderQueue() {
+    SDL_DestroyMutex(mutex);
+  }
+
+  void push(int r, int c) {
+    SDL_LockMutex(mutex);
+    queue.push(Point(r, c));
+    SDL_UnlockMutex(mutex);
+  }
+
+  void pushRow(int r) {
+    SDL_LockMutex(mutex);
+    for (int c = 0; c < screen->width(); c++)
+      queue.push(Point(r, c));
+    SDL_UnlockMutex(mutex);
+  }
+
+  Point pop() {
+    Point p = queue.front();
+    queue.pop();
+    return p;
+  }
+  
+  bool empty() {return queue.empty();}
+};
+
+int renderThread(void* v) {
+  RenderQueue* rq = (RenderQueue*)v;
+  RenderQueue::Point p;
+  for (;;) {
+    SDL_LockMutex(rq->mutex);
+    if (rq->empty()) break;
+    p = rq->pop();
+    SDL_UnlockMutex(rq->mutex);
+    traceAt(*rq->scene, *rq->screen, p.r, p.c);
+  }
+  SDL_UnlockMutex(rq->mutex);
+  return 0;
+}
+
+int renderThread_AA(void* v) {
+  RenderQueue* rq = (RenderQueue*)v;
+  RenderQueue::Point p;
+  Vect4 color;
+  for (;;) {
+    SDL_LockMutex(rq->mutex);
+    if (rq->empty()) break;
+    p = rq->pop();
+    SDL_UnlockMutex(rq->mutex);
+    traceAt_AA(*rq->scene, *rq->screen, p.r, p.c);
+    color = rq->screen->getColor(p.r, p.c);
+    px->set(p.r, p.c, toByte(color[0]), toByte(color[1]), toByte(color[2]));
+  }
+  SDL_UnlockMutex(rq->mutex);
+  return 0;
+}
+
+//#define NO_QUEUE
 void render(Ray5Scene& scene, Ray5Screen& r_screen, int renderno = 0, int outof = 1) {
   char titlebuf[200];
   sprintf(titlebuf, "%s",TITLE);
@@ -182,6 +260,14 @@ void render(Ray5Scene& scene, Ray5Screen& r_screen, int renderno = 0, int outof 
 
   Vect4 color;
   bool exitflag = 0;
+#ifndef NO_QUEUE
+  int v;
+  RenderQueue rq(&scene, &r_screen);
+  int nworkers = SDL_GetCPUCount();
+  if (nworkers > 1) nworkers--;
+  SDL_Thread** threads = new SDL_Thread* [nworkers];
+#endif
+
   for (int r = 0; r < r_screen.height(); r++) {
     SDL_Event event;
     while (SDL_PollEvent(&event))
@@ -189,12 +275,23 @@ void render(Ray5Scene& scene, Ray5Screen& r_screen, int renderno = 0, int outof 
       else if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_RETURN) exitflag = 1;
     if (exitflag) break;
 
-
+#ifdef NO_QUEUE
     for (int c = 0; c < r_screen.width(); c++) {
       traceAt(scene, r_screen, r, c);
       color = r_screen.getColor(r, c);
       px->set(r, c, toByte(color[0]), toByte(color[1]), toByte(color[2]));
     }
+#else
+    rq.pushRow(r);
+    for (int i = 0; i < nworkers; i++) threads[i] = SDL_CreateThread(&renderThread, NULL, &rq);
+    for (int i = 0; i < nworkers; i++) SDL_WaitThread(threads[i], &v);
+    /*
+    for (int c = 0; c < r_screen.width(); c++) {
+      color = r_screen.getColor(r, c);
+      px->set(r, c, toByte(color[0]), toByte(color[1]), toByte(color[2]));
+    }
+    */
+#endif
 
     if (outof > 1)
       sprintf(titlebuf, "%s [%d / %d, %d of %d]",TITLE, r + 1, r_screen.height(), renderno, outof);
@@ -202,8 +299,10 @@ void render(Ray5Scene& scene, Ray5Screen& r_screen, int renderno = 0, int outof 
       sprintf(titlebuf, "%s [%d / %d]",TITLE, r + 1, r_screen.height());
     SDL_SetWindowTitle(window, titlebuf);
 
+    /*
     px->redraw();
     SDL_RenderPresent(px->getRenderer());
+    */
   }
 
   if (!settings.aa_enabled) return;
@@ -220,26 +319,40 @@ void render(Ray5Scene& scene, Ray5Screen& r_screen, int renderno = 0, int outof 
     for (int c = 0; c < r_screen.width(); c++) {
       d = dot(dmap.getColor(r, c), Vect4(1, 1, 1, 0));
       if (d > settings.aa_threshold) {
-#ifdef SHOW_AA
-	color = Vect4(0.0, 1.0, 0.0);
-#else
+#ifdef NO_QUEUE
 	traceAt_AA(scene, r_screen, r, c);
 	color = r_screen.getColor(r, c);
-#endif
 	px->set(r, c, toByte(color[0]), toByte(color[1]), toByte(color[2]));
+#else
+      rq.push(r, c);
+#endif
       }
     }
-
+#ifdef NO_QUEUE
     if (outof > 1)
-      sprintf(titlebuf, "%s [AA: %d / %d, %d of %d]",TITLE, r + 1, r_screen.height(), renderno, outof);
+      sprintf(titlebuf, "%s [AA: %d / %d, %d of %d]", TITLE, r + 1, r_screen.height(), renderno, outof);
     else
       sprintf(titlebuf, "%s [AA: %d / %d]",TITLE, r + 1, r_screen.height());
     SDL_SetWindowTitle(window, titlebuf);
     
     px->redraw();
     SDL_RenderPresent(px->getRenderer());
+#endif
   }
 
+#ifndef NO_QUEUE
+  sprintf(titlebuf, "%s [AA]",TITLE);
+  SDL_SetWindowTitle(window, titlebuf);
+  for (int i = 0; i < nworkers; i++) threads[i] = SDL_CreateThread(&renderThread_AA, NULL, &rq);
+  for (int i = 0; i < nworkers; i++) SDL_WaitThread(threads[i], &v);
+  px->redraw();
+  SDL_RenderPresent(px->getRenderer());
+  SDL_SetWindowTitle(window, TITLE);
+#endif
+
+#ifndef NO_QUEUE
+  delete [] threads;
+#endif
 }
 
 void printUsage() {
@@ -345,7 +458,6 @@ int main(int argc, char* argv[]) {
   
   std::vector<Ray5Screen> screens;
 
-  float rmag, rth, rx, ry;
   for (int i = 0; i < settings.nrenders; i++) {
     render(scene, r_screen, i + 1, settings.nrenders); 
     screens.push_back(r_screen);
