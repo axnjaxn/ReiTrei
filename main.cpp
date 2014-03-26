@@ -187,6 +187,7 @@ public:
   Ray5Scene* scene;
   Ray5Screen* screen;
   SDL_mutex* mutex;
+  bool is_open;
   
   std::queue<Point> queue;
 
@@ -194,6 +195,7 @@ public:
     this->scene = scene;
     this->screen = screen;
     mutex = SDL_CreateMutex();
+    is_open = 0;
   }
   ~RenderQueue() {
     SDL_DestroyMutex(mutex);
@@ -218,7 +220,21 @@ public:
     return p;
   }
   
-  bool empty() {return queue.empty();}
+  bool empty() const {return queue.empty();}
+  
+  void open() {
+    SDL_LockMutex(mutex);
+    is_open = 1;
+    SDL_UnlockMutex(mutex);
+  }
+
+  void close() {
+    SDL_LockMutex(mutex);
+    is_open = 0;
+    SDL_UnlockMutex(mutex);
+  }
+
+  bool closed() const {return !is_open;}
 };
 
 int renderThread(void* v) {
@@ -226,7 +242,13 @@ int renderThread(void* v) {
   RenderQueue::Point p;
   for (;;) {
     SDL_LockMutex(rq->mutex);
-    if (rq->empty()) break;
+    if (rq->empty()) {
+      if (rq->closed()) break;
+      else {
+	SDL_UnlockMutex(rq->mutex);
+	continue;
+      }
+    }
     p = rq->pop();
     SDL_UnlockMutex(rq->mutex);
     traceAt(*rq->scene, *rq->screen, p.r, p.c);
@@ -241,7 +263,13 @@ int renderThread_AA(void* v) {
   Vect4 color;
   for (;;) {
     SDL_LockMutex(rq->mutex);
-    if (rq->empty()) break;
+    if (rq->empty()) {
+      if (rq->closed()) break;
+      else {
+	SDL_UnlockMutex(rq->mutex);
+	continue;
+      }
+    }
     p = rq->pop();
     SDL_UnlockMutex(rq->mutex);
     traceAt_AA(*rq->scene, *rq->screen, p.r, p.c);
@@ -260,7 +288,6 @@ void drawRow(Ray5Screen& r_screen, int r) {
   }
 }
 
-//#define NO_QUEUE
 void render(Ray5Scene& scene, Ray5Screen& r_screen, int renderno = 0, int outof = 1) {
   char titlebuf[200];
   sprintf(titlebuf, "%s",TITLE);
@@ -314,16 +341,10 @@ void render(Ray5Scene& scene, Ray5Screen& r_screen, int renderno = 0, int outof 
     
     for (int c = 0; c < r_screen.width(); c++) {
       d = dot(dmap.getColor(r, c), Vect4(1, 1, 1, 0));
-      if (d > settings.aa_threshold) {
-#ifdef NO_QUEUE
-	traceAt_AA(scene, r_screen, r, c);
-	color = r_screen.getColor(r, c);
-	px->set(r, c, toByte(color[0]), toByte(color[1]), toByte(color[2]));
-#else
-      rq.push(r, c);
-#endif
-      }
+      if (d > settings.aa_threshold)
+	rq.push(r, c);
     }
+
 #ifdef NO_QUEUE
     if (outof > 1)
       sprintf(titlebuf, "%s [AA: %d / %d, %d of %d]", TITLE, r + 1, r_screen.height(), renderno, outof);
