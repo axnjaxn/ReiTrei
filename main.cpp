@@ -252,6 +252,14 @@ int renderThread_AA(void* v) {
   return 0;
 }
 
+void drawRow(Ray5Screen& r_screen, int r) {
+  Vect4 color;
+  for (int c = 0; c < r_screen.width(); c++) {
+    color = r_screen.getColor(r, c);
+    px->set(r, c, toByte(color[0]), toByte(color[1]), toByte(color[2]));
+  }
+}
+
 //#define NO_QUEUE
 void render(Ray5Scene& scene, Ray5Screen& r_screen, int renderno = 0, int outof = 1) {
   char titlebuf[200];
@@ -260,51 +268,39 @@ void render(Ray5Scene& scene, Ray5Screen& r_screen, int renderno = 0, int outof 
 
   Vect4 color;
   bool exitflag = 0;
-#ifndef NO_QUEUE
-  int v;
+
+  int v; //Return value from threads
   RenderQueue rq(&scene, &r_screen);
   int nworkers = SDL_GetCPUCount();
-  if (nworkers > 1) nworkers--;
+  if (nworkers > 1) nworkers--; //Use n threads (counting this one) on n-core machines, but 2 threads for single-core machines
   SDL_Thread** threads = new SDL_Thread* [nworkers];
-#endif
 
-  for (int r = 0; r < r_screen.height(); r++) {
+  rq.pushRow(0);
+  for (int r = 1; r < r_screen.height(); r++) {
     SDL_Event event;
     while (SDL_PollEvent(&event))
       if (event.type == SDL_QUIT || (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)) exit(0);
       else if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_RETURN) exitflag = 1;
     if (exitflag) break;
 
-#ifdef NO_QUEUE
-    for (int c = 0; c < r_screen.width(); c++) {
-      traceAt(scene, r_screen, r, c);
-      color = r_screen.getColor(r, c);
-      px->set(r, c, toByte(color[0]), toByte(color[1]), toByte(color[2]));
-    }
-#else
     rq.pushRow(r);
+    
     for (int i = 0; i < nworkers; i++) threads[i] = SDL_CreateThread(&renderThread, NULL, &rq);
-    for (int i = 0; i < nworkers; i++) SDL_WaitThread(threads[i], &v);
-    /*
-    for (int c = 0; c < r_screen.width(); c++) {
-      color = r_screen.getColor(r, c);
-      px->set(r, c, toByte(color[0]), toByte(color[1]), toByte(color[2]));
-    }
-    */
-#endif
 
-    if (outof > 1)
-      sprintf(titlebuf, "%s [%d / %d, %d of %d]",TITLE, r + 1, r_screen.height(), renderno, outof);
-    else
-      sprintf(titlebuf, "%s [%d / %d]",TITLE, r + 1, r_screen.height());
-    SDL_SetWindowTitle(window, titlebuf);
-
-    /*
+    drawRow(r_screen, r - 1);
     px->redraw();
-    SDL_RenderPresent(px->getRenderer());
-    */
-  }
+    SDL_RenderPresent(px->getRenderer()); 
 
+    for (int i = 0; i < nworkers; i++) SDL_WaitThread(threads[i], &v);
+
+    if (outof > 1) sprintf(titlebuf, "%s [%d / %d, %d of %d]",TITLE, r + 1, r_screen.height(), renderno, outof);
+    else sprintf(titlebuf, "%s [%d / %d]",TITLE, r + 1, r_screen.height());
+    SDL_SetWindowTitle(window, titlebuf);
+  }
+  drawRow(r_screen, r_screen.height() - 1);
+  px->redraw();
+  SDL_RenderPresent(px->getRenderer()); 
+  
   if (!settings.aa_enabled) return;
 
   Ray5Screen dmap = r_screen.differenceMap();
