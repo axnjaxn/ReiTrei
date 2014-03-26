@@ -5,7 +5,7 @@ else
 EXT = .exe
 endif
 APP = $(APPNAME)$(EXT)
-DFLAGS = -O2 -DDEBUG -DVERBOSE -g
+DFLAGS = -O2 -DDEBUG -DVERBOSE
 LFLAGS = `sdl2-config --libs`
 
 OBJECT_FILES = \
