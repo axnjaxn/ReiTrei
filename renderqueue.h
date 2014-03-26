@@ -28,9 +28,8 @@ public:
   RenderQueue(Ray5Scene* scene, Ray5Screen* screen);
   ~RenderQueue();
   void push(int r, int c);
-  void pushRow(int r);
-  Point pop();  
-  bool empty() const;
+  void pushRow(int r); 
+  bool empty();
   bool checkPop(Point& p);
 };
 

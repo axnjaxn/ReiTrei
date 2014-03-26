@@ -23,13 +23,12 @@ void RenderQueue::pushRow(int r) {
   SDL_UnlockMutex(mutex);
 }
 
-RenderQueue::Point RenderQueue::pop() {
-  Point p = queue.front();
-  queue.pop();
-  return p;
+bool RenderQueue::empty() {
+  SDL_LockMutex(mutex);
+  bool b = queue.empty();
+  SDL_UnlockMutex(mutex);
+  return b;
 }
-
-bool RenderQueue::empty() const {return queue.empty();}
 
 bool RenderQueue::checkPop(Point& p) {
   SDL_LockMutex(mutex);

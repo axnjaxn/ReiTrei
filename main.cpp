@@ -176,28 +176,18 @@ void redraw(const Ray5Screen& screen) {
 int renderThread(void* v) {
   RenderQueue* rq = (RenderQueue*)v;
   RenderQueue::Point p;
-  for (;;) {
-    SDL_LockMutex(rq->mutex);
-    if (rq->empty()) break;
-    p = rq->pop();
-    SDL_UnlockMutex(rq->mutex);
+  while (rq->checkPop(p)) {
     traceAt(*rq->scene, *rq->screen, p.r, p.c);
   }
-  SDL_UnlockMutex(rq->mutex);
   return 0;
 }
 
 int renderThread_AA(void* v) {
   RenderQueue* rq = (RenderQueue*)v;
   RenderQueue::Point p;
-  for (;;) {
-    SDL_LockMutex(rq->mutex);
-    if (rq->empty()) break;
-    p = rq->pop();
-    SDL_UnlockMutex(rq->mutex);
+  while (rq->checkPop(p)) {
     traceAt_AA(*rq->scene, *rq->screen, p.r, p.c);
   }
-  SDL_UnlockMutex(rq->mutex);
   return 0;
 }
 
