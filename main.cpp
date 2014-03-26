@@ -6,6 +6,7 @@
 #include "ray5parser.h"
 #include "ray5shapes.h"
 #include "randomizer.h"
+#include <string>
 #include <vector> 
 
 class RenderSettings {
@@ -23,7 +24,7 @@ public:
     coherence = 0;
     dof_range = 0.0;
     aa_enabled = 1;
-    aa_threshold = 0.25;
+    aa_threshold = 0.2;
   }
 } settings;
 
@@ -325,7 +326,8 @@ int main(int argc, char* argv[]) {
   Ray5Scene& scene = *Ray5Scene::getInstance();
   Ray5Screen screen;
   int w = 300, h = 300;
-  for (int i = 1; i < argc - 1; i++) {
+  std::string filename;
+  for (int i = 1; i < argc; i++) {
     if (!strcmp(argv[i], "--size")) {
       sscanf(argv[++i], "%d", &w);
       sscanf(argv[++i], "%d", &h);
@@ -353,12 +355,17 @@ int main(int argc, char* argv[]) {
       sscanf(argv[++i], "%f", &settings.aa_threshold);
     }
     else {
-      printf("Unrecognized token \"%s\".\n", argv[i]);
-      exit(0);
+      if (filename.empty()) {
+	filename = argv[i];
+      }
+      else {
+	printf("Unrecognized token \"%s\".\n", argv[i]);
+	exit(0);
+      }
     }
   }
 
-  parseScene(argv[argc - 1], &scene);
+  parseScene(filename.c_str(), &scene);
   scene.init();
   
   /*
