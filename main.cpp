@@ -214,6 +214,9 @@ void render(Ray5Scene& scene, Ray5Screen& screen, int renderno = 0, int outof = 
   SDL_Thread** threads = new SDL_Thread* [nworkers];
 
   rq.pushRow(0);
+  for (int i = 0; i < nworkers; i++) threads[i] = SDL_CreateThread(&renderThread, NULL, &rq);
+  for (int i = 0; i < nworkers; i++) SDL_WaitThread(threads[i], &v);
+
   for (int r = 1; r < screen.height(); r++) {
     SDL_Event event;
     while (SDL_PollEvent(&event))
