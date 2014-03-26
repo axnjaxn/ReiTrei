@@ -314,8 +314,7 @@ void render(Ray5Scene& scene, Ray5Screen& r_screen, int renderno = 0, int outof 
     
     for (int c = 1; c < r_screen.width() - 1; c++) {
       d = dot(dmap.getColor(r, c), Vect4(1, 1, 1, 0));
-      if (d > settings.aa_threshold)
-	rq.push(r, c);
+      if (d > settings.aa_threshold) rq.push(r, c);
     }
 
     for (int i = 0; i < nworkers; i++) threads[i] = SDL_CreateThread(&renderThread_AA, NULL, &rq);
@@ -356,14 +355,12 @@ void printUsage() {
 }
 
 void drawPattern(Ray5Screen& r_screen) {
-  //Vect4 gray(0.875, 0.875, 0.875), white(1.0, 1.0, 1.0);
-  Vect4 gray(0.0, 0.0, 0.0), white(0.125, 0.125, 0.125);
+  Vect4 black(0.0, 0.0, 0.0), gray(0.125, 0.125, 0.125);
   for (int r = 0; r < r_screen.height(); r++)
     for (int c = 0; c < r_screen.width(); c++) {
-      if (((r + c) / 5) % 2) r_screen.setColor(r, c, white);
-      else r_screen.setColor(r, c, gray);
-    }      
-  
+      if (((r + c) / 5) % 2) r_screen.setColor(r, c, gray);
+      else r_screen.setColor(r, c, black);
+    }  
 }
 
 int main(int argc, char* argv[]) {
