@@ -15,6 +15,7 @@ OBJECT_FILES = \
 	ray5parser.o \
 	ray5screen.o \
 	pixelrenderer.o \
+	renderqueue.o \
 	main.o
 
 all: $(APP)

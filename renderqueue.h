@@ -7,6 +7,10 @@
 #include <queue>
 
 class RenderQueue {
+private:
+  RenderQueue(const RenderQueue&) { }
+  RenderQueue& operator=(const RenderQueue&) {return *this;}
+
 public:
   class Point {
   public:
@@ -21,35 +25,13 @@ public:
   
   std::queue<Point> queue;
 
-  RenderQueue(Ray5Scene* scene = NULL, Ray5Screen* screen = NULL) {
-    this->scene = scene;
-    this->screen = screen;
-    mutex = SDL_CreateMutex();
-  }
-  ~RenderQueue() {
-    SDL_DestroyMutex(mutex);
-  }
-
-  void push(int r, int c) {
-    SDL_LockMutex(mutex);
-    queue.push(Point(r, c));
-    SDL_UnlockMutex(mutex);
-  }
-
-  void pushRow(int r) {
-    SDL_LockMutex(mutex);
-    for (int c = 0; c < screen->width(); c++)
-      queue.push(Point(r, c));
-    SDL_UnlockMutex(mutex);
-  }
-
-  Point pop() {
-    Point p = queue.front();
-    queue.pop();
-    return p;
-  }
-  
-  bool empty() const {return queue.empty();}
+  RenderQueue(Ray5Scene* scene, Ray5Screen* screen);
+  ~RenderQueue();
+  void push(int r, int c);
+  void pushRow(int r);
+  Point pop();  
+  bool empty() const;
+  bool checkPop(Point& p);
 };
 
 #endif
