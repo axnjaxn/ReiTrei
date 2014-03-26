@@ -161,11 +161,11 @@ inline Uint8 toByte(Real r) {return (r > 1.0)? 255 : (Uint8)(255 * r);}
 SDL_Window* window = NULL;
 PixelRenderer* px = NULL;
 
-void redraw(const Ray5Screen& r_screen) {
+void redraw(const Ray5Screen& screen) {
   Vect4 color;
-  for (int r = 0; r < r_screen.height(); r++) {
-    for (int c = 0; c < r_screen.width(); c++) {
-      color = r_screen.getColor(r, c);
+  for (int r = 0; r < screen.height(); r++) {
+    for (int c = 0; c < screen.width(); c++) {
+      color = screen.getColor(r, c);
       px->set(r, c, toByte(color[0]), toByte(color[1]), toByte(color[2]));
     }
   }
@@ -249,15 +249,15 @@ int renderThread_AA(void* v) {
   return 0;
 }
 
-void drawRow(Ray5Screen& r_screen, int r) {
+void drawRow(Ray5Screen& screen, int r) {
   Vect4 color;
-  for (int c = 0; c < r_screen.width(); c++) {
-    color = r_screen.getColor(r, c);
+  for (int c = 0; c < screen.width(); c++) {
+    color = screen.getColor(r, c);
     px->set(r, c, toByte(color[0]), toByte(color[1]), toByte(color[2]));
   }
 }
 
-void render(Ray5Scene& scene, Ray5Screen& r_screen, int renderno = 0, int outof = 1) {
+void render(Ray5Scene& scene, Ray5Screen& screen, int renderno = 0, int outof = 1) {
   char titlebuf[200];
   sprintf(titlebuf, "%s",TITLE);
   SDL_SetWindowTitle(window, titlebuf);
@@ -266,13 +266,13 @@ void render(Ray5Scene& scene, Ray5Screen& r_screen, int renderno = 0, int outof 
   bool exitflag = 0;
 
   int v; //Return value from threads
-  RenderQueue rq(&scene, &r_screen);
+  RenderQueue rq(&scene, &screen);
   int nworkers = SDL_GetCPUCount();
   if (nworkers > 1) nworkers--; //Use n threads (counting this one) on n-core machines, but 2 threads for single-core machines
   SDL_Thread** threads = new SDL_Thread* [nworkers];
 
   rq.pushRow(0);
-  for (int r = 1; r < r_screen.height(); r++) {
+  for (int r = 1; r < screen.height(); r++) {
     SDL_Event event;
     while (SDL_PollEvent(&event))
       if (event.type == SDL_QUIT || (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)) exit(0);
@@ -283,18 +283,18 @@ void render(Ray5Scene& scene, Ray5Screen& r_screen, int renderno = 0, int outof 
     
     for (int i = 0; i < nworkers; i++) threads[i] = SDL_CreateThread(&renderThread, NULL, &rq);
 
-    drawRow(r_screen, r - 1);
+    drawRow(screen, r - 1);
     px->redraw();
     SDL_RenderPresent(px->getRenderer()); 
 
     for (int i = 0; i < nworkers; i++) SDL_WaitThread(threads[i], &v);
 
-    if (outof > 1) sprintf(titlebuf, "%s [%d / %d, %d of %d]",TITLE, r + 1, r_screen.height(), renderno, outof);
-    else sprintf(titlebuf, "%s [%d / %d]",TITLE, r + 1, r_screen.height());
+    if (outof > 1) sprintf(titlebuf, "%s [%d / %d, %d of %d]",TITLE, r + 1, screen.height(), renderno, outof);
+    else sprintf(titlebuf, "%s [%d / %d]",TITLE, r + 1, screen.height());
     SDL_SetWindowTitle(window, titlebuf);
   }
 
-  drawRow(r_screen, r_screen.height() - 1);
+  drawRow(screen, screen.height() - 1);
   px->redraw();
   SDL_RenderPresent(px->getRenderer()); 
   
@@ -303,38 +303,38 @@ void render(Ray5Scene& scene, Ray5Screen& r_screen, int renderno = 0, int outof 
     return;
   }
 
-  Ray5Screen dmap = r_screen.differenceMap();
+  Ray5Screen dmap = screen.differenceMap();
   float d;
-  for (int r = 1; r < r_screen.height() - 1; r++) {
+  for (int r = 1; r < screen.height() - 1; r++) {
     SDL_Event event;
     while (SDL_PollEvent(&event))
       if (event.type == SDL_QUIT || (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)) exit(0);
       else if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_RETURN) exitflag = 1;
     if (exitflag) break;
     
-    for (int c = 1; c < r_screen.width() - 1; c++) {
+    for (int c = 1; c < screen.width() - 1; c++) {
       d = dot(dmap.getColor(r, c), Vect4(1, 1, 1, 0));
       if (d > settings.aa_threshold) rq.push(r, c);
     }
 
     for (int i = 0; i < nworkers; i++) threads[i] = SDL_CreateThread(&renderThread_AA, NULL, &rq);
 
-    drawRow(r_screen, r - 1);
+    drawRow(screen, r - 1);
     px->redraw();
     SDL_RenderPresent(px->getRenderer());
 
     for (int i = 0; i < nworkers; i++) SDL_WaitThread(threads[i], &v);
 
     if (outof > 1)
-      sprintf(titlebuf, "%s [AA: %d / %d, %d of %d]", TITLE, r + 1, r_screen.height(), renderno, outof);
+      sprintf(titlebuf, "%s [AA: %d / %d, %d of %d]", TITLE, r + 1, screen.height(), renderno, outof);
     else
-      sprintf(titlebuf, "%s [AA: %d / %d]",TITLE, r + 1, r_screen.height());
+      sprintf(titlebuf, "%s [AA: %d / %d]",TITLE, r + 1, screen.height());
     SDL_SetWindowTitle(window, titlebuf);
   }
 
   delete [] threads;
 
-  drawRow(r_screen, r_screen.height() - 2);
+  drawRow(screen, screen.height() - 2);
   px->redraw();
   SDL_RenderPresent(px->getRenderer());
   SDL_SetWindowTitle(window, TITLE);
@@ -354,12 +354,12 @@ void printUsage() {
   printf("\t--aa-threshold: Set threshold (1-norm) for anti-aliasing\n");
 }
 
-void drawPattern(Ray5Screen& r_screen) {
+void drawPattern(Ray5Screen& screen) {
   Vect4 black(0.0, 0.0, 0.0), gray(0.125, 0.125, 0.125);
-  for (int r = 0; r < r_screen.height(); r++)
-    for (int c = 0; c < r_screen.width(); c++) {
-      if (((r + c) / 5) % 2) r_screen.setColor(r, c, gray);
-      else r_screen.setColor(r, c, black);
+  for (int r = 0; r < screen.height(); r++)
+    for (int c = 0; c < screen.width(); c++) {
+      if (((r + c) / 5) % 2) screen.setColor(r, c, gray);
+      else screen.setColor(r, c, black);
     }  
 }
 
@@ -379,7 +379,7 @@ int main(int argc, char* argv[]) {
   randomizer.timeSeed();
 
   Ray5Scene& scene = *Ray5Scene::getInstance();
-  Ray5Screen r_screen;
+  Ray5Screen screen;
   int w = 300, h = 300;
   for (int i = 1; i < argc - 1; i++) {
     if (!strcmp(argv[i], "--size")) {
@@ -432,24 +432,24 @@ int main(int argc, char* argv[]) {
 			    0);
   px = new PixelRenderer(SDL_CreateRenderer(window, -1, 0), scene.camera.pxw, scene.camera.pxh);
 
-  r_screen.setDimensions(scene.camera.pxw, scene.camera.pxh);
+  screen.setDimensions(scene.camera.pxw, scene.camera.pxh);
 
-  drawPattern(r_screen);
-  redraw(r_screen);
+  drawPattern(screen);
+  redraw(screen);
 
   Uint32 started = SDL_GetTicks();
   
   std::vector<Ray5Screen> screens;
 
   for (int i = 0; i < settings.nrenders; i++) {
-    render(scene, r_screen, i + 1, settings.nrenders); 
-    screens.push_back(r_screen);
+    render(scene, screen, i + 1, settings.nrenders); 
+    screens.push_back(screen);
     randomizer.advanceSeed();
   }
 
-  r_screen = Ray5Screen(screens);
+  screen = Ray5Screen(screens);
 #ifndef SHOW_AA
-  redraw(r_screen);
+  redraw(screen);
 #endif
   
   printf("Tracing complete:\n");
