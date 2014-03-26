@@ -260,7 +260,6 @@ int renderThread(void* v) {
 int renderThread_AA(void* v) {
   RenderQueue* rq = (RenderQueue*)v;
   RenderQueue::Point p;
-  Vect4 color;
   for (;;) {
     SDL_LockMutex(rq->mutex);
     if (rq->empty()) {
@@ -273,8 +272,6 @@ int renderThread_AA(void* v) {
     p = rq->pop();
     SDL_UnlockMutex(rq->mutex);
     traceAt_AA(*rq->scene, *rq->screen, p.r, p.c);
-    color = rq->screen->getColor(p.r, p.c);
-    px->set(p.r, p.c, toByte(color[0]), toByte(color[1]), toByte(color[2]));
   }
   SDL_UnlockMutex(rq->mutex);
   return 0;
