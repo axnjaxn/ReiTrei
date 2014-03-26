@@ -92,6 +92,7 @@ void traceAt(Ray5Scene& scene, Ray5Screen& screen, int r, int c) {
 
   Vect4 O, D, color;
   float rmag, rth, rx, ry;
+  Ray5Camera camera;
   for (int i = 0; i < settings.nsamples; i++) {    
     if (settings.dof_range > 0.0) {
       rmag = randomizer.uniform() * settings.dof_range; 
@@ -101,13 +102,12 @@ void traceAt(Ray5Scene& scene, Ray5Screen& screen, int r, int c) {
     }
     else {rx = ry = 0.0;}
 
-    scene.camera.xrotate(rx);
-    scene.camera.yrotate(ry);    
-    O = scene.camera.getOrigin();
-    D = scene.camera.getDirection(r, c);
+    camera = scene.camera;
+    camera.xrotate(rx);
+    camera.yrotate(ry);    
+    O = camera.getOrigin();
+    D = camera.getDirection(r, c);
     color += traceRay(scene, O, D);
-    scene.camera.yrotate(-ry);
-    scene.camera.xrotate(-rx);
   }
       
   screen.setColor(r, c, color / settings.nsamples);
@@ -118,6 +118,7 @@ void traceAt_AA(Ray5Scene& scene, Ray5Screen& screen, int r, int c) {
 
   Vect4 O, D, color;
   float rmag, rth, rx, ry;
+  Ray5Camera camera;
   for (int i = 0; i < settings.nsamples; i++) {    
     if (settings.dof_range > 0.0) {
       rmag = randomizer.uniform() * settings.dof_range; 
@@ -127,8 +128,9 @@ void traceAt_AA(Ray5Scene& scene, Ray5Screen& screen, int r, int c) {
     }
     else {rx = ry = 0.0;}
 
-    scene.camera.xrotate(rx);
-    scene.camera.yrotate(ry);
+    camera = scene.camera;
+    camera.xrotate(rx);
+    camera.yrotate(ry);
     
     O = scene.camera.getOrigin();
     for (Real r1 = -0.5; r1 <= 0.5; r1 += 0.5)
@@ -136,9 +138,6 @@ void traceAt_AA(Ray5Scene& scene, Ray5Screen& screen, int r, int c) {
 	D = scene.camera.getDirection(r + r1, c + c1);
 	color += traceRay(scene, O, D) / 9.0;
       }
-
-    scene.camera.yrotate(-ry);
-    scene.camera.xrotate(-rx);
   }
       
   screen.setColor(r, c, color / settings.nsamples);
