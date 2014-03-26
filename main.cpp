@@ -187,7 +187,6 @@ public:
   Ray5Scene* scene;
   Ray5Screen* screen;
   SDL_mutex* mutex;
-  bool is_open;
   
   std::queue<Point> queue;
 
@@ -195,7 +194,6 @@ public:
     this->scene = scene;
     this->screen = screen;
     mutex = SDL_CreateMutex();
-    is_open = 0;
   }
   ~RenderQueue() {
     SDL_DestroyMutex(mutex);
@@ -221,20 +219,6 @@ public:
   }
   
   bool empty() const {return queue.empty();}
-  
-  void open() {
-    SDL_LockMutex(mutex);
-    is_open = 1;
-    SDL_UnlockMutex(mutex);
-  }
-
-  void close() {
-    SDL_LockMutex(mutex);
-    is_open = 0;
-    SDL_UnlockMutex(mutex);
-  }
-
-  bool closed() const {return !is_open;}
 };
 
 int renderThread(void* v) {
@@ -242,13 +226,7 @@ int renderThread(void* v) {
   RenderQueue::Point p;
   for (;;) {
     SDL_LockMutex(rq->mutex);
-    if (rq->empty()) {
-      if (rq->closed()) break;
-      else {
-	SDL_UnlockMutex(rq->mutex);
-	continue;
-      }
-    }
+    if (rq->empty()) break;
     p = rq->pop();
     SDL_UnlockMutex(rq->mutex);
     traceAt(*rq->scene, *rq->screen, p.r, p.c);
@@ -262,13 +240,7 @@ int renderThread_AA(void* v) {
   RenderQueue::Point p;
   for (;;) {
     SDL_LockMutex(rq->mutex);
-    if (rq->empty()) {
-      if (rq->closed()) break;
-      else {
-	SDL_UnlockMutex(rq->mutex);
-	continue;
-      }
-    }
+    if (rq->empty()) break;
     p = rq->pop();
     SDL_UnlockMutex(rq->mutex);
     traceAt_AA(*rq->scene, *rq->screen, p.r, p.c);
@@ -333,8 +305,6 @@ void render(Ray5Scene& scene, Ray5Screen& r_screen, int renderno = 0, int outof 
 
   Ray5Screen dmap = r_screen.differenceMap();
   float d;
-  rq.open();
-  for (int i = 0; i < nworkers; i++) threads[i] = SDL_CreateThread(&renderThread_AA, NULL, &rq);
   for (int r = 1; r < r_screen.height() - 1; r++) {
     SDL_Event event;
     while (SDL_PollEvent(&event))
@@ -348,9 +318,13 @@ void render(Ray5Scene& scene, Ray5Screen& r_screen, int renderno = 0, int outof 
 	rq.push(r, c);
     }
 
+    for (int i = 0; i < nworkers; i++) threads[i] = SDL_CreateThread(&renderThread_AA, NULL, &rq);
+
     drawRow(r_screen, r - 1);
     px->redraw();
     SDL_RenderPresent(px->getRenderer());
+
+    for (int i = 0; i < nworkers; i++) SDL_WaitThread(threads[i], &v);
 
     if (outof > 1)
       sprintf(titlebuf, "%s [AA: %d / %d, %d of %d]", TITLE, r + 1, r_screen.height(), renderno, outof);
@@ -359,8 +333,6 @@ void render(Ray5Scene& scene, Ray5Screen& r_screen, int renderno = 0, int outof 
     SDL_SetWindowTitle(window, titlebuf);
   }
 
-  rq.close();
-  for (int i = 0; i < nworkers; i++) SDL_WaitThread(threads[i], &v);
   delete [] threads;
 
   drawRow(r_screen, r_screen.height() - 2);
