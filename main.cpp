@@ -324,52 +324,52 @@ void render(Ray5Scene& scene, Ray5Screen& r_screen, int renderno = 0, int outof 
     else sprintf(titlebuf, "%s [%d / %d]",TITLE, r + 1, r_screen.height());
     SDL_SetWindowTitle(window, titlebuf);
   }
+
   drawRow(r_screen, r_screen.height() - 1);
   px->redraw();
   SDL_RenderPresent(px->getRenderer()); 
   
-  if (!settings.aa_enabled) return;
+  if (!settings.aa_enabled) {
+    delete [] threads;
+    return;
+  }
 
   Ray5Screen dmap = r_screen.differenceMap();
   float d;
-  for (int r = 0; r < r_screen.height(); r++) {
+  rq.open();
+  for (int i = 0; i < nworkers; i++) threads[i] = SDL_CreateThread(&renderThread_AA, NULL, &rq);
+  for (int r = 1; r < r_screen.height() - 1; r++) {
     SDL_Event event;
     while (SDL_PollEvent(&event))
       if (event.type == SDL_QUIT || (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)) exit(0);
       else if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_RETURN) exitflag = 1;
     if (exitflag) break;
     
-    for (int c = 0; c < r_screen.width(); c++) {
+    for (int c = 1; c < r_screen.width() - 1; c++) {
       d = dot(dmap.getColor(r, c), Vect4(1, 1, 1, 0));
       if (d > settings.aa_threshold)
 	rq.push(r, c);
     }
 
-#ifdef NO_QUEUE
+    drawRow(r_screen, r - 1);
+    px->redraw();
+    SDL_RenderPresent(px->getRenderer());
+
     if (outof > 1)
       sprintf(titlebuf, "%s [AA: %d / %d, %d of %d]", TITLE, r + 1, r_screen.height(), renderno, outof);
     else
       sprintf(titlebuf, "%s [AA: %d / %d]",TITLE, r + 1, r_screen.height());
     SDL_SetWindowTitle(window, titlebuf);
-    
-    px->redraw();
-    SDL_RenderPresent(px->getRenderer());
-#endif
   }
 
-#ifndef NO_QUEUE
-  sprintf(titlebuf, "%s [AA]",TITLE);
-  SDL_SetWindowTitle(window, titlebuf);
-  for (int i = 0; i < nworkers; i++) threads[i] = SDL_CreateThread(&renderThread_AA, NULL, &rq);
+  rq.close();
   for (int i = 0; i < nworkers; i++) SDL_WaitThread(threads[i], &v);
+  delete [] threads;
+
+  drawRow(r_screen, r_screen.height() - 2);
   px->redraw();
   SDL_RenderPresent(px->getRenderer());
   SDL_SetWindowTitle(window, TITLE);
-#endif
-
-#ifndef NO_QUEUE
-  delete [] threads;
-#endif
 }
 
 void printUsage() {
