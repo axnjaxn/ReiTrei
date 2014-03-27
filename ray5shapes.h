@@ -6,7 +6,7 @@
 
 class Ray5Sphere : public Ray5Object {
 public:
-  virtual Ray5Intersection intersectsUnit(const Vect4& O, const Vect4& D) {
+  virtual Ray5Intersection intersectsUnit(const Vect4& O, const Vect4& D) const {
     Real discriminant = dot(D, O) * dot(D, O) - dot(D, D) * (dot(O, O) - 1);
     if (discriminant < 0) return Ray5Intersection();
 
@@ -22,7 +22,7 @@ public:
 
 class Ray5Box : public Ray5Object {
 public:
-  virtual Ray5Intersection intersectsUnit(const Vect4& O, const Vect4& D) {
+  virtual Ray5Intersection intersectsUnit(const Vect4& O, const Vect4& D) const {
     Real Tmin[3], Tmax[3];
     for (int i = 0; i < 3; i++)
       if (D[i] > 0) {
@@ -69,7 +69,7 @@ public:
 
   Ray5Cone() : Ray5Object() {r0 = r1 = 1;}
 
-  virtual Ray5Intersection intersectsUnit(const Vect4& O, const Vect4& D) {
+  virtual Ray5Intersection intersectsUnit(const Vect4& O, const Vect4& D) const {
     Real a = D[0] * D[0] + D[1] * D[1];
     Real b = 2 * O[0] * D[0] + 2 * O[1] * D[1] - D[2] * (r1 - r0) / 2;
     Real c = O[0] * O[0] + O[1] * O[1] - r0 - ((r1 - r0) * (O[2] + 1)) / 2;
@@ -99,7 +99,7 @@ public:
   Ray5Plane() : Ray5Object() {N = Vect4(0, 1, 0);}
 
   virtual bool infBounds() {return 1;}
-  virtual Ray5Intersection intersectsUnit(const Vect4& O, const Vect4& D) {
+  virtual Ray5Intersection intersectsUnit(const Vect4& O, const Vect4& D) const {
     Real t = dot(A - O, N) / dot(D, N);
 
     if (t > 0) return Ray5Intersection(this, t, O + t * D, N);

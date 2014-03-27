@@ -26,12 +26,12 @@ class Ray5Object;
 
 class Ray5Intersection {
  public:
-  Ray5Object* obj;
+  const Ray5Object* obj;
   Real t;
   Vect4 P, N;
 
   Ray5Intersection() {obj = NULL; t = -1;}
-  Ray5Intersection(Ray5Object* obj, Real t, const Vect4& P, const Vect4& N) {
+  Ray5Intersection(const Ray5Object* obj, Real t, const Vect4& P, const Vect4& N) {
     this->obj = obj; this->t = t; this->P = P; this->N = N;
   }
   inline bool nearerThan(const Ray5Intersection& hit) {return (t > 0 && (hit.t < 0 || t < hit.t));}
@@ -47,7 +47,7 @@ public:
   inline Ray5Object() {M = N = Mat4::identity();}
   inline virtual ~Ray5Object() { }
 
-  Ray5Intersection intersects(const Vect4& O, const Vect4& D) {
+  Ray5Intersection intersects(const Vect4& O, const Vect4& D) const {
     Ray5Intersection result = intersectsUnit(transformPoint(N, O), transformDirection(N, D));
     if (result.t > 0) {
       result.P = transformPoint(M, result.P);
@@ -55,7 +55,7 @@ public:
     }
     return result;
   }
-  virtual Ray5Intersection intersectsUnit(const Vect4& O, const Vect4& D) = 0;
+  virtual Ray5Intersection intersectsUnit(const Vect4& O, const Vect4& D) const = 0;
   virtual inline bool infBounds() {return 0;}
   virtual void getBounds(Vect4* lower, Vect4* upper) {
     Vect4 corners[8];
