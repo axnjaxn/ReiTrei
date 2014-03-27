@@ -11,6 +11,7 @@
 
 class RenderSettings {
 public:
+  int nworkers;
   int nsamples;
   int nrenders;
   int nshadows;
@@ -20,7 +21,7 @@ public:
   float aa_threshold;
 
   RenderSettings() {
-    nsamples = nrenders = nshadows = 1;
+    nworkers = nsamples = nrenders = nshadows = 1;
     coherence = 0;
     dof_range = 0.0;
     aa_enabled = 1;
@@ -209,13 +210,11 @@ void render(Ray5Scene& scene, Ray5Screen& screen, int renderno = 0, int outof = 
 
   int v; //Return value from threads
   RenderQueue rq(&scene, &screen);
-  int nworkers = SDL_GetCPUCount();
-  if (nworkers > 1) nworkers--; //Use n threads (counting this one) on n-core machines, but 2 threads for single-core machines
-  SDL_Thread** threads = new SDL_Thread* [nworkers];
+  SDL_Thread** threads = new SDL_Thread* [settings.nworkers];
 
   rq.pushRow(0);
-  for (int i = 0; i < nworkers; i++) threads[i] = SDL_CreateThread(&renderThread, NULL, &rq);
-  for (int i = 0; i < nworkers; i++) SDL_WaitThread(threads[i], &v);
+  for (int i = 0; i < settings.nworkers; i++) threads[i] = SDL_CreateThread(&renderThread, NULL, &rq);
+  for (int i = 0; i < settings.nworkers; i++) SDL_WaitThread(threads[i], &v);
 
   for (int r = 1; r < screen.height(); r++) {
     SDL_Event event;
@@ -226,13 +225,13 @@ void render(Ray5Scene& scene, Ray5Screen& screen, int renderno = 0, int outof = 
 
     rq.pushRow(r);
     
-    for (int i = 0; i < nworkers; i++) threads[i] = SDL_CreateThread(&renderThread, NULL, &rq);
+    for (int i = 0; i < settings.nworkers; i++) threads[i] = SDL_CreateThread(&renderThread, NULL, &rq);
 
     drawRow(screen, r - 1);
     px->redraw();
     SDL_RenderPresent(px->getRenderer()); 
 
-    for (int i = 0; i < nworkers; i++) SDL_WaitThread(threads[i], &v);
+    for (int i = 0; i < settings.nworkers; i++) SDL_WaitThread(threads[i], &v);
 
     if (outof > 1) sprintf(titlebuf, "%s [%d / %d, %d of %d]",TITLE, r + 1, screen.height(), renderno, outof);
     else sprintf(titlebuf, "%s [%d / %d]",TITLE, r + 1, screen.height());
@@ -262,13 +261,13 @@ void render(Ray5Scene& scene, Ray5Screen& screen, int renderno = 0, int outof = 
       if (d > settings.aa_threshold) rq.push(r, c);
     }
 
-    for (int i = 0; i < nworkers; i++) threads[i] = SDL_CreateThread(&renderThread_AA, NULL, &rq);
+    for (int i = 0; i < settings.nworkers; i++) threads[i] = SDL_CreateThread(&renderThread_AA, NULL, &rq);
 
     drawRow(screen, r - 1);
     px->redraw();
     SDL_RenderPresent(px->getRenderer());
 
-    for (int i = 0; i < nworkers; i++) SDL_WaitThread(threads[i], &v);
+    for (int i = 0; i < settings.nworkers; i++) SDL_WaitThread(threads[i], &v);
 
     if (outof > 1)
       sprintf(titlebuf, "%s [AA: %d / %d, %d of %d]", TITLE, r + 1, screen.height(), renderno, outof);
@@ -323,6 +322,12 @@ int main(int argc, char* argv[]) {
   
   randomizer.timeSeed();
 
+  if (SDL_Init(SDL_INIT_VIDEO) < 0) exit(1);
+  atexit(SDL_Quit);
+
+  settings.nworkers = SDL_GetCPUCount();
+  if (settings.nworkers > 1) settings.nworkers--; //Use n threads (counting this one) on n-core machines, but 2 threads for single-core machines
+
   Ray5Scene& scene = *Ray5Scene::getInstance();
   Ray5Screen screen;
   int w = 300, h = 300;
@@ -354,6 +359,9 @@ int main(int argc, char* argv[]) {
     else if (!strcmp(argv[i], "--aa-threshold")) {
       sscanf(argv[++i], "%f", &settings.aa_threshold);
     }
+    else if (!strcmp(argv[i], "--threads")) {
+      sscanf(argv[++i], "%d", &settings.nworkers);
+    }
     else {
       if (filename.empty()) {
 	filename = argv[i];
@@ -372,9 +380,6 @@ int main(int argc, char* argv[]) {
    * Set up scene
    */
   scene.camera.setScreen(w, h, (float)w / h, 1, PI / 2);
-
-  if (SDL_Init(SDL_INIT_VIDEO) < 0) exit(1);
-  atexit(SDL_Quit);
 
   window = SDL_CreateWindow(TITLE,
 			    SDL_WINDOWPOS_CENTERED,
