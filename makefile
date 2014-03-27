@@ -1,12 +1,20 @@
 APPNAME = ReiTrei5
-ifndef CYGWIN
+
+LFLAGS = `sdl2-config --libs`
+DFLAGS = -O2 -DDEBUG -DVERBOSE
 EXT = 
+
+ifndef MINGW
+LFLAGS += 
+DFLAGS += 
+OBJECT_FILES += zipreader.o
 else
+LFLAGS += -lmingw32 -mwindows -lSDL2main -static-libgcc -static-libstdc++
+DFLAGS += -DMINGW -DNO_STDIO_REDIRECT
 EXT = .exe
 endif
+
 APP = $(APPNAME)$(EXT)
-DFLAGS = -O2 -DDEBUG -DVERBOSE -g
-LFLAGS = `sdl2-config --libs`
 
 OBJECT_FILES = \
 	mat4.o \
@@ -23,16 +31,13 @@ all: $(APP)
 rebuild: clean $(APP)
 
 .cpp.o:
-	g++ -c $< $(DFLAGS)
+	$(CXX) -c $< $(DFLAGS)
 
 $(APP): $(OBJECT_FILES)
-	g++ $(OBJECT_FILES) -o $(APP) $(LFLAGS) $(DFLAGS)
+	$(CXX) $(OBJECT_FILES) -o $(APP) $(LFLAGS) $(DFLAGS)
 
 clean:
 	rm -f *~ *.o $(APP) Thumbs.db *.stackdump
-
-debug: $(APP)
-	gdb $(APP)
 
 run: $(APP) tricol.ray
 	./$(APP) tricol.ray
