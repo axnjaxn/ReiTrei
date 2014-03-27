@@ -296,6 +296,7 @@ void printUsage() {
   printf("\t--coherence: Turn on coherent rendering mode\n");
   printf("\t--no-aa: Turn off anti-aliasing\n");
   printf("\t--aa-threshold: Set threshold (1-norm) for anti-aliasing\n");
+  printf("\t--output filename: Set filename of rendered bitmap\n");
 }
 
 void drawPattern(Ray5Screen& screen) {
@@ -331,7 +332,7 @@ int main(int argc, char* argv[]) {
   Ray5Scene& scene = *Ray5Scene::getInstance();
   Ray5Screen screen;
   int w = 300, h = 300;
-  std::string filename;
+  std::string filename, output = "out.bmp";
   for (int i = 1; i < argc; i++) {
     if (!strcmp(argv[i], "--size")) {
       sscanf(argv[++i], "%d", &w);
@@ -361,6 +362,9 @@ int main(int argc, char* argv[]) {
     }
     else if (!strcmp(argv[i], "--threads")) {
       sscanf(argv[++i], "%d", &settings.nworkers);
+    }
+    else if (!strcmp(argv[i], "--output") || !strcmp(argv[i], "-o")) {
+      output = argv[++i];
     }
     else {
       if (filename.empty()) {
@@ -413,7 +417,7 @@ int main(int argc, char* argv[]) {
   fflush(0);
 
   SDL_Surface* surf = px->getSurface();
-  SDL_SaveBMP(surf, "out.bmp");
+  SDL_SaveBMP(surf, output.c_str());
   SDL_FreeSurface(surf);
 
   SDL_Event event;
