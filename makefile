@@ -5,13 +5,13 @@ else
 EXT = .exe
 endif
 APP = $(APPNAME)$(EXT)
-DFLAGS = -O2 -DDEBUG -DVERBOSE
+DFLAGS = -O2 -DDEBUG -DVERBOSE -g
 LFLAGS = `sdl2-config --libs`
 
 OBJECT_FILES = \
 	mat4.o \
 	randomizer.o \
-	ray5grid.o \
+	grid.o \
 	ray5parser.o \
 	ray5screen.o \
 	pixelrenderer.o \
