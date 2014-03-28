@@ -1,5 +1,5 @@
-#ifndef _BPJ_REITREI5_MAT4_H
-#define _BPJ_REITREI5_MAT4_H
+#ifndef _BPJ_REITREI_MAT4_H
+#define _BPJ_REITREI_MAT4_H
 
 #include <cstdlib>
 #include <cmath>

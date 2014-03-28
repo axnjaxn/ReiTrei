@@ -1,5 +1,5 @@
 #define MAX_RECURSE 10
-#define TITLE "ReiTrei5"
+#define TITLE "ReiTrei"
 //#define NO_GRID
 
 #include "renderqueue.h"
@@ -285,8 +285,8 @@ void render(Ray5Scene& scene, Ray5Screen& screen, int renderno = 0, int outof = 
 }
 
 void printUsage() {
-  printf("ReiTrei5 by Brian Jackson\n");
-  printf("Usage: ReiTrei5 [options] scene-file\n");
+  printf("ReiTrei by Brian Jackson\n");
+  printf("Usage: ReiTrei [options] scene-file\n");
   printf("Options:\n");
   printf("\t--size width height : Give the size of the desired output image\n");
   printf("\t--renders : Turn on multirendering for statistical effects\n");

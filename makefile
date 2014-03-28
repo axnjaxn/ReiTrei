@@ -1,4 +1,4 @@
-APPNAME = ReiTrei5
+APPNAME = ReiTrei
 
 LFLAGS = `sdl2-config --libs`
 DFLAGS = -O2 -DDEBUG -DVERBOSE
