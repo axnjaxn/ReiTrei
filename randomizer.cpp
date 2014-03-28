@@ -11,7 +11,13 @@ void Randomizer::reseed() {srand(seedno);}
 
 void Randomizer::advanceSeed() {seedno++; reseed();}
 
-float Randomizer::uniform() {return (rand() & 0x7FFF) / 32768.0;}
+float Randomizer::uniform() {
+#ifdef NO_RAND_MAX
+  return (rand() & 0x7FFF) / 32768.0;
+#else
+  return (rand() & RAND_MAX) / (float)(RAND_MAX + 1);
+#endif
+}
 
 Vect4 Randomizer::randomSpherical(float radius) {
   Real theta = 2 * PI * uniform(), phi = PI * uniform();
