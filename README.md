@@ -15,6 +15,8 @@ Usage
 
 On the console, type `./ReiTrei5 [OPTIONS] yourscene.ray` to parse and render a file called yourscene.ray.
 
+See the [wiki page](https://github.com/axnjaxn/ReiTrei/wiki/Command-Line-Arguments) for a list of options.
+
 Dependencies
 ------------
 
