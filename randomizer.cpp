@@ -15,7 +15,7 @@ float Randomizer::uniform() {
 #ifdef NO_RAND_MAX
   return (rand() & 0x7FFF) / 32768.0;
 #else
-  return (rand() & RAND_MAX) / (float)(RAND_MAX + 1);
+  return (rand() & RAND_MAX) / (RAND_MAX + 1.0);
 #endif
 }
 
