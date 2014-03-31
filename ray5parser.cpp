@@ -287,6 +287,10 @@ Ray5Material parseMaterial(TokenStream* ts) {
     else if (token == "ambient") material.ambient = parseVector(ts);
     else if (token == "diffuse") material.diffuse = parseVector(ts);
     else if (token == "reflective") material.reflective = parseVector(ts);
+    else if (token == "refractive") {
+      material.refractive = parseVector(ts);
+      material.refractive_index = parseReal(ts);
+    }
     else if (token == "specular") material.specular = parseReal(ts);
     else if (token == "shininess") material.shininess = parseReal(ts);
     else {

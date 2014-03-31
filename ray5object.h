@@ -12,12 +12,13 @@ typedef enum {
 class Ray5Material {
  public:
   bool shadowless, twosided;
-  Vect4 ambient, reflective, diffuse;
-  Real specular, shininess;
+  Vect4 ambient, reflective, refractive, diffuse;
+  Real specular, shininess, refractive_index;
 
   Ray5Material() {
     shadowless = twosided = 0;
     specular = shininess = 0.0;
+    refractive_index = 1.0;
   }
   Ray5Material(const Ray5Material& m) {*this = m;}
 };
