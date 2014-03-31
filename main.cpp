@@ -63,12 +63,14 @@ Vect4 traceRay(const Ray5Scene& scene, const Vect4& O, const Vect4& D, int nrecu
       if (nearest.obj->material.specular > 0 && nearest.obj->material.shininess > 0) {
 	Vect4 R = D + (2 * nearest.N * -dot(nearest.N, D));
 	coef = dot(shadow_ray, R);
+	if (scene.getLight(l)->falloff) coef /= lv.sqLength();
 	if (coef < 0.0 && nearest.obj->material.twosided) coef = -coef;
 	if (coef > 0.0) specular_power += pow(coef, nearest.obj->material.shininess);
       }
     
       //Diffuse
       coef = dot(shadow_ray, nearest.N);
+      if (scene.getLight(l)->falloff) coef /= lv.sqLength();
       if (coef < 0.0 && nearest.obj->material.twosided) coef = -coef;
       if (coef > 0.0) diffuse_power += coef;
     }

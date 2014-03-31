@@ -366,6 +366,7 @@ Ray5Light* parseLight(TokenStream* ts) {
     Token token = ts->getToken();
     if (token == "intensity") light->intensity = parseReal(ts);
     else if (token == "radius") light->radius = parseReal(ts);    
+    else if (token == "falloff") light->falloff = 1;
     else ts->parseError("_LightProperty_", token);
   }
   ts->expectToken("}");
