@@ -29,6 +29,36 @@ public:
   }
 } settings;
 
+std::string toString(const Vect4& v) {
+  static char buf[256];
+  sprintf(buf, "<%6.3lf, %6.3f, %6.3lf>", v[0], v[1], v[2]);
+  return std::string(buf);
+}
+
+Vect4 refract(const Vect4& V, const Vect4& N, Real n) {
+  //if (V[3] || N[3]) printf("WTF\n");
+
+  Real c1 = -dot(N, V);
+
+  if (c1 > 0) {
+    n = 1 / n;
+    //printf("En ");
+  }
+  //else printf("Ex ");
+
+
+  Real c2 = sqrt(1 - (n * n) * (1 - (c1 * c1)));
+
+  Vect4 Rr = ((n * V) + (n * c1 - c2) * N).unit();
+  //printf("V = %s\tN = %s\tRr = %s\n", toString(V).c_str(), toString(N).c_str(), toString(Rr).c_str());
+
+  if (nonzero(Rr - V)) {
+    //printf("\tDiff: %e\n", (Rr - V).length());
+  }
+
+  return Rr;
+}
+
 Vect4 traceRay(const Ray5Scene& scene, const Vect4& O, const Vect4& D, int nrecurse = 0) {
   Vect4 color;
   
@@ -46,6 +76,13 @@ Vect4 traceRay(const Ray5Scene& scene, const Vect4& O, const Vect4& D, int nrecu
     Vect4 _D = D + (2 * nearest.N * -dot(nearest.N, D));
     Vect4 _O = nearest.P + EPS * _D;
     color += nearest.obj->material.reflective.multComp(traceRay(scene, _O, _D, nrecurse + 1));
+  }
+
+  //Refractive lighting
+  if (nonzero(nearest.obj->material.refractive)) {
+    Vect4 _D = refract(D.unit(), nearest.N.unit(), nearest.obj->material.refractive_index);
+    Vect4 _O = nearest.P + EPS * _D;
+    color += nearest.obj->material.refractive.multComp(traceRay(scene, _O, _D, nrecurse + 1));
   }
 
   //Lighting-dependent color
