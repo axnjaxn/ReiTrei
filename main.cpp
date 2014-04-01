@@ -40,10 +40,15 @@ inline Vect4 reflect(const Vect4& D, Vect4 N) {
 }
 
 inline Vect4 refract(const Vect4& D, Vect4 N, Real n) {
-  Real dn = dot(D, N);
-  if (dn > 0) n = 1 / n;
-  else {N = -N; dn = -dn;}
-  return n * (D - N * dn) - N * sqrt(1 - (n * n * (1 - dn * dn)));
+  Real c1 = -dot(D, N);
+  if (c1 > 0) n = 1.0 / n; //This is an entrance.
+  else if (abs(c1) < EPS) return D;//I don't bother with nearly parallel refraction
+  else {N = -N; c1 = -c1;} //This is an exit
+    
+  Real c2 = 1 - n * n * (1 - c1 * c1);
+  if (c2 > 0) c2 = sqrt(c2);
+  else c2 = sqrt(-c2); //This should really never happen unless the refractive index is abused
+  return n * D + (n * c1 - c2) * N;
 }
 
 Vect4 traceRay(const Ray5Scene& scene, const Vect4& O, const Vect4& D, int nrecurse = 0) {
