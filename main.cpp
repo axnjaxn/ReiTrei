@@ -11,6 +11,7 @@
 
 class RenderSettings {
 public:
+  bool show_preview;
   int nworkers;
   int nsamples;
   int nrenders;
@@ -21,6 +22,7 @@ public:
   float aa_threshold;
 
   RenderSettings() {
+    show_preview = 1;
     nworkers = nsamples = nrenders = nshadows = 1;
     coherence = 0;
     dof_range = 0.0;
@@ -319,6 +321,7 @@ void printUsage() {
   printf("ReiTrei by Brian Jackson\n");
   printf("Usage: ReiTrei [options] scene-file\n");
   printf("Options:\n");
+  printf("\t--no-preview : Disable the preview window\n");
   printf("\t--size width height : Give the size of the desired output image\n");
   printf("\t--renders : Turn on multirendering for statistical effects\n");
   printf("\t--samples : Turn on multisampling for statistical effects\n");
@@ -354,18 +357,16 @@ int main(int argc, char* argv[]) {
   
   randomizer.timeSeed();
 
-  if (SDL_Init(SDL_INIT_VIDEO) < 0) exit(1);
-  atexit(SDL_Quit);
-
-  settings.nworkers = SDL_GetCPUCount();
-  if (settings.nworkers > 1) settings.nworkers--; //Use n threads (counting this one) on n-core machines, but 2 threads for single-core machines
-
   Ray5Scene& scene = *Ray5Scene::getInstance();
   Screen screen;
   int w = 300, h = 300;
+  bool threads_changed = 0;
   std::string filename, output = "out.bmp";
   for (int i = 1; i < argc; i++) {
-    if (!strcmp(argv[i], "--size")) {
+    if (!strcmp(argv[i], "--no-preview")) {
+      settings.show_preview = 0;
+    }
+    else if (!strcmp(argv[i], "--size")) {
       sscanf(argv[++i], "%d", &w);
       sscanf(argv[++i], "%d", &h);
     }
@@ -392,6 +393,7 @@ int main(int argc, char* argv[]) {
       sscanf(argv[++i], "%f", &settings.aa_threshold);
     }
     else if (!strcmp(argv[i], "--threads")) {
+      threads_changed = 1;
       sscanf(argv[++i], "%d", &settings.nworkers);
     }
     else if (!strcmp(argv[i], "--output") || !strcmp(argv[i], "-o")) {
@@ -406,6 +408,14 @@ int main(int argc, char* argv[]) {
 	exit(0);
       }
     }
+  }
+
+  if (SDL_Init(SDL_INIT_VIDEO) < 0) exit(1);
+  atexit(SDL_Quit);
+
+  if (!threads_changed) {
+    settings.nworkers = SDL_GetCPUCount();
+    if (settings.nworkers > 1) settings.nworkers--; //Use n threads (counting this one) on n-core machines, but 2 threads for single-core machines
   }
 
   parseScene(filename.c_str(), &scene);
