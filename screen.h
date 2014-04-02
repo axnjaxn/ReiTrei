@@ -24,6 +24,8 @@ class Screen {
   inline void setColor(int r, int c, const Vect4& color) {buffer[r * w + c] = color;}
   inline const Vect4& getColor(int r, int c) const {return buffer[r * w + c];}
 
+  void saveBMP(const char* filename) const;
+
   Screen differenceMap() const;
 };
 

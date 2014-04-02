@@ -447,9 +447,7 @@ int main(int argc, char* argv[]) {
   printf("\tTotal time elapsed: %.3fs\n", 0.001 * (SDL_GetTicks() - started));
   fflush(0);
 
-  SDL_Surface* surf = px->getSurface();
-  SDL_SaveBMP(surf, output.c_str());
-  SDL_FreeSurface(surf);
+  screen.saveBMP(output.c_str());
 
   SDL_Event event;
   bool exitflag = 0;
