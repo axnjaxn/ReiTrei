@@ -235,8 +235,10 @@ void drawRow(Screen& screen, int r) {
 
 void render(Ray5Scene& scene, Screen& screen, int renderno = 0, int outof = 1) {
   char titlebuf[200];
-  sprintf(titlebuf, "%s",TITLE);
-  SDL_SetWindowTitle(window, titlebuf);
+  if (settings.show_preview) {
+    sprintf(titlebuf, "%s", TITLE);
+    SDL_SetWindowTitle(window, titlebuf);
+  }
 
   Vect4 color;
   bool exitflag = 0;
@@ -250,30 +252,43 @@ void render(Ray5Scene& scene, Screen& screen, int renderno = 0, int outof = 1) {
   for (int i = 0; i < settings.nworkers; i++) SDL_WaitThread(threads[i], &v);
 
   for (int r = 1; r < screen.height(); r++) {
-    SDL_Event event;
-    while (SDL_PollEvent(&event))
-      if (event.type == SDL_QUIT || (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)) exit(0);
-      else if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_RETURN) exitflag = 1;
-    if (exitflag) break;
+    if (settings.show_preview) {
+      SDL_Event event;
+      while (SDL_PollEvent(&event))
+	if (event.type == SDL_QUIT || (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)) exit(0);
+	else if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_RETURN) exitflag = 1;
+      if (exitflag) break;
+    }
 
     rq.pushRow(r);
     
     for (int i = 0; i < settings.nworkers; i++) threads[i] = SDL_CreateThread(&renderThread, NULL, &rq);
 
-    drawRow(screen, r - 1);
-    px->redraw();
-    SDL_RenderPresent(px->getRenderer()); 
+    if (settings.show_preview) {
+      drawRow(screen, r - 1);
+      px->redraw();
+      SDL_RenderPresent(px->getRenderer()); 
+    }
 
     for (int i = 0; i < settings.nworkers; i++) SDL_WaitThread(threads[i], &v);
 
     if (outof > 1) sprintf(titlebuf, "%s [%d / %d, %d of %d]",TITLE, r + 1, screen.height(), renderno, outof);
-    else sprintf(titlebuf, "%s [%d / %d]",TITLE, r + 1, screen.height());
-    SDL_SetWindowTitle(window, titlebuf);
+    else sprintf(titlebuf, "%s [%d / %d]", TITLE, r + 1, screen.height());
+
+    if (settings.show_preview)
+      SDL_SetWindowTitle(window, titlebuf);
+    else {
+      printf("\r%s", titlebuf);
+      fflush(0);
+    }
   }
 
-  drawRow(screen, screen.height() - 1);
-  px->redraw();
-  SDL_RenderPresent(px->getRenderer()); 
+  if (settings.show_preview) {
+    drawRow(screen, screen.height() - 1);
+    px->redraw();
+    SDL_RenderPresent(px->getRenderer()); 
+  }
+  else printf("\n");
   
   if (!settings.aa_enabled) {
     delete [] threads;
@@ -283,11 +298,13 @@ void render(Ray5Scene& scene, Screen& screen, int renderno = 0, int outof = 1) {
   Screen dmap = screen.differenceMap();
   float d;
   for (int r = 1; r < screen.height() - 1; r++) {
-    SDL_Event event;
-    while (SDL_PollEvent(&event))
-      if (event.type == SDL_QUIT || (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)) exit(0);
-      else if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_RETURN) exitflag = 1;
-    if (exitflag) break;
+    if (settings.show_preview) {
+      SDL_Event event;
+      while (SDL_PollEvent(&event))
+	if (event.type == SDL_QUIT || (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)) exit(0);
+	else if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_RETURN) exitflag = 1;
+      if (exitflag) break;
+    }
     
     for (int c = 1; c < screen.width() - 1; c++) {
       d = dot(dmap.getColor(r, c), Vect4(1, 1, 1, 0));
@@ -296,25 +313,34 @@ void render(Ray5Scene& scene, Screen& screen, int renderno = 0, int outof = 1) {
 
     for (int i = 0; i < settings.nworkers; i++) threads[i] = SDL_CreateThread(&renderThread_AA, NULL, &rq);
 
-    drawRow(screen, r - 1);
-    px->redraw();
-    SDL_RenderPresent(px->getRenderer());
+    if (settings.show_preview) {
+      drawRow(screen, r - 1);
+      px->redraw();
+      SDL_RenderPresent(px->getRenderer());
+    }
 
     for (int i = 0; i < settings.nworkers; i++) SDL_WaitThread(threads[i], &v);
 
-    if (outof > 1)
-      sprintf(titlebuf, "%s [AA: %d / %d, %d of %d]", TITLE, r + 1, screen.height(), renderno, outof);
-    else
-      sprintf(titlebuf, "%s [AA: %d / %d]",TITLE, r + 1, screen.height());
-    SDL_SetWindowTitle(window, titlebuf);
+    if (outof > 1) sprintf(titlebuf, "%s [AA: %d / %d, %d of %d]", TITLE, r + 2, screen.height(), renderno, outof);
+    else sprintf(titlebuf, "%s [AA: %d / %d]",TITLE, r + 2, screen.height());
+
+    if (settings.show_preview)
+      SDL_SetWindowTitle(window, titlebuf);
+    else {
+      printf("\r%s", titlebuf);
+      fflush(0);
+    }
   }
 
   delete [] threads;
 
-  drawRow(screen, screen.height() - 2);
-  px->redraw();
-  SDL_RenderPresent(px->getRenderer());
-  SDL_SetWindowTitle(window, TITLE);
+  if (settings.show_preview) {
+    drawRow(screen, screen.height() - 2);
+    px->redraw();
+    SDL_RenderPresent(px->getRenderer());
+    SDL_SetWindowTitle(window, TITLE);
+  }
+  else printf("\n");
 }
 
 void printUsage() {
@@ -410,7 +436,12 @@ int main(int argc, char* argv[]) {
     }
   }
 
-  if (SDL_Init(SDL_INIT_VIDEO) < 0) exit(1);
+  if (settings.show_preview) {
+    if (SDL_Init(SDL_INIT_VIDEO) < 0) exit(1);
+  }
+  else {
+    if (SDL_Init(0) < 0) exit(1);
+  }
   atexit(SDL_Quit);
 
   if (!threads_changed) {
@@ -425,18 +456,19 @@ int main(int argc, char* argv[]) {
    * Set up scene
    */
   scene.camera.setScreen(w, h, (float)w / h, 1, PI / 2);
-
-  window = SDL_CreateWindow(TITLE,
-			    SDL_WINDOWPOS_CENTERED,
-			    SDL_WINDOWPOS_CENTERED,
-			    scene.camera.pxw, scene.camera.pxh,
-			    0);
-  px = new PixelRenderer(SDL_CreateRenderer(window, -1, 0), scene.camera.pxw, scene.camera.pxh);
-
   screen.setDimensions(scene.camera.pxw, scene.camera.pxh);
-
   drawPattern(screen);
-  redraw(screen);
+
+  if (settings.show_preview) {
+    window = SDL_CreateWindow(TITLE,
+			      SDL_WINDOWPOS_CENTERED,
+			      SDL_WINDOWPOS_CENTERED,
+			      scene.camera.pxw, scene.camera.pxh,
+			      0);
+    px = new PixelRenderer(SDL_CreateRenderer(window, -1, 0), scene.camera.pxw, scene.camera.pxh);
+    redraw(screen);
+  }
+
 
   Uint32 started = SDL_GetTicks();
   
@@ -450,7 +482,8 @@ int main(int argc, char* argv[]) {
 
   screen = Screen(screens);
 #ifndef SHOW_AA
-  redraw(screen);
+  if (settings.show_preview)
+    redraw(screen);
 #endif
   
   printf("Tracing complete:\n");
@@ -459,17 +492,19 @@ int main(int argc, char* argv[]) {
 
   screen.saveBMP(output.c_str());
 
-  SDL_Event event;
-  bool exitflag = 0;
-  while (!exitflag) {
-    while (SDL_PollEvent(&event))
-      if (event.type == SDL_QUIT || (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)) exitflag = 1;
-    SDL_Delay(100);
+  if (settings.show_preview) {
+    SDL_Event event;
+    bool exitflag = 0;
+    while (!exitflag) {
+      while (SDL_PollEvent(&event))
+	if (event.type == SDL_QUIT || (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)) exitflag = 1;
+      SDL_Delay(100);
+    }
+    
+    SDL_DestroyRenderer(px->getRenderer());
+    delete px;
+    SDL_DestroyWindow(window);
   }
-
-  SDL_DestroyRenderer(px->getRenderer());
-  delete px;
-  SDL_DestroyWindow(window);
 
   return 0;
 }
