@@ -1,21 +1,21 @@
-#ifndef _BPJ_REITREI5_SCREEN_H
-#define _BPJ_REITREI5_SCREEN_H
+#ifndef _BPJ_REITREI_SCREEN_H
+#define _BPJ_REITREI_SCREEN_H
 
 #include "mat4.h"
 #include <vector>
 
-class Ray5Screen {
+class Screen {
  protected:
   Vect4* buffer;
   int w, h;
 
  public:
-  Ray5Screen();
-  Ray5Screen(const std::vector<Ray5Screen>& v);
-  Ray5Screen(const Ray5Screen& screen);
-  ~Ray5Screen();
+  Screen();
+  Screen(const std::vector<Screen>& v);
+  Screen(const Screen& screen);
+  ~Screen();
   
-  Ray5Screen& operator=(const Ray5Screen& screen);
+  Screen& operator=(const Screen& screen);
 
   inline int width() const {return w;}
   inline int height() const {return h;}
@@ -24,7 +24,7 @@ class Ray5Screen {
   inline void setColor(int r, int c, const Vect4& color) {buffer[r * w + c] = color;}
   inline const Vect4& getColor(int r, int c) const {return buffer[r * w + c];}
 
-  Ray5Screen differenceMap() const;
+  Screen differenceMap() const;
 };
 
 #endif

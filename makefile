@@ -21,7 +21,7 @@ OBJECT_FILES = \
 	randomizer.o \
 	grid.o \
 	ray5parser.o \
-	ray5screen.o \
+	screen.o \
 	pixelrenderer.o \
 	renderqueue.o \
 	main.o

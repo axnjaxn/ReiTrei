@@ -1,12 +1,12 @@
-#include "ray5screen.h"
+#include "screen.h"
 #include <cstring>
 
-Ray5Screen::Ray5Screen() {
+Screen::Screen() {
   w = h = 0;
   buffer = NULL;
 }
 
-Ray5Screen::Ray5Screen(const std::vector<Ray5Screen>& v) {
+Screen::Screen(const std::vector<Screen>& v) {
   buffer = NULL;
   
   if (v.empty()) {
@@ -22,30 +22,30 @@ Ray5Screen::Ray5Screen(const std::vector<Ray5Screen>& v) {
     buffer[i] = buffer[i] / v.size();
 }
 
-Ray5Screen::Ray5Screen(const Ray5Screen& screen) {
+Screen::Screen(const Screen& screen) {
   *this = screen;
 }
 
-Ray5Screen::~Ray5Screen() {
+Screen::~Screen() {
   if (buffer) delete [] buffer;
 }
 
-Ray5Screen& Ray5Screen::operator=(const Ray5Screen& screen) {
+Screen& Screen::operator=(const Screen& screen) {
   buffer = NULL;
   setDimensions(screen.w, screen.h);
   memcpy(buffer, screen.buffer, w * h * sizeof(Vect4));
   return *this;
 }
 
-void Ray5Screen::setDimensions(int w, int h) {
+void Screen::setDimensions(int w, int h) {
   if (buffer) delete [] buffer;
 
   this->w = w; this->h = h;
   buffer = new Vect4 [w * h];
 }
 
-Ray5Screen Ray5Screen::differenceMap() const {
-  Ray5Screen map;
+Screen Screen::differenceMap() const {
+  Screen map;
   map.setDimensions(w, h);
 
   Vect4 Gx, Gy, G;

@@ -2,7 +2,7 @@
 #define _BPJ_REITREI_RENDERQUEUE_H
 
 #include "ray5scene.h"
-#include "ray5screen.h"
+#include "screen.h"
 #include <SDL2/SDL.h>
 #include <queue>
 
@@ -20,12 +20,12 @@ public:
   };
 
   Ray5Scene* scene;
-  Ray5Screen* screen;
+  Screen* screen;
   SDL_mutex* mutex;
   
   std::queue<Point> queue;
 
-  RenderQueue(Ray5Scene* scene, Ray5Screen* screen);
+  RenderQueue(Ray5Scene* scene, Screen* screen);
   ~RenderQueue();
   void push(int r, int c);
   void pushRow(int r); 

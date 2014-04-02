@@ -1,6 +1,6 @@
 #include "renderqueue.h"
 
-RenderQueue::RenderQueue(Ray5Scene* scene, Ray5Screen* screen) {
+RenderQueue::RenderQueue(Ray5Scene* scene, Screen* screen) {
   this->scene = scene;
   this->screen = screen;
   mutex = SDL_CreateMutex();
