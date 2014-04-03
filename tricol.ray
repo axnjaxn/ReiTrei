@@ -20,8 +20,7 @@ Define v_reflect {0.25}
 Define v_wreflect {0.25}
 Define v_diffuse {0.5}
 Define v_ambient {0.1}
-Define v_shininess {4.0}
-Define v_specular {specular 0.0625 shininess v_shininess}
+Define v_specular {specular 0.5 shininess 15.0}
 
 Light {
   <2, 5, -5> white
@@ -85,6 +84,7 @@ Sphere {
     reflective white * 0.4
     diffuse white * 0.4
     ambient white * 0.2
+    v_specular
   }
 }
 
@@ -96,6 +96,7 @@ Sphere {
     reflective red * v_reflect + white * v_wreflect
     diffuse red * v_diffuse
     ambient red * v_ambient
+    v_specular
   }
 }
 Sphere {
@@ -104,6 +105,7 @@ Sphere {
     reflective green * v_reflect + white * v_wreflect
     diffuse green * v_diffuse
     ambient green * v_ambient
+    v_specular
   }
   rotate z 120
 }
@@ -113,6 +115,7 @@ Sphere {
     reflective blue * v_reflect + white * v_wreflect
     diffuse blue * v_diffuse
     ambient blue * v_ambient
+    v_specular
   }
   rotate z -120
 }
@@ -122,6 +125,7 @@ Sphere {
     reflective yellow * v_reflect + white * v_wreflect
     diffuse yellow * v_diffuse
     ambient yellow * v_ambient
+    v_specular
   }
   rotate z 60
 }
@@ -131,6 +135,7 @@ Sphere {
     reflective magenta * v_reflect + white * v_wreflect
     diffuse magenta * v_diffuse
     ambient magenta * v_ambient
+    v_specular
   }
   rotate z -60
 }
@@ -140,6 +145,7 @@ Sphere {
     reflective cyan * v_reflect + white * v_wreflect
     diffuse cyan * v_diffuse
     ambient cyan * v_ambient
+    v_specular
   }
   rotate z 180
 }
