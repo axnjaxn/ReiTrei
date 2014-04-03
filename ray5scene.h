@@ -4,7 +4,7 @@
 #include <cstdio>
 #include <vector>
 #include "ray5camera.h"
-#include "ray5light.h"
+#include "light.h"
 #include "grid.h"
 
 //uf Why have I made this a singleton class?
@@ -21,7 +21,7 @@ private:
 
 protected:
   Ray5ObjectSet objects;
-  std::vector<Ray5Light*> lights;
+  std::vector<Light*> lights;
   Grid grid;
 
 public:
@@ -37,8 +37,8 @@ public:
   inline int countObjects() const {return objects.count();}
   inline Ray5Object* operator[](int i) const {return objects[i];}
 
-  inline void addLight(Ray5Light* light) {lights.push_back(light);}
-  inline Ray5Light* getLight(int i) const {return lights[i];}
+  inline void addLight(Light* light) {lights.push_back(light);}
+  inline Light* getLight(int i) const {return lights[i];}
   inline int countLights() const {return lights.size();}
 
   inline void init() {grid = Grid(objects);}

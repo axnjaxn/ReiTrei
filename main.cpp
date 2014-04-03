@@ -110,7 +110,7 @@ Vect4 traceRay(const Ray5Scene& scene, const Vect4& O, const Vect4& D, int nrecu
     specular_power /= settings.nshadows;
 
     color += nearest.obj->material.diffuse.multComp(scene.getLight(l)->getColor() * diffuse_power);
-    color += nearest.obj->material.diffuse.multComp(nearest.obj->material.specular * scene.getLight(l)->getColor() * specular_power);
+    color += Vect4(1.0, 1.0, 1.0).multComp(nearest.obj->material.specular * scene.getLight(l)->getColor() * specular_power);
   }
   
   return color;

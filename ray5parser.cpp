@@ -361,9 +361,9 @@ Ray5Plane* parsePlane(TokenStream* ts) {
   return plane;
 }
 
-Ray5Light* parseLight(TokenStream* ts) {
+Light* parseLight(TokenStream* ts) {
   ts->expectToken("{");
-  Ray5Light* light = new Ray5Light();
+  Light* light = new Light();
   light->position = parseVector(ts);
   light->color = parseVector(ts);
   while (ts->peekToken() != "}") {
