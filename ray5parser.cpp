@@ -228,6 +228,10 @@ Real parseReal(TokenStream* ts) {
   return r;
 }
 
+Real parseAngle(TokenStream* ts) {
+  return PI * parseReal(ts) / 180.0;
+}
+
 Vect4 parseTriplet(TokenStream* ts) {
   ts->expectToken("<");
   Vect4 v;
@@ -309,9 +313,9 @@ void parseModifiers(TokenStream* ts, Ray5Object* obj) {
     else if (token == "scale") obj->scale(parseVector(ts));
     else if (token == "rotate") {
       token = ts->getToken();
-      if (token == "x") obj->xrotate(parseReal(ts) * -2 * PI);
-      else if (token == "y") obj->yrotate(parseReal(ts) * -2 * PI);
-      else if (token == "z") obj->zrotate(parseReal(ts) * -2 * PI);
+      if (token == "x") obj->xrotate(-parseAngle(ts));
+      else if (token == "y") obj->yrotate(-parseAngle(ts));
+      else if (token == "z") obj->zrotate(-parseAngle(ts));
       else ts->parseError("_Axis_", token);
     }
     else if (token == "material") obj->material = parseMaterial(ts);
