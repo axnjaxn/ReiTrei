@@ -40,4 +40,4 @@ clean:
 	rm -f *~ *.o $(APP) Thumbs.db *.stackdump
 
 run: $(APP) tricol.ray
-	./$(APP) tricol.ray
+	./$(APP) tricol.ray --point-lights

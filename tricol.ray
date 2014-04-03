@@ -24,6 +24,7 @@ Define v_specular {specular 0.5 shininess 15.0}
 
 Light {
   <2, 5, -5> white
+  radius 0.5
 }
 
 Camera {

@@ -17,6 +17,7 @@ public:
   int nrenders;
   int nshadows;
   bool coherence;
+  bool point_lights;
   float dof_range;
   bool aa_enabled;
   float aa_threshold;
@@ -24,7 +25,7 @@ public:
   RenderSettings() {
     show_preview = 1;
     nworkers = nsamples = nrenders = nshadows = 1;
-    coherence = 0;
+    coherence = point_lights = 0;
     dof_range = 0.0;
     aa_enabled = 1;
     aa_threshold = 0.2;
@@ -84,7 +85,10 @@ Vect4 traceRay(const Ray5Scene& scene, const Vect4& O, const Vect4& D, int nrecu
     Vect4 lv, shadow_ray;
     Real diffuse_power = 0.0, specular_power = 0.0, coef;
     for (int s = 0; s < settings.nshadows; s++) {
-      lv = scene.getLight(l)->position + randomizer.randomSpherical(scene.getLight(l)->radius) - nearest.P;
+      if (settings.point_lights)
+	lv = scene.getLight(l)->position - nearest.P;
+      else
+	lv = scene.getLight(l)->position + randomizer.randomSpherical(scene.getLight(l)->radius) - nearest.P;
       shadow_ray = lv.unit();
 
       Ray5Intersection shadow = scene.intersect(nearest.P + EPS * shadow_ray, shadow_ray, TRACE_SHADOW);
@@ -353,8 +357,9 @@ void printUsage() {
   printf("\t--renders : Turn on multirendering for statistical effects\n");
   printf("\t--samples : Turn on multisampling for statistical effects\n");
   printf("\t--shadows : Set soft-shadow sampling rate\n");
-  printf("\t--dof_degrees degrees: Allow depth of field to rotate around the focal point\n");
+  printf("\t--dof-degrees degrees: Allow DOF by rotating around the focal point\n");
   printf("\t--coherence: Turn on coherent rendering mode\n");
+  printf("\t--point-lights: Force all light sources to behave as point lights\n");
   printf("\t--no-aa: Turn off anti-aliasing\n");
   printf("\t--aa-threshold: Set threshold (1-norm) for anti-aliasing\n");
   printf("\t--output filename: Set filename of rendered bitmap\n");
@@ -409,7 +414,10 @@ int main(int argc, char* argv[]) {
     else if (!strcmp(argv[i], "--coherent")) {
       settings.coherence = 1;
     }
-    else if (!strcmp(argv[i], "--dof_degrees")) {
+    else if (!strcmp(argv[i], "--point-lights")) {
+      settings.point_lights = 1;
+    }
+    else if (!strcmp(argv[i], "--dof-degrees")) {
       sscanf(argv[++i], "%f", &settings.dof_range);
       settings.dof_range *= PI / 180.0;
     }
