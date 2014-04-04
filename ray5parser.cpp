@@ -4,6 +4,7 @@
 #include <cstring>
 #include <cctype>
 #include "ray5shapes.h"
+#include "triangle.h"
 
 /*
  * Token
@@ -365,6 +366,17 @@ Ray5Plane* parsePlane(TokenStream* ts) {
   return plane;
 }
 
+Triangle* parseTriangle(TokenStream* ts) {
+  ts->expectToken("{");
+  Vect4 a = parseVector(ts);
+  Vect4 b = parseVector(ts);
+  Vect4 c = parseVector(ts);
+  Triangle* tri = new Triangle(a, b, c);
+  parseModifiers(ts, tri);
+  ts->expectToken("}");
+  return tri;
+}
+
 Light* parseLight(TokenStream* ts) {
   ts->expectToken("{");
   Light* light = new Light();
@@ -427,6 +439,8 @@ void parseSceneItem(TokenStream* ts, Ray5Scene* scene) {
   else if (token == "Sphere") scene->addObject(parseSphere(ts));
   //uf cone?
   else if (token == "Plane") scene->addObject(parsePlane(ts));
+
+  else if (token == "Triangle") scene->addObject(parseTriangle(ts));
 
   //Miscellaneous
   else if (token == "BGColor") scene->bgcolor = parseVector(ts);

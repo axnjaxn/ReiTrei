@@ -19,6 +19,7 @@ APP = $(APPNAME)$(EXT)
 OBJECT_FILES = \
 	mat4.o \
 	randomizer.o \
+	triangle.o \
 	grid.o \
 	ray5parser.o \
 	screen.o \
