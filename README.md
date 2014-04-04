@@ -1,7 +1,7 @@
-ReiTrei5
-========
+ReiTrei
+=======
 
-This is a ray tracer I built some time ago, and I'm currently refactoring it to support textures, meshes, soft shadows, and focal blur.
+ReiTrei is a ray tracer, a program for rendering 3D scenes by simulating the path light takes as it enters a camera at different angles. ReiTrei has a number of interesting features: soft shadows, focal blur, and its own scene description language.
 
 See the wiki at https://github.com/axnjaxn/ReiTrei5/wiki for documentation of the scene file format and command line arguments.
 
@@ -21,3 +21,4 @@ Dependencies
 ------------
 
 SDL 2.0
+libMagick++ (optional)
