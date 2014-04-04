@@ -48,6 +48,26 @@ void Screen::setDimensions(int w, int h) {
   buffer = new Vect4 [w * h];
 }
 
+Screen Screen::differenceMap() const {
+  Screen map;
+  map.setDimensions(w, h);
+
+  Vect4 Gx, Gy, G;
+  for (int r = 1; r < h - 1; r++)
+    for (int c = 1; c < w - 1; c++) {
+      Gx = getColor(r, c + 1) - getColor(r, c - 1);
+      Gy = getColor(r + 1, c) - getColor(r - 1, c);
+      for (int i = 0; i < 3; i++) {
+	G[i] = sqrt(Gx[i] * Gx[i] + Gy[i] * Gy[i]);
+	if (G[i] > 0.25) G[i] = 1.0;
+	else G[i] = 0.0;
+      }
+      map.setColor(r, c, G);
+    }
+  
+  return map;
+}
+
 inline uint8_t toByte(Real r) {return (r < 0)? 0 : (r > 1.0)? 255 : (uint8_t)(255 * r);}
 
 void Screen::saveBMP(const char* filename) const {
@@ -93,22 +113,58 @@ void Screen::saveBMP(const char* filename) const {
   fclose(fp);
 }
 
-Screen Screen::differenceMap() const {
-  Screen map;
-  map.setDimensions(w, h);
+#ifndef NO_MAGICK
+#include <Magick++.h>
+void Screen::load_filename(const std::string& fn) {
+  using namespace Magick;
+  Image img(fn);
 
-  Vect4 Gx, Gy, G;
-  for (int r = 1; r < h - 1; r++)
-    for (int c = 1; c < w - 1; c++) {
-      Gx = getColor(r, c + 1) - getColor(r, c - 1);
-      Gy = getColor(r + 1, c) - getColor(r - 1, c);
-      for (int i = 0; i < 3; i++) {
-	G[i] = sqrt(Gx[i] * Gx[i] + Gy[i] * Gy[i]);
-	if (G[i] > 0.25) G[i] = 1.0;
-	else G[i] = 0.0;
-      }
-      map.setColor(r, c, G);
-    }
+  setDimensions(img.columns(), img.rows());
+
+  Pixels cache(img);
+  PixelPacket* packet = cache.get(0, 0, w, h);
+
+  //nshifts will allow a nice transition between quantizations
+  int nshifts = 0;
+  for (int i = MaxRGB >> 8; i & 1; i = i >> 1) nshifts++;
   
-  return map;
+  Vect4 color;
+  for (int r = 0; r < h; r++)
+    for (int c = 0; c < w; c++) {
+      color[0] = (packet[r * w + c].red >> nshifts) / 255.0;
+      color[1] = (packet[r * w + c].green >> nshifts) / 255.0;
+      color[2] = (packet[r * w + c].blue >> nshifts) / 255.0;
+      setColor(r, c, color);
+    }
+
+  cache.sync();
+}
+#endif
+
+void Screen::save_filename(const std::string& fn) const {
+#ifndef NO_MAGICK
+  using namespace Magick;
+  Image img(Geometry(w, h), Color(0, 0, 0, 0));
+
+  Pixels cache(img);
+  PixelPacket* packet = cache.get(0, 0, w, h);
+
+  int nshifts = 0;
+  for (int i = MaxRGB >> 8; i & 1; i = i >> 1) nshifts++;
+  
+  Vect4 color;
+  for (int r = 0; r < h; r++)
+    for (int c = 0; c < w; c++) {
+      color = getColor(r, c);
+      packet[r * w + c].red = toByte(color[0]) << nshifts;
+      packet[r * w + c].green = toByte(color[1]) << nshifts;
+      packet[r * w + c].blue = toByte(color[2]) << nshifts;
+    }	
+  
+  cache.sync();
+
+  img.write(fn);
+#else
+  saveBMP(fn.c_str());
+#endif
 }

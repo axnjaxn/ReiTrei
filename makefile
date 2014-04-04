@@ -14,6 +14,13 @@ DFLAGS += -DMINGW -DNO_STDIO_REDIRECT
 EXT = .exe
 endif
 
+ifndef NO_MAGICK
+LFLAGS += `Magick++-config --libs`
+DFLAGS += `Magick++-config --cppflags`
+else
+DFLAGS += -DNO_MAGICK
+endif
+
 APP = $(APPNAME)$(EXT)
 
 OBJECT_FILES = \

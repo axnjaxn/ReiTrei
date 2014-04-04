@@ -499,7 +499,7 @@ int main(int argc, char* argv[]) {
   printf("\tTotal time elapsed: %.3fs\n", 0.001 * (SDL_GetTicks() - started));
   fflush(0);
 
-  screen.saveBMP(output.c_str());
+  screen.save_filename(output);
 
   if (settings.show_preview) {
     SDL_Event event;
