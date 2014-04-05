@@ -1,5 +1,5 @@
-#ifndef _BPJ_REITREI_SCREEN_H
-#define _BPJ_REITREI_SCREEN_H
+#ifndef _BPJ_REITREI_TEXTURE_H
+#define _BPJ_REITREI_TEXTURE_H
 
 /*
  * This needs to be renamed texture
@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 
-class Screen {
+class Texture {
  protected:
   Vect4* buffer;
   int w, h;
@@ -17,12 +17,12 @@ class Screen {
   void saveBMP(const char* filename) const;
 
  public:
-  Screen();
-  Screen(const std::vector<Screen>& v);
-  Screen(const Screen& screen);
-  ~Screen();
+  Texture();
+  Texture(const std::vector<Texture>& v);
+  Texture(const Texture& screen);
+  ~Texture();
   
-  Screen& operator=(const Screen& screen);
+  Texture& operator=(const Texture& screen);
 
   inline int width() const {return w;}
   inline int height() const {return h;}
@@ -31,10 +31,10 @@ class Screen {
   inline void setColor(int r, int c, const Vect4& color) {buffer[r * w + c] = color;}
   inline const Vect4& getColor(int r, int c) const {return buffer[r * w + c];}
 
-  Screen differenceMap() const;
+  Texture differenceMap() const;
 
 #ifndef NO_MAGICK
-  inline Screen(const std::string& fn) {buffer = NULL; load_filename(fn);}
+  inline Texture(const std::string& fn) {buffer = NULL; load_filename(fn);}
   void load_filename(const std::string& fn);
 #endif
 

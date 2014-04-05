@@ -29,7 +29,7 @@ OBJECT_FILES = \
 	triangle.o \
 	grid.o \
 	ray5parser.o \
-	screen.o \
+	texture.o \
 	pixelrenderer.o \
 	renderqueue.o \
 	main.o

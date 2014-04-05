@@ -1,16 +1,16 @@
-#include "screen.h"
+#include "texture.h"
 #include <cstring>
 #include <cstdio>
 extern "C" {
 #include <stdint.h>
 }
 
-Screen::Screen() {
+Texture::Texture() {
   w = h = 0;
   buffer = NULL;
 }
 
-Screen::Screen(const std::vector<Screen>& v) {
+Texture::Texture(const std::vector<Texture>& v) {
   buffer = NULL;
   
   if (v.empty()) {
@@ -26,30 +26,30 @@ Screen::Screen(const std::vector<Screen>& v) {
     buffer[i] = buffer[i] / v.size();
 }
 
-Screen::Screen(const Screen& screen) {
+Texture::Texture(const Texture& screen) {
   *this = screen;
 }
 
-Screen::~Screen() {
+Texture::~Texture() {
   if (buffer) delete [] buffer;
 }
 
-Screen& Screen::operator=(const Screen& screen) {
+Texture& Texture::operator=(const Texture& screen) {
   buffer = NULL;
   setDimensions(screen.w, screen.h);
   memcpy(buffer, screen.buffer, w * h * sizeof(Vect4));
   return *this;
 }
 
-void Screen::setDimensions(int w, int h) {
+void Texture::setDimensions(int w, int h) {
   if (buffer) delete [] buffer;
 
   this->w = w; this->h = h;
   buffer = new Vect4 [w * h];
 }
 
-Screen Screen::differenceMap() const {
-  Screen map;
+Texture Texture::differenceMap() const {
+  Texture map;
   map.setDimensions(w, h);
 
   Vect4 Gx, Gy, G;
@@ -70,7 +70,7 @@ Screen Screen::differenceMap() const {
 
 inline uint8_t toByte(Real r) {return (r < 0)? 0 : (r > 1.0)? 255 : (uint8_t)(255 * r);}
 
-void Screen::saveBMP(const char* filename) const {
+void Texture::saveBMP(const char* filename) const {
   FILE* fp = fopen(filename, "wb");
 
   //BMP standard header: 14 bytes
@@ -115,7 +115,7 @@ void Screen::saveBMP(const char* filename) const {
 
 #ifndef NO_MAGICK
 #include <Magick++.h>
-void Screen::load_filename(const std::string& fn) {
+void Texture::load_filename(const std::string& fn) {
   using namespace Magick;
   Image img(fn);
 
@@ -141,7 +141,7 @@ void Screen::load_filename(const std::string& fn) {
 }
 #endif
 
-void Screen::save_filename(const std::string& fn) const {
+void Texture::save_filename(const std::string& fn) const {
 #ifndef NO_MAGICK
   using namespace Magick;
   Image img(Geometry(w, h), Color(0, 0, 0, 0));

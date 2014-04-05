@@ -127,7 +127,7 @@ inline void segFault(int param) {
   exit(0);
 }
 
-void traceAt(const Ray5Scene& scene, Screen& screen, int r, int c) {
+void traceAt(const Ray5Scene& scene, Texture& screen, int r, int c) {
   if (settings.coherence) randomizer.reseed();
 
   Vect4 O, D, color;
@@ -153,7 +153,7 @@ void traceAt(const Ray5Scene& scene, Screen& screen, int r, int c) {
   screen.setColor(r, c, color / settings.nsamples);
 }
 
-void traceAt_AA(const Ray5Scene& scene, Screen& screen, int r, int c) {
+void traceAt_AA(const Ray5Scene& scene, Texture& screen, int r, int c) {
   if (settings.coherence) randomizer.reseed();
 
   Vect4 O, D, color;
@@ -199,7 +199,7 @@ inline Uint8 toByte(Real r) {return (r > 1.0)? 255 : (Uint8)(255 * r);}
 SDL_Window* window = NULL;
 PixelRenderer* px = NULL;
 
-void redraw(const Screen& screen) {
+void redraw(const Texture& screen) {
   Vect4 color;
   for (int r = 0; r < screen.height(); r++) {
     for (int c = 0; c < screen.width(); c++) {
@@ -230,7 +230,7 @@ int renderThread_AA(void* v) {
   return 0;
 }
 
-void drawRow(Screen& screen, int r) {
+void drawRow(Texture& screen, int r) {
   Vect4 color;
   for (int c = 0; c < screen.width(); c++) {
     color = screen.getColor(r, c);
@@ -238,7 +238,7 @@ void drawRow(Screen& screen, int r) {
   }
 }
 
-void render(Ray5Scene& scene, Screen& screen, int renderno = 0, int outof = 1) {
+void render(Ray5Scene& scene, Texture& screen, int renderno = 0, int outof = 1) {
   char titlebuf[200];
   if (settings.show_preview) {
     sprintf(titlebuf, "%s", TITLE);
@@ -300,7 +300,7 @@ void render(Ray5Scene& scene, Screen& screen, int renderno = 0, int outof = 1) {
     return;
   }
 
-  Screen dmap = screen.differenceMap();
+  Texture dmap = screen.differenceMap();
   float d;
   for (int r = 1; r < screen.height() - 1; r++) {
     if (settings.show_preview) {
@@ -365,7 +365,7 @@ void printUsage() {
   printf("\t--output filename: Set filename of rendered bitmap\n");
 }
 
-void drawPattern(Screen& screen) {
+void drawPattern(Texture& screen) {
   Vect4 black(0.0, 0.0, 0.0), gray(0.125, 0.125, 0.125);
   for (int r = 0; r < screen.height(); r++)
     for (int c = 0; c < screen.width(); c++) {
@@ -390,7 +390,7 @@ int main(int argc, char* argv[]) {
   randomizer.timeSeed();
 
   Ray5Scene& scene = *Ray5Scene::getInstance();
-  Screen screen;
+  Texture screen;
   int w = 300, h = 300;
   bool threads_changed = 0;
   std::string filename, output = "out.bmp";
@@ -481,7 +481,7 @@ int main(int argc, char* argv[]) {
 
   Uint32 started = SDL_GetTicks();
   
-  std::vector<Screen> screens;
+  std::vector<Texture> screens;
 
   for (int i = 0; i < settings.nrenders; i++) {
     render(scene, screen, i + 1, settings.nrenders); 
@@ -489,7 +489,7 @@ int main(int argc, char* argv[]) {
     randomizer.advanceSeed();
   }
 
-  screen = Screen(screens);
+  screen = Texture(screens);
 #ifndef SHOW_AA
   if (settings.show_preview)
     redraw(screen);
