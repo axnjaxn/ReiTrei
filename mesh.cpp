@@ -17,7 +17,12 @@ int readOBJ(const char* filename, Ray5Scene* scene) {
   while (!feof(fp)) {
     char buf[256];
     fscanf(fp, "%s", buf);
-    if (!strcmp(buf, "v")) {
+    if (!strcmp(buf, "#")) skipLine(fp);
+    else if (!strcmp(buf, "g")) {
+      //Group ID
+      skipLine(fp);
+    }
+    else if (!strcmp(buf, "v")) {
       Vect4 v;
       fscanf(fp, "%lf%lf%lf", &v[0], &v[1], &v[2]);
       vertices.push_back(v);
@@ -36,6 +41,7 @@ int readOBJ(const char* filename, Ray5Scene* scene) {
       tri->material.twosided = 1;
       scene->addObject(tri);
     }
+    else printf("Don't know what's happening here: %s\n", buf);
   }
   
   fclose(fp);
