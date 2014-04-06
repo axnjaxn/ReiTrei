@@ -21,6 +21,7 @@ public:
   Ray5Intersection intersectsUnit(const Vect4& O, const Vect4& D) const;
 
   void getBounds(Vect4* lower, Vect4* upper);
+  inline void setNormal(const Vect4& normal) {this->normal = normal;}
 };
 
 #endif

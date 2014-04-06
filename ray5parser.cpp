@@ -420,6 +420,8 @@ void parseDefine(TokenStream* ts) {
   ts->addDefine(define);
 }
 
+#include "mesh.h"
+#include <string>
 void parseSceneItem(TokenStream* ts, Ray5Scene* scene) {
   Token token = ts->getToken();
 
@@ -444,6 +446,13 @@ void parseSceneItem(TokenStream* ts, Ray5Scene* scene) {
 
   //Miscellaneous
   else if (token == "BGColor") scene->bgcolor = parseVector(ts);
+
+  else if (token == "Obj") {
+    std::string str = ts->getToken().str;
+    str = "teapot.obj";
+    printf("%s\n", str.c_str());
+    readOBJ(str.c_str(), scene);
+  }
 
   else ts->parseError("_SceneItem_", token);
 }

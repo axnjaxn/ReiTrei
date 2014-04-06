@@ -27,6 +27,7 @@ OBJECT_FILES = \
 	mat4.o \
 	randomizer.o \
 	triangle.o \
+	mesh.o \
 	grid.o \
 	ray5parser.o \
 	texture.o \
