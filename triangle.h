@@ -9,11 +9,12 @@ protected:
 
   //These variables are used in barycentric coordinates
   Vect4 p1, p2;
-  float d00, d01, d11, denom;
+  Real d00, d01, d11, denom;
   
   Vect4 normal;
   
   void recompute();
+  bool computeBary(const Vect4& P, Real& u, Real& v, Real& w);//Returns true if in triangle
 
 public:
   Triangle(const Vect4& a, const Vect4& b, const Vect4& c);

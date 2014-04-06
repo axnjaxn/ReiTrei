@@ -11,6 +11,22 @@ void Triangle::recompute() {
   denom = d00 * d11 - d01 * d01;
 }
 
+bool Triangle::computeBary(const Vect4& P, Real& u, Real& v, Real& w) {
+  /* 
+   * An application of Cramer's rule
+   * Adapted from Christer Ericson's Real Time Collision Detection
+   */
+  Vect4 p = P - a;
+  Real d20 = dot(p, p1);
+  Real d21 = dot(p, p2);
+  
+  v = (d11 * d20 - d01 * d21) / denom;
+  w = (d00 * d21 - d01 * d20) / denom;
+  u = 1.0 - v - w;
+  
+  if (0.0 <= u && u <= 1.0 && 0.0 <= v && v <= 1.0 && 0.0 <= w && w <= 1.0) return true;
+}
+
 Triangle::Triangle(const Vect4& a, const Vect4& b, const Vect4& c) : Ray5Object() {
   this->a = a;
   this->b = b;
@@ -19,25 +35,12 @@ Triangle::Triangle(const Vect4& a, const Vect4& b, const Vect4& c) : Ray5Object(
 }
 
 Ray5Intersection Triangle::intersectsUnit(const Vect4& O, const Vect4& D) const {
-  Real t = dot(a - O, normal) / dot(D, normal);
+  Real t = dot(a - O, normal) / dot(D, normal), u, v, w;
 
-  if (t > 0) {
-    //An application of Cramer's rule
-    //Adapted from Christer Ericson's Real Time Collision Detection
-    Vect4 P = O + t * D;
-    Vect4 p = P - a;
-
-    float d20 = dot(p, p1);
-    float d21 = dot(p, p2);
-
-    float v = (d11 * d20 - d01 * d21) / denom;
-    float w = (d00 * d21 - d01 * d20) / denom;
-    float u = 1.0 - v - w;
-
-    if (0.0 <= u && u <= 1.0 && 0.0 <= v && v <= 1.0 && 0.0 <= w && w <= 1.0) 
+  if (t > 0)
+    if (computeBary(u, v, w))
       return Ray5Intersection(this, t, P, normal);
-  }
-    
+  
   return Ray5Intersection();
 }
   
@@ -60,24 +63,11 @@ InterpTriangle::InterpTriangle(const Vect4& a, const Vect4& b, const Vect4& c,
 }
 
 Ray5Intersection InterpTriangle::intersectsUnit(const Vect4& O, const Vect4& D) const {
-  Real t = dot(a - O, normal) / dot(D, normal);
+  Real t = dot(a - O, normal) / dot(D, normal), u, v, w;
 
-  if (t > 0) {
-    //An application of Cramer's rule
-    //Adapted from Christer Ericson's Real Time Collision Detection
-    Vect4 P = O + t * D;
-    Vect4 p = P - a;
+  if (t > 0)
+    if (computeBary(u, v, w))
+      return Ray5Intersection(this, t, P, u * normal0 + v * normal1 + w * normal2);
 
-    float d20 = dot(p, p1);
-    float d21 = dot(p, p2);
-
-    float v = (d11 * d20 - d01 * d21) / denom;
-    float w = (d00 * d21 - d01 * d20) / denom;
-    float u = 1.0 - v - w;
-
-    if (0.0 <= u && u <= 1.0 && 0.0 <= v && v <= 1.0 && 0.0 <= w && w <= 1.0) 
-      return Ray5Intersection(this, t, P, u * normal0 + w * normal1 + v * normal2);
-  }
-    
-  return Ray5Intersection();  
+  return Ray5Intersection();
 }
