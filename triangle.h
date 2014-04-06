@@ -14,7 +14,7 @@ protected:
   Vect4 normal;
   
   void recompute();
-  bool computeBary(const Vect4& P, Real& u, Real& v, Real& w);//Returns true if in triangle
+  bool computeBary(const Vect4& P, Real& u, Real& v, Real& w) const ;//Returns true if in triangle
 
 public:
   Triangle(const Vect4& a, const Vect4& b, const Vect4& c);

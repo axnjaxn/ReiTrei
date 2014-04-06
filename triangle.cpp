@@ -11,7 +11,7 @@ void Triangle::recompute() {
   denom = d00 * d11 - d01 * d01;
 }
 
-bool Triangle::computeBary(const Vect4& P, Real& u, Real& v, Real& w) {
+bool Triangle::computeBary(const Vect4& P, Real& u, Real& v, Real& w) const {
   /* 
    * An application of Cramer's rule
    * Adapted from Christer Ericson's Real Time Collision Detection
@@ -37,9 +37,11 @@ Triangle::Triangle(const Vect4& a, const Vect4& b, const Vect4& c) : Ray5Object(
 Ray5Intersection Triangle::intersectsUnit(const Vect4& O, const Vect4& D) const {
   Real t = dot(a - O, normal) / dot(D, normal), u, v, w;
 
-  if (t > 0)
-    if (computeBary(u, v, w))
+  if (t > 0) {
+    Vect4 P = O + t * D;
+    if (computeBary(P, u, v, w))
       return Ray5Intersection(this, t, P, normal);
+  }
   
   return Ray5Intersection();
 }
@@ -65,9 +67,11 @@ InterpTriangle::InterpTriangle(const Vect4& a, const Vect4& b, const Vect4& c,
 Ray5Intersection InterpTriangle::intersectsUnit(const Vect4& O, const Vect4& D) const {
   Real t = dot(a - O, normal) / dot(D, normal), u, v, w;
 
-  if (t > 0)
-    if (computeBary(u, v, w))
+  if (t > 0) {
+    Vect4 P = O + t * D;
+    if (computeBary(P, u, v, w))
       return Ray5Intersection(this, t, P, u * normal0 + v * normal1 + w * normal2);
+  }
 
   return Ray5Intersection();
 }
