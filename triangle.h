@@ -18,10 +18,20 @@ protected:
 public:
   Triangle(const Vect4& a, const Vect4& b, const Vect4& c);
 
-  Ray5Intersection intersectsUnit(const Vect4& O, const Vect4& D) const;
+  virtual Ray5Intersection intersectsUnit(const Vect4& O, const Vect4& D) const;
 
   void getBounds(Vect4* lower, Vect4* upper);
-  inline void setNormal(const Vect4& normal) {this->normal = normal;}
+};
+
+class InterpTriangle : public Triangle {
+protected:
+  Vect4 normal1, normal2;
+
+public:
+  InterpTriangle(const Vect4& a, const Vect4& b, const Vect4& c,
+		 const Vect4& n, const Vect4& n1, const Vect4& n2);
+
+  Ray5Intersection intersectsUnit(const Vect4& O, const Vect4& D) const;
 };
 
 #endif

@@ -50,3 +50,34 @@ void Triangle::getBounds(Vect4* lower, Vect4* upper) {
     else if (c[i] > (*upper)[i]) (*upper)[i] = c[i];
   }
 }
+
+InterpTriangle::InterpTriangle(const Vect4& a, const Vect4& b, const Vect4& c,
+			       const Vect4& n, const Vect4& n1, const Vect4& n2)
+  : Triangle(a, b, c) {
+  normal = n;
+  normal1 = n1;
+  normal2 = n2;
+}
+
+Ray5Intersection InterpTriangle::intersectsUnit(const Vect4& O, const Vect4& D) const {
+  Real t = dot(a - O, normal) / dot(D, normal);
+
+  if (t > 0) {
+    //An application of Cramer's rule
+    //Adapted from Christer Ericson's Real Time Collision Detection
+    Vect4 P = O + t * D;
+    Vect4 p = P - a;
+
+    float d20 = dot(p, p1);
+    float d21 = dot(p, p2);
+
+    float v = (d11 * d20 - d01 * d21) / denom;
+    float w = (d00 * d21 - d01 * d20) / denom;
+    float u = 1.0 - v - w;
+
+    if (0.0 <= u && u <= 1.0 && 0.0 <= v && v <= 1.0 && 0.0 <= w && w <= 1.0) 
+      return Ray5Intersection(this, t, P, u * normal + v * normal1 + w * normal2);
+  }
+    
+  return Ray5Intersection();  
+}

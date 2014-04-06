@@ -25,14 +25,14 @@ int readOBJ(const char* filename, Ray5Scene* scene) {
     else if (!strcmp(buf, "vn")) {
       Vect4 vn;
       fscanf(fp, "%lf%lf%lf", &vn[0], &vn[1], &vn[2]);
-      normals.push_back(vn);
+      normals.push_back(vn.unit());
     }
     else if (!strcmp(buf, "f")) {
       int a, b, c;
       fscanf(fp, "%d%d%d", &a, &b, &c);
-      Triangle* tri = new Triangle(vertices[a], vertices[b], vertices[c]);
+      InterpTriangle* tri = new InterpTriangle(vertices[a], vertices[b], vertices[c],
+					       normals[a], normals[b], normals[c]);
       tri->material.diffuse = Vect4(0.0, 0.0, 1.0);
-      //tri->setNormal(normals[c]);
       tri->material.twosided = 1;
       scene->addObject(tri);
     }
