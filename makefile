@@ -50,3 +50,6 @@ clean:
 
 run: $(APP) tricol.ray
 	./$(APP) tricol.ray --point-lights
+
+test: $(APP) test.ray teapot.obj
+	./$(APP) test.ray --size 640 480 --no-aa
