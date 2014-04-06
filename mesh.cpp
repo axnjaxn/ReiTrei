@@ -32,7 +32,7 @@ int readOBJ(const char* filename, Ray5Scene* scene) {
       fscanf(fp, "%d%d%d", &a, &b, &c);
       InterpTriangle* tri = new InterpTriangle(vertices[a], vertices[b], vertices[c],
 					       normals[a], normals[b], normals[c]);
-      tri->material.diffuse = Vect4(0.0, 0.0, 1.0);
+      tri->material.diffuse = Vect4(1.0, 1.0, 1.0);
       tri->material.twosided = 1;
       scene->addObject(tri);
     }

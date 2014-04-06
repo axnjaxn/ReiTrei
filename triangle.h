@@ -25,7 +25,7 @@ public:
 
 class InterpTriangle : public Triangle {
 protected:
-  Vect4 normal1, normal2;
+  Vect4 normal0, normal1, normal2;
 
 public:
   InterpTriangle(const Vect4& a, const Vect4& b, const Vect4& c,
