@@ -24,7 +24,7 @@ bool Triangle::computeBary(const Vect4& P, Real& u, Real& v, Real& w) const {
   w = (d00 * d21 - d01 * d20) / denom;
   u = 1.0 - v - w;
   
-  if (0.0 <= u && u <= 1.0 && 0.0 <= v && v <= 1.0 && 0.0 <= w && w <= 1.0) return true;
+  return (0.0 <= u && u <= 1.0 && 0.0 <= v && v <= 1.0 && 0.0 <= w && w <= 1.0);
 }
 
 Triangle::Triangle(const Vect4& a, const Vect4& b, const Vect4& c) : Ray5Object() {

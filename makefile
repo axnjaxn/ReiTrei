@@ -1,7 +1,7 @@
 APPNAME = ReiTrei
 
 LFLAGS = `sdl2-config --libs`
-DFLAGS = -O2 -DDEBUG -DVERBOSE
+DFLAGS = -O2 -DDEBUG -DVERBOSE -Wno-unused-result
 EXT = 
 
 ifndef MINGW
