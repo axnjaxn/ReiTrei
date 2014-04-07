@@ -2,10 +2,6 @@
 #include "tokens.h"
 #include "ray5shapes.h"
 #include "triangle.h"
-#include <cstdlib>
-#include <cstdio>
-#include <cstring>
-#include <cctype>
 
 /*
  * Parser
