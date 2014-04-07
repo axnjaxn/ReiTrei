@@ -1,174 +1,11 @@
 #include "ray5parser.h"
+#include "tokens.h"
+#include "ray5shapes.h"
+#include "triangle.h"
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
 #include <cctype>
-#include "ray5shapes.h"
-#include "triangle.h"
-
-/*
- * Token
- */
-
-class Token {
-public:
-  char* str;
-
-  Token() {str = NULL;}
-  Token(const char* str) {
-    this->str = new char [strlen(str) + 1];
-    sprintf(this->str, "%s", str);
-  }
-  Token(const Token& t) {
-    str = NULL;
-    *this = t;
-  }
-  ~Token() {
-    delete [] str;
-  }
-  
-  Token& operator=(const Token& t) {
-    if (str) delete [] str;
-    str = new char [strlen(t.str) + 1];
-    sprintf(str, "%s", t.str);
-    return *this;
-  }
-  inline char& operator[](int i) {return str[i];}
-  char operator[](int i) const {return str[i];}
-};
-inline bool operator==(const Token& t, const char* str) {return !strcmp(t.str, str);}
-inline bool operator==(const char* str, const Token& t) {return (t == str);}
-inline bool operator!=(const Token& t, const char* str) {return !(t == str);}
-inline bool operator!=(const char* str, const Token& t) {return !(t == str);}
-inline bool operator==(const Token& t1, const Token& t2) {return (t1 == t2.str);}
-inline bool operator!=(const Token& t1, const Token& t2) {return !(t1 == t2);}
-
-/*
- * DefinedToken
- */
-
-class Define {
-public:
-  Token name;
-  std::vector<Token> values;
-
-  Define(Token name) {this->name = name;}
-  void addToken(Token token) {values.push_back(token);}
-};
-
-/*
- * TokenStream
- */
-
-char fpeek(FILE* fp) {
-  char c = fgetc(fp);
-  ungetc(c, fp);
-  return c;
-}
-
-bool isenclosure(char c) {return (c == '{' || c == '}' || c == '<' || c == '>' || c == '(' || c == ')');}
-bool isoperator(char c) {return (c == '+' || c == '-' || c == '*' || c == '/');}
-bool isseparator(char c) {return (c == ',');}
-
-class TokenStream {
-protected:
-  FILE* fp;
-  std::vector<Token> tokens;
-  std::vector<Define> defines;
-
-  void readToken() {
-    char tokenbuf[1024];
-    memset(tokenbuf, 0, 1024);
-
-    char next;
-    
-    //Remove whitespace and peek at leading character
-    do {
-      next = fgetc(fp);
-      if (next == '%') {
-	while (fgetc(fp) != '\n');
-	next = ' ';
-      }
-    } while (isspace(next));
-    ungetc(next, fp);
-    
-    //Enclosure tokens
-    if (isenclosure(next) || isoperator(next) || isseparator(next)) {
-      fgetc(fp);
-      sprintf(tokenbuf, "%c", next);
-      tokens.push_back(Token(tokenbuf));
-      return;
-    } 
-
-    //General tokens
-    for (int i = 0; i < 1024; i++) {
-      next = fgetc(fp);
-      if (isspace(next) || isenclosure(next) || isseparator(next)) {
-	ungetc(next, fp);
-	break;
-      }
-      tokenbuf[i] = next;
-    }
-    tokens.push_back(Token(tokenbuf));
-  }
-public:
-  int open(const char* fn) {
-    fp = fopen(fn, "r");
-    return !fp;
-  }
-  void close() {
-    fclose(fp);
-  }
-
-  Token getToken() {
-    Token token = peekToken();
-    tokens.pop_back();
-    return token;
-  }
-  void ungetToken(Token token) {
-    tokens.push_back(token);
-  }
-  Token peekToken() {
-    if (tokens.empty()) readToken();
-
-    //Load a defined symbol
-    for (int i = 0; i < defines.size(); i++)
-      if (tokens[tokens.size() - 1] == defines[i].name) {
-	tokens.pop_back();
-	for (int j = defines[i].values.size() - 1; j >= 0; j--)
-	  tokens.push_back(defines[i].values[j]);
-	return peekToken();
-      }
-
-    return tokens[tokens.size() - 1];
-  }
-  void expectToken(const char* expect) {
-    Token token = getToken();
-    if (token != expect) parseError(expect, token);
-  }
-  
-  int lineNumber() {
-    int L = 1;
-    int pos = ftell(fp);
-    rewind(fp);
-    for (int i = 0; i < pos; i++)
-      if (fgetc(fp) == '\n') L++;
-    return L;
-  }
-  bool eof() {
-    return feof(fp);
-  }
-  void parseError(const char* expected, const char* got) {
-    printf("Syntax error on line %d: expected %s, got \"%s\" instead.\n", lineNumber(), expected, got);
-    exit(0);
-  }
-  void parseError(const char* expected, const Token& got) {
-    parseError(expected, got.str);
-  }
-  void addDefine(Define define) {
-    defines.push_back(define);
-  }
-};
 
 /*
  * Parser
@@ -197,7 +34,7 @@ Real parseNumber(TokenStream* ts) {
     else if (!isdigit(token[i])) ts->parseError("_Real_", token);
 
   Real r;
-  sscanf(token.str, "%lf", &r);
+  sscanf(token.c_str(), "%lf", &r);
   return r;
 }
 
@@ -402,7 +239,7 @@ Ray5Camera parseCamera(TokenStream* ts) {
 }
 
 void parseDefine(TokenStream* ts) {
-  Define define(ts->getToken()); 
+  Macro macro(ts->getToken()); 
   Token value = ts->getToken();
   if (value == "{") {
     int braces_count = 0;
@@ -414,10 +251,10 @@ void parseDefine(TokenStream* ts) {
 	else braces_count--;
       }
       else if (ts->eof()) ts->parseError("}", "_EOF_");
-      define.addToken(value);
+      macro.addToken(value);
     }
   }
-  ts->addDefine(define);
+  ts->addMacro(macro);
 }
 
 #include "mesh.h"
@@ -448,9 +285,8 @@ void parseSceneItem(TokenStream* ts, Ray5Scene* scene) {
   else if (token == "BGColor") scene->bgcolor = parseVector(ts);
 
   else if (token == "Obj") {
-    std::string str = ts->getToken().str;
-    str = "teapot.obj";
-    printf("%s\n", str.c_str());
+    std::string str = ts->getToken();
+    printf("Reading OBJ: %s\n", str.c_str());
     readOBJ(str.c_str(), scene);
   }
 

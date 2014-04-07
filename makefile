@@ -29,6 +29,7 @@ OBJECT_FILES = \
 	triangle.o \
 	mesh.o \
 	grid.o \
+	tokens.o \
 	ray5parser.o \
 	texture.o \
 	pixelrenderer.o \
