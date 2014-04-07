@@ -8,6 +8,7 @@
 #include "randomizer.h"
 #include <string>
 #include <vector> 
+#include <exception>
 
 class RenderSettings {
 public:
@@ -446,10 +447,10 @@ int main(int argc, char* argv[]) {
   }
 
   if (settings.show_preview) {
-    if (SDL_Init(SDL_INIT_VIDEO) < 0) exit(1);
+    if (SDL_Init(SDL_INIT_VIDEO) < 0) return 1;
   }
   else {
-    if (SDL_Init(0) < 0) exit(1);
+    if (SDL_Init(0) < 0) return 1;
   }
   atexit(SDL_Quit);
 
@@ -458,7 +459,13 @@ int main(int argc, char* argv[]) {
     if (settings.nworkers > 1) settings.nworkers--; //Use n threads (counting this one) on n-core machines, but 2 threads for single-core machines
   }
 
-  parseScene(filename.c_str(), &scene);
+  try {
+    parseScene(filename.c_str(), &scene);
+  }
+  catch (std::exception& e) {
+    printf("%s\n", e.what());
+    return 1;
+  }
   scene.init();
   
   /*

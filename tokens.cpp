@@ -3,6 +3,21 @@
 #include <cstring>
 #include <cstdlib>
 
+ParseError::ParseError(const std::string& message, int lineno) {
+  this->message = message;
+  this->lineno = lineno;
+}
+
+ParseError::ParseError(const std::string& expected, const std::string& got, int lineno) {
+  this->lineno = lineno;
+
+  char buf[256];
+  sprintf(buf, "Syntax error on line %d: expected %s, got \"%s\" instead.", lineno, expected.c_str(), got.c_str());
+  message = buf;
+}
+
+const char* ParseError::what() const throw() {return message.c_str();}
+
 char fpeek(FILE* fp) {
   char c = fgetc(fp);
   ungetc(c, fp);
@@ -85,7 +100,7 @@ Token TokenStream::peekToken() {
 
 void TokenStream::expectToken(const char* expect) {
   Token token = getToken();
-  if (token != expect) parseError(expect, token);
+  if (token != expect) throw ParseError(expect, token, lineNumber());
 }
   
 int TokenStream::lineNumber() {
@@ -98,15 +113,6 @@ int TokenStream::lineNumber() {
 }
 
 bool TokenStream::eof() {return feof(fp);}
-
-void TokenStream::parseError(const char* expected, const char* got) {
-  printf("Syntax error on line %d: expected %s, got \"%s\" instead.\n", lineNumber(), expected, got);
-  exit(0);
-}
-
-void TokenStream::parseError(const char* expected, const Token& got) {
-  parseError(expected, got.c_str());
-}
 
 void TokenStream::addMacro(Macro macro) {
   macros.push_back(macro);

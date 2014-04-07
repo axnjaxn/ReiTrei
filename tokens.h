@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <exception>
 
 typedef std::string Token;
 
@@ -13,6 +14,18 @@ public:
   
   Macro(const Token& name) {this->name = name;}
   inline void addToken(const Token& token) {values.push_back(token);}
+};
+
+class ParseError : public std::exception {
+protected:
+  std::string message;
+  int lineno;
+
+public:
+  ParseError(const std::string& message, int lineno = 0);
+  ParseError(const std::string& expected, const std::string& got, int lineno);
+  virtual ~ParseError() throw() { }
+  virtual const char* what() const throw();
 };
 
 class TokenStream {
@@ -34,8 +47,6 @@ public:
   int lineNumber();
   bool eof();
 
-  void parseError(const char* expected, const char* got);
-  void parseError(const char* expected, const Token& got);
   void addMacro(Macro macro);
 };
 

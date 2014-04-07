@@ -25,9 +25,9 @@ Real parseNumber(TokenStream* ts) {
   for (int i = 0; token[i]; i++)
     if (token[i] == '.') {
       if (!haspt) haspt = 1;
-      else ts->parseError("_Real_", token);
+      else throw ParseError("_Real_", token, ts->lineNumber());
     }
-    else if (!isdigit(token[i])) ts->parseError("_Real_", token);
+    else if (!isdigit(token[i])) throw ParseError("_Real_", token, ts->lineNumber());
 
   Real r;
   sscanf(token.c_str(), "%lf", &r);
@@ -150,7 +150,7 @@ void parseModifiers(TokenStream* ts, Ray5Object* obj) {
       if (token == "x") obj->xrotate(-parseAngle(ts));
       else if (token == "y") obj->yrotate(-parseAngle(ts));
       else if (token == "z") obj->zrotate(-parseAngle(ts));
-      else ts->parseError("_Axis_", token);
+      else throw ParseError("_Axis_", token, ts->lineNumber());
     }
     else if (token == "material") obj->material = parseMaterial(ts);
     else {
@@ -220,7 +220,7 @@ Light* parseLight(TokenStream* ts) {
     if (token == "intensity") light->intensity = parseReal(ts);
     else if (token == "radius") light->radius = parseReal(ts);    
     else if (token == "falloff") light->falloff = 1;
-    else ts->parseError("_LightProperty_", token);
+    else throw ParseError("_LightProperty_", token, ts->lineNumber());
   }
   ts->expectToken("}");
   return light;
@@ -246,7 +246,7 @@ void parseDefine(TokenStream* ts) {
 	if (braces_count == 0) break;
 	else braces_count--;
       }
-      else if (ts->eof()) ts->parseError("}", "_EOF_");
+      else if (ts->eof()) throw ParseError("}", "_EOF_", ts->lineNumber());
       macro.addToken(value);
     }
   }
@@ -286,7 +286,7 @@ void parseSceneItem(TokenStream* ts, Ray5Scene* scene) {
     readOBJ(str.c_str(), scene);
   }
 
-  else ts->parseError("_SceneItem_", token);
+  else throw ParseError("_SceneItem_", token, ts->lineNumber());
 }
 
 void parseScene(TokenStream* ts, Ray5Scene* scene) {
@@ -295,8 +295,9 @@ void parseScene(TokenStream* ts, Ray5Scene* scene) {
 
 void parseScene(const char* fn, Ray5Scene* scene) {
   TokenStream ts;
-  if (ts.open(fn))
-    printf("Couldn't open scene file.\n");
+  if (ts.open(fn)) {
+    throw ParseError("Couldn't open scene file.");
+  }
   else {
     parseScene(&ts, scene);
     ts.close();
