@@ -63,36 +63,6 @@ public:
   }
 };
 
-class Ray5Cone : public Ray5Object {
-public:
-  Real r0, r1;
-
-  Ray5Cone() : Ray5Object() {r0 = r1 = 1;}
-
-  virtual Ray5Intersection intersectsUnit(const Vect4& O, const Vect4& D) const {
-    Real a = D[0] * D[0] + D[1] * D[1];
-    Real b = 2 * O[0] * D[0] + 2 * O[1] * D[1] - D[2] * (r1 - r0) / 2;
-    Real c = O[0] * O[0] + O[1] * O[1] - r0 - ((r1 - r0) * (O[2] + 1)) / 2;
-    
-    Real discriminant = b * b - 4 * a * c;
-    if (discriminant < 0) return Ray5Intersection();
-    
-    Real t1 = (-b + sqrt(discriminant)) / (2 * a);
-    Real t2 = (-b - sqrt(discriminant)) / (2 * a);
-    Real t = (t1 > 0 && (t2 <= 0 || t1 < t2))? t1 : t2;
-    
-    if (t <= 0) return Ray5Intersection();
-    
-    Vect4 P = O + t * D;
-    if (P[1] < 0 || P[1] > 1) return Ray5Intersection();
-    
-    Vect4 N = Vect4(P[0], -P[1], P[2]).unit();
-    
-    Ray5Intersection result(this, t, P, N);
-    return result;
-  }
-};
-
 class Ray5Plane : public Ray5Object {
 public:
   Vect4 A, N;

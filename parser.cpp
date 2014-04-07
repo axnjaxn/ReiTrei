@@ -184,11 +184,6 @@ Ray5Sphere* parseSphere(TokenStream* ts) {
   return sphere;
 }
 
-Ray5Cone* parseCone(TokenStream* ts) {
-  //uf
-  return NULL;
-}
-
 Ray5Plane* parsePlane(TokenStream* ts) {
   ts->expectToken("{");
   Ray5Plane* plane = new Ray5Plane();
@@ -272,9 +267,7 @@ void parseSceneItem(TokenStream* ts, Ray5Scene* scene) {
   //Shapes
   else if (token == "Box") scene->addObject(parseBox(ts));
   else if (token == "Sphere") scene->addObject(parseSphere(ts));
-  //uf cone?
   else if (token == "Plane") scene->addObject(parsePlane(ts));
-
   else if (token == "Triangle") scene->addObject(parseTriangle(ts));
 
   //Miscellaneous
