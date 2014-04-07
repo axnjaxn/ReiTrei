@@ -4,4 +4,6 @@ ReiTrei
 *.stackdump
 Thumbs.db
 *.ray
+*.obj
 *.bmp
+*.png
