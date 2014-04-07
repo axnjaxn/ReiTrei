@@ -3,7 +3,7 @@
 //#define NO_GRID
 
 #include "renderqueue.h"
-#include "ray5parser.h"
+#include "parser.h"
 #include "ray5shapes.h"
 #include "randomizer.h"
 #include <string>

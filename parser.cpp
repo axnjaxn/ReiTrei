@@ -1,4 +1,4 @@
-#include "ray5parser.h"
+#include "parser.h"
 #include "tokens.h"
 #include "ray5shapes.h"
 #include "triangle.h"

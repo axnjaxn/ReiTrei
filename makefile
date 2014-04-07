@@ -30,7 +30,7 @@ OBJECT_FILES = \
 	mesh.o \
 	grid.o \
 	tokens.o \
-	ray5parser.o \
+	parser.o \
 	texture.o \
 	pixelrenderer.o \
 	renderqueue.o \
