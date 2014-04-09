@@ -28,21 +28,31 @@ bool isenclosure(char c) {return (c == '{' || c == '}' || c == '<' || c == '>' |
 bool isoperator(char c) {return (c == '+' || c == '-' || c == '*' || c == '/');}
 bool isseparator(char c) {return (c == ',');}
 
+void TokenStream::removeComment() {
+  for (char next = fgetc(fp); next != '\n'; next = fgetc(fp));
+}
+
+void TokenStream::removeWhitespace() {
+  char next;
+  do {
+    next = fgetc(fp);
+    if (next == '%') {
+      removeComment();
+      next = ' ';
+    }
+    else if (feof(fp)) return;
+  } while (isspace(next));
+  ungetc(next, fp);
+}
+
 void TokenStream::readToken() {
   char tokenbuf[1024];
   memset(tokenbuf, 0, 1024);
 
-  char next;
-    
-  //Remove whitespace and peek at leading character
-  do {
-    next = fgetc(fp);
-    if (next == '%') {
-      while (fgetc(fp) != '\n');
-      next = ' ';
-    }
-  } while (isspace(next));
-  ungetc(next, fp);
+  removeWhitespace();
+  if (feof(fp)) return;
+
+  char next = fpeek(fp);
     
   //Enclosure tokens
   if (isenclosure(next) || isoperator(next) || isseparator(next)) {
@@ -112,7 +122,7 @@ int TokenStream::lineNumber() {
   return L;
 }
 
-bool TokenStream::eof() {return feof(fp);}
+bool TokenStream::eof() {removeWhitespace(); return feof(fp);}
 
 void TokenStream::addMacro(Macro macro) {
   macros.push_back(macro);

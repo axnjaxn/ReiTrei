@@ -34,6 +34,8 @@ protected:
   std::vector<Token> tokens;
   std::vector<Macro> macros;
 
+  void removeComment();
+  void removeWhitespace();
   void readToken();
 
 public:
