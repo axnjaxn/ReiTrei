@@ -2,7 +2,8 @@
 #define _BPJ_REITREI_MESH_H
 
 #include "ray5scene.h"
+#include <string>
 
-int readOBJ(const char* filename, Ray5Scene* scene);
+int readOBJ(const std::string& filename, Ray5Scene* scene);
 
 #endif

@@ -7,8 +7,8 @@ void skipLine(FILE* fp) {
   while (fgetc(fp) != '\n');
 }
 
-int readOBJ(const char* filename, Ray5Scene* scene) {
-  FILE* fp = fopen(filename, "r");
+int readOBJ(const std::string& filename, Ray5Scene* scene) {
+  FILE* fp = fopen(filename.c_str(), "r");
   if (!fp) return -1;
 
   std::vector<Vect4> vertices;

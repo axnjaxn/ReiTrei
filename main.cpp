@@ -460,7 +460,8 @@ int main(int argc, char* argv[]) {
   }
 
   try {
-    parseScene(filename.c_str(), &scene);
+    Parser parser;
+    parser.parseInto(filename.c_str(), &scene);
   }
   catch (std::exception& e) {
     printf("%s\n", e.what());

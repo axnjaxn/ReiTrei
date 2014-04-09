@@ -1,7 +1,7 @@
 #include "parser.h"
-#include "tokens.h"
 #include "ray5shapes.h"
 #include "triangle.h"
+#include "mesh.h"
 
 /*
  * Parser
@@ -205,19 +205,34 @@ Triangle* parseTriangle(TokenStream* ts) {
   return tri;
 }
 
-Light* parseLight(TokenStream* ts) {
-  ts->expectToken("{");
+Ray5Object* Parser::parseShape() {
+  Token token = ts.getToken();
+
+  if (token == "Box") return parseBox(&ts);
+  else if (token == "Sphere") return parseSphere(&ts);
+  else if (token == "Plane") return parsePlane(&ts);
+  else if (token == "Triangle") return parseTriangle(&ts);
+  
+  ts.ungetToken(token);
+  return NULL;
+}
+
+Light* Parser::parseLight() {
+  if (ts.peekToken() != "Light") return NULL;
+  else ts.getToken();  
+
+  ts.expectToken("{");
   Light* light = new Light();
-  light->position = parseVector(ts);
-  light->color = parseVector(ts);
-  while (ts->peekToken() != "}") {
-    Token token = ts->getToken();
-    if (token == "intensity") light->intensity = parseReal(ts);
-    else if (token == "radius") light->radius = parseReal(ts);    
+  light->position = parseVector(&ts);
+  light->color = parseVector(&ts);
+  while (ts.peekToken() != "}") {
+    Token token = ts.getToken();
+    if (token == "intensity") light->intensity = parseReal(&ts);
+    else if (token == "radius") light->radius = parseReal(&ts);    
     else if (token == "falloff") light->falloff = 1;
-    else throw ParseError("_LightProperty_", token, ts->lineNumber());
+    else throw ParseError("_LightProperty_", token, ts.lineNumber());
   }
-  ts->expectToken("}");
+  ts.expectToken("}");
   return light;
 }
 
@@ -229,70 +244,85 @@ Ray5Camera parseCamera(TokenStream* ts) {
   return camera;
 }
 
-void parseDefine(TokenStream* ts) {
-  Macro macro(ts->getToken()); 
-  Token value = ts->getToken();
-  if (value == "{") {
-    int braces_count = 0;
-    for (;;) {
-      value = ts->getToken();
-      if (value == "{") braces_count++;
-      if (value == "}") {
-	if (braces_count == 0) break;
-	else braces_count--;
-      }
-      else if (ts->eof()) throw ParseError("}", "_EOF_", ts->lineNumber());
-      macro.addToken(value);
-    }
-  }
-  ts->addMacro(macro);
-}
+bool Parser::parsedMacro() {
+  if (ts.peekToken() != "Define") return 0;
+  else ts.getToken();
 
-#include "mesh.h"
-#include <string>
-void parseSceneItem(TokenStream* ts, Ray5Scene* scene) {
-  Token token = ts->getToken();
-
-  if (ts->eof()) return;
-
-  //Defines
-  if (token == "Define") parseDefine(ts);
-
-  //Cameras
-  else if (token == "Camera") scene->camera = parseCamera(ts);
+  Macro macro(ts.getToken()); 
+  ts.expectToken("{");
   
-  //Lights
-  else if (token == "Light") scene->addLight(parseLight(ts));
+  int braces_count = 1;
+  for (Token value = ts.getToken(); value != "}"; value = ts.getToken()) {
+    if (value == "{") braces_count++;
+    else if (value == "}") {if (--braces_count == 0) break;}
+    else if (ts.eof()) throw ParseError("}", "_EOF_", ts.lineNumber());
 
-  //Shapes
-  else if (token == "Box") scene->addObject(parseBox(ts));
-  else if (token == "Sphere") scene->addObject(parseSphere(ts));
-  else if (token == "Plane") scene->addObject(parsePlane(ts));
-  else if (token == "Triangle") scene->addObject(parseTriangle(ts));
-
-  //Miscellaneous
-  else if (token == "BGColor") scene->bgcolor = parseVector(ts);
-
-  else if (token == "Obj") {
-    std::string str = ts->getToken();
-    printf("Reading OBJ: %s\n", str.c_str());
-    readOBJ(str.c_str(), scene);
+    macro.addToken(value);
   }
 
-  else throw ParseError("_SceneItem_", token, ts->lineNumber());
+  ts.addMacro(macro);
+  return 1;
 }
 
-void parseScene(TokenStream* ts, Ray5Scene* scene) {
-  while (!ts->eof() && !(ts->peekToken() == "EOF")) parseSceneItem(ts, scene);
+bool Parser::parsedShape(Ray5Scene* scene) {
+  Ray5Object* obj = parseShape();
+  if (obj) scene->addObject(obj);
+  return obj;
 }
 
-void parseScene(const char* fn, Ray5Scene* scene) {
-  TokenStream ts;
-  if (ts.open(fn)) {
+bool Parser::parsedMesh(Ray5Scene* scene) {
+  if (ts.peekToken() == "Obj") {
+    ts.getToken();
+    ts.ungetToken(Token("teapot.obj"));//uf we have issues loading this
+    printf("Attempting to load %s\n", ts.peekToken().c_str());
+    readOBJ(ts.getToken().c_str(), scene);
+    ts.getToken();
+    return 1;
+  }
+  else return 0;
+}
+
+bool Parser::parsedLight(Ray5Scene* scene) {
+  Light* light = parseLight();
+  if (light) scene->addLight(light);
+  return light;
+}
+
+bool Parser::parsedBG(Ray5Scene* scene) {
+  if (ts.peekToken() != "BGColor") return 0;
+  
+  ts.getToken();
+  scene->bgcolor = parseVector(&ts);
+  return 1;
+}
+
+bool Parser::parsedCamera(Ray5Scene* scene) {
+  if (ts.peekToken() != "Camera") return 0;
+
+  ts.getToken();
+  scene->camera = parseCamera(&ts);
+  return 1;
+}
+
+bool Parser::parsedSceneItem(Ray5Scene* scene) {
+  return (parsedMacro()
+	  || parsedShape(scene) 
+	  || parsedMesh(scene)
+	  || parsedLight(scene)
+	  || parsedBG(scene)
+	  || parsedCamera(scene));
+}
+
+void Parser::parseInto(const char* filename, Ray5Scene* scene) {
+  if (ts.open(filename)) {
     throw ParseError("Couldn't open scene file.");
   }
   else {
-    parseScene(&ts, scene);
+    while (!ts.eof() && (ts.peekToken() != "EOF")) 
+      if (!parsedSceneItem(scene)) {
+	printf("%d\n", ts.lineNumber());
+	throw ParseError("_SceneItem_", ts.getToken(), ts.lineNumber());
+      }
     ts.close();
   }
 }
