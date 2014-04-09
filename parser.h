@@ -23,9 +23,9 @@ protected:
   Material parseMaterial();
   void parseModifiers(Object* obj);
 
-  Ray5Box* parseBox();
-  Ray5Sphere* parseSphere();
-  Ray5Plane* parsePlane();
+  Box* parseBox();
+  Sphere* parseSphere();
+  Plane* parsePlane();
   Triangle* parseTriangle();
   Object* parseShape();
   Light* parseLight();

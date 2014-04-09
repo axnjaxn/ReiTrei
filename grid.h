@@ -2,7 +2,6 @@
 #define _BPJ_REITREI_GRID_H
 
 #include "shapes.h"
-#include <cstdio>
 
 class Grid {  
 public:
@@ -10,7 +9,7 @@ public:
 
 protected:
   Vect4 corner, size;
-  Ray5Box box;
+  Box box;
   ObjectSet outer;
   std::vector<ObjectSet> sets;
   CellNumber count;

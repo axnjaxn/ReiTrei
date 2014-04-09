@@ -22,8 +22,4 @@ public:
   virtual Intersection intersectsUnit(const Vect4& O, const Vect4& D) const;
 };
 
-typedef Sphere Ray5Sphere;
-typedef Box Ray5Box;
-typedef Plane Ray5Plane;
-
 #endif

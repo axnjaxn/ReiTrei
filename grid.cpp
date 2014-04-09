@@ -106,7 +106,7 @@ Intersection Grid::intersect(const Vect4& O, const Vect4& D, TraceMode mode) con
     t1 = 0.0;
   }
   else {
-    Ray5Box box = this->box;//uf delete this when constness is restored to Object class
+    Box box = this->box;//uf delete this when constness is restored to Object class
     test = box.intersects(O, D);
     if (test.t < 0) return best;
 

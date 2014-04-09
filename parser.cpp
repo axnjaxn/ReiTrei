@@ -156,14 +156,14 @@ void Parser::parseModifiers(Object* obj) {
   }
 }
 
-Ray5Box* Parser::parseBox() {
+Box* Parser::parseBox() {
   if (ts.peekToken() != "Box") return NULL;
   else ts.getToken();
 
   ts.expectToken("{");
   Vect4 upper = parseVector();
   Vect4 lower = parseVector();
-  Ray5Box* box = new Ray5Box();
+  Box* box = new Box();
   box->scale((upper - lower) / 2);
   box->translate((upper + lower) / 2);
   parseModifiers(box);
@@ -171,14 +171,14 @@ Ray5Box* Parser::parseBox() {
   return box;
 }
 
-Ray5Sphere* Parser::parseSphere() {
+Sphere* Parser::parseSphere() {
   if (ts.peekToken() != "Sphere") return NULL;
   else ts.getToken();
 
   ts.expectToken("{");
   Vect4 center = parseVector();
   Real radius = parseReal();
-  Ray5Sphere* sphere = new Ray5Sphere();
+  Sphere* sphere = new Sphere();
   sphere->scale(Vect4(radius, radius, radius));
   sphere->translate(center);
   parseModifiers(sphere);
@@ -186,12 +186,12 @@ Ray5Sphere* Parser::parseSphere() {
   return sphere;
 }
 
-Ray5Plane* Parser::parsePlane() {
+Plane* Parser::parsePlane() {
   if (ts.peekToken() != "Plane") return NULL;
   else ts.getToken();
 
   ts.expectToken("{");
-  Ray5Plane* plane = new Ray5Plane();
+  Plane* plane = new Plane();
   plane->A = parseVector();
   plane->N = parseVector();
   parseModifiers(plane);
