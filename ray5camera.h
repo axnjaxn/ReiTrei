@@ -1,7 +1,7 @@
 #ifndef _BPJ_REITREI5_CAMERA_H
 #define _BPJ_REITREI5_CAMERA_H
 
-#include "ray5object.h"
+#include "object.h"
 #include <cmath>
 
 class Ray5Camera : public Ray5Object {

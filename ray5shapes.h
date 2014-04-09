@@ -1,7 +1,7 @@
 #ifndef _BPJ_REITREI5_SHAPES_H
 #define _BPJ_REITREI5_SHAPES_H
 
-#include "ray5object.h"
+#include "object.h"
 #include <cmath>
 
 class Ray5Sphere : public Ray5Object {

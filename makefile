@@ -26,6 +26,7 @@ APP = $(APPNAME)$(EXT)
 OBJECT_FILES = \
 	mat4.o \
 	randomizer.o \
+	object.o \
 	triangle.o \
 	mesh.o \
 	grid.o \

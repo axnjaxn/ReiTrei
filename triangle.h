@@ -1,7 +1,7 @@
 #ifndef _BPJ_REITREI_TRIANGLE_H
 #define _BPJ_REITREI_TRIANGLE_H
 
-#include "ray5object.h"
+#include "object.h"
 
 class Triangle : public Ray5Object {
 protected:
