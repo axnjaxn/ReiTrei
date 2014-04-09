@@ -4,25 +4,25 @@
 #include "object.h"
 #include <cmath>
 
-class Ray5Sphere : public Ray5Object {
+class Ray5Sphere : public Object {
 public:
-  virtual Ray5Intersection intersectsUnit(const Vect4& O, const Vect4& D) const {
+  virtual Intersection intersectsUnit(const Vect4& O, const Vect4& D) const {
     Real discriminant = dot(D, O) * dot(D, O) - dot(D, D) * (dot(O, O) - 1);
-    if (discriminant < 0) return Ray5Intersection();
+    if (discriminant < 0) return Intersection();
 
     Real t1 = (dot(-D, O) + sqrt(discriminant)) / dot(D, D);
     Real t2 = (dot(-D, O) - sqrt(discriminant)) / dot(D, D);
     Real t = (t1 > 0 && (t2 <= 0 || t1 < t2))? t1 : t2;
-    if (t <= 0) return Ray5Intersection();
+    if (t <= 0) return Intersection();
 
     Vect4 P = O + t * D;
-    return Ray5Intersection(this, t, P, P);
+    return Intersection(this, t, P, P);
   }  
 };
 
-class Ray5Box : public Ray5Object {
+class Ray5Box : public Object {
 public:
-  virtual Ray5Intersection intersectsUnit(const Vect4& O, const Vect4& D) const {
+  virtual Intersection intersectsUnit(const Vect4& O, const Vect4& D) const {
     Real Tmin[3], Tmax[3];
     for (int i = 0; i < 3; i++)
       if (D[i] > 0) {
@@ -48,10 +48,10 @@ public:
     else t1 = Tmax[1];
     if (Tmax[2] < t1) t1 = Tmax[2];
 
-    if (t0 >= t1) return Ray5Intersection();
+    if (t0 >= t1) return Intersection();
 
     Real t = (t0 > 0 && (t1 <= 0 || t0 < t1))? t0 : t1;
-    if (t <= 0) return Ray5Intersection();
+    if (t <= 0) return Intersection();
 
     Vect4 P = O + t * D;
     Vect4 N;
@@ -59,21 +59,21 @@ public:
       if (P[i] >= 1 - EPS) N[i] = 1;
       else if (P[i] <= -1 + EPS) N[i] = -1;
 
-    return Ray5Intersection(this, t, P, N);
+    return Intersection(this, t, P, N);
   }
 };
 
-class Ray5Plane : public Ray5Object {
+class Ray5Plane : public Object {
 public:
   Vect4 A, N;
-  Ray5Plane() : Ray5Object() {N = Vect4(0, 1, 0);}
+  Ray5Plane() : Object() {N = Vect4(0, 1, 0);}
 
   virtual bool infBounds() {return 1;}
-  virtual Ray5Intersection intersectsUnit(const Vect4& O, const Vect4& D) const {
+  virtual Intersection intersectsUnit(const Vect4& O, const Vect4& D) const {
     Real t = dot(A - O, N) / dot(D, N);
 
-    if (t > 0) return Ray5Intersection(this, t, O + t * D, N);
-    else return Ray5Intersection();
+    if (t > 0) return Intersection(this, t, O + t * D, N);
+    else return Intersection();
   }
 };
 

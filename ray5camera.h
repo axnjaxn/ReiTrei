@@ -4,12 +4,12 @@
 #include "object.h"
 #include <cmath>
 
-class Ray5Camera : public Ray5Object {
+class Ray5Camera : public Object {
 public:
   Real cellw, cellh;
   int pxw, pxh;
 
-  virtual Ray5Intersection intersectsUnit(const Vect4& O, const Vect4& D) const {return Ray5Intersection();}//Useless, but necessary override.
+  virtual Intersection intersectsUnit(const Vect4& O, const Vect4& D) const {return Intersection();}//Useless, but necessary override.
 
   Ray5Camera() {setScreen(100, 100, 1, 1, PI / 2);}
 

@@ -20,14 +20,14 @@ protected:
   Vect4 parseVectorTerm();
   Vect4 parseVector();
 
-  Ray5Material parseMaterial();
-  void parseModifiers(Ray5Object* obj);
+  Material parseMaterial();
+  void parseModifiers(Object* obj);
 
   Ray5Box* parseBox();
   Ray5Sphere* parseSphere();
   Ray5Plane* parsePlane();
   Triangle* parseTriangle();
-  Ray5Object* parseShape();
+  Object* parseShape();
   Light* parseLight();
 
   bool parsedMacro();

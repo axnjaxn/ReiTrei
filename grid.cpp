@@ -27,17 +27,17 @@ void Grid::getCellNumber(const Vect4& v, CellNumber cell) const {
   }
 }
 
-Ray5ObjectSet& Grid::getObjects(CellNumber cell) {
+ObjectSet& Grid::getObjects(CellNumber cell) {
   return sets[cell[2] * count[0] * count[1] + cell[1] * count[0] + cell[0]];
 }
 
-const Ray5ObjectSet& Grid::getObjects(CellNumber cell) const {
+const ObjectSet& Grid::getObjects(CellNumber cell) const {
   return sets[cell[2] * count[0] * count[1] + cell[1] * count[0] + cell[0]];
 }
 
 Grid::Grid() {count[0] = count[1] = count[2] = 0;}
  
-Grid::Grid(const Ray5ObjectSet& objects) {
+Grid::Grid(const ObjectSet& objects) {
   /*
    * Determine bounding box extrema, size, and reference corner
    */ 
@@ -91,8 +91,8 @@ Grid::Grid(const Ray5ObjectSet& objects) {
   }
 }
 
-Ray5Intersection Grid::intersect(const Vect4& O, const Vect4& D, TraceMode mode) const {
-  Ray5Intersection best = outer.intersect(O, D, mode), test;  
+Intersection Grid::intersect(const Vect4& O, const Vect4& D, TraceMode mode) const {
+  Intersection best = outer.intersect(O, D, mode), test;  
   CellNumber cell; //Current cell
   Real t0, t1;//t values for entry and exit wrt cell
 

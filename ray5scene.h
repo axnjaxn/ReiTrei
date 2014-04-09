@@ -20,7 +20,7 @@ private:
   Ray5Scene& operator=(const Ray5Scene&) {return *this;}
 
 protected:
-  Ray5ObjectSet objects;
+  ObjectSet objects;
   std::vector<Light*> lights;
   Grid grid;
 
@@ -33,9 +33,9 @@ public:
     return &scene;
   }
 
-  inline void addObject(Ray5Object* obj) {objects.add(obj);}
+  inline void addObject(Object* obj) {objects.add(obj);}
   inline int countObjects() const {return objects.count();}
-  inline Ray5Object* operator[](int i) const {return objects[i];}
+  inline Object* operator[](int i) const {return objects[i];}
 
   inline void addLight(Light* light) {lights.push_back(light);}
   inline Light* getLight(int i) const {return lights[i];}
@@ -43,7 +43,7 @@ public:
 
   inline void init() {grid = Grid(objects);}
   
-  inline Ray5Intersection intersect(const Vect4& O, const Vect4& D, TraceMode mode = TRACE_NORMAL) const {
+  inline Intersection intersect(const Vect4& O, const Vect4& D, TraceMode mode = TRACE_NORMAL) const {
 #ifdef NO_GRID
     return objects.intersect(O, D, mode);
 #else

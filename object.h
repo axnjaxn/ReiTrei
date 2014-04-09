@@ -2,6 +2,7 @@
 #define _BPJ_REITREI_OBJECT_H
 
 #include "mat4.h"
+#include <vector>
 
 typedef enum {
   TRACE_NORMAL = 0,
@@ -74,8 +75,6 @@ public:
   }
 };
 
-#include <vector>
-
 class ObjectSet {
  protected:
   std::vector<Object*> objects;
@@ -90,11 +89,5 @@ class ObjectSet {
   Intersection intersect(const Vect4& O, const Vect4& D, TraceMode mode = TRACE_NORMAL) const;
   void getBounds(Vect4* L, Vect4* U) const;
 };
-
-//Deprecated typenames
-typedef Material Ray5Material;
-typedef Intersection Ray5Intersection;
-typedef Object Ray5Object;
-typedef ObjectSet Ray5ObjectSet;
 
 #endif

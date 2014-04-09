@@ -60,7 +60,7 @@ Vect4 traceRay(const Ray5Scene& scene, const Vect4& O, const Vect4& D, int nrecu
   
   if (nrecurse >= MAX_RECURSE) return color;
  
-  Ray5Intersection nearest = scene.intersect(O, D);
+  Intersection nearest = scene.intersect(O, D);
 
   if (nearest.t <= 0) return scene.bgcolor;
 
@@ -92,7 +92,7 @@ Vect4 traceRay(const Ray5Scene& scene, const Vect4& O, const Vect4& D, int nrecu
 	lv = scene.getLight(l)->position + randomizer.randomSpherical(scene.getLight(l)->radius) - nearest.P;
       shadow_ray = lv.unit();
 
-      Ray5Intersection shadow = scene.intersect(nearest.P + EPS * shadow_ray, shadow_ray, TRACE_SHADOW);
+      Intersection shadow = scene.intersect(nearest.P + EPS * shadow_ray, shadow_ray, TRACE_SHADOW);
       if (shadow.t >= 0 && shadow.t < lv.length()) continue;
 
       //Specular

@@ -113,8 +113,8 @@ Vect4 Parser::parseVector() {
   return v;
 }
 
-Ray5Material Parser::parseMaterial() {
-  Ray5Material material;
+Material Parser::parseMaterial() {
+  Material material;
   ts.expectToken("{");
   for (;;) {
     Token token = ts.getToken();
@@ -138,7 +138,7 @@ Ray5Material Parser::parseMaterial() {
   return material;
 }
 
-void Parser::parseModifiers(Ray5Object* obj) {
+void Parser::parseModifiers(Object* obj) {
   for (;;) {
     Token token = ts.getToken();
     if (token == "translate") obj->translate(parseVector());
@@ -225,8 +225,8 @@ Triangle* Parser::parseTriangle() {
   return tri;
 }
 
-Ray5Object* Parser::parseShape() {
-  Ray5Object* obj;
+Object* Parser::parseShape() {
+  Object* obj;
   if (obj = parseBox()) return obj;
   else if (obj = parseSphere()) return obj;
   else if (obj = parsePlane()) return obj;
@@ -274,7 +274,7 @@ bool Parser::parsedMacro() {
 }
 
 bool Parser::parsedShape(Ray5Scene* scene) {
-  Ray5Object* obj = parseShape();
+  Object* obj = parseShape();
   if (obj) scene->addObject(obj);
   return obj;
 }

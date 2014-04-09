@@ -3,7 +3,7 @@
 
 #include "object.h"
 
-class Triangle : public Ray5Object {
+class Triangle : public Object {
 protected:
   Vect4 a, b, c;
 
@@ -19,7 +19,7 @@ protected:
 public:
   Triangle(const Vect4& a, const Vect4& b, const Vect4& c);
 
-  virtual Ray5Intersection intersectsUnit(const Vect4& O, const Vect4& D) const;
+  virtual Intersection intersectsUnit(const Vect4& O, const Vect4& D) const;
 
   void getBounds(Vect4* lower, Vect4* upper);
 };
@@ -32,7 +32,7 @@ public:
   InterpTriangle(const Vect4& a, const Vect4& b, const Vect4& c,
 		 const Vect4& n, const Vect4& n1, const Vect4& n2);
 
-  Ray5Intersection intersectsUnit(const Vect4& O, const Vect4& D) const;
+  Intersection intersectsUnit(const Vect4& O, const Vect4& D) const;
 };
 
 #endif

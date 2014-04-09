@@ -27,23 +27,23 @@ bool Triangle::computeBary(const Vect4& P, Real& u, Real& v, Real& w) const {
   return (0.0 <= u && u <= 1.0 && 0.0 <= v && v <= 1.0 && 0.0 <= w && w <= 1.0);
 }
 
-Triangle::Triangle(const Vect4& a, const Vect4& b, const Vect4& c) : Ray5Object() {
+Triangle::Triangle(const Vect4& a, const Vect4& b, const Vect4& c) : Object() {
   this->a = a;
   this->b = b;
   this->c = c;
   recompute();
 }
 
-Ray5Intersection Triangle::intersectsUnit(const Vect4& O, const Vect4& D) const {
+Intersection Triangle::intersectsUnit(const Vect4& O, const Vect4& D) const {
   Real t = dot(a - O, normal) / dot(D, normal), u, v, w;
 
   if (t > 0) {
     Vect4 P = O + t * D;
     if (computeBary(P, u, v, w))
-      return Ray5Intersection(this, t, P, normal);
+      return Intersection(this, t, P, normal);
   }
   
-  return Ray5Intersection();
+  return Intersection();
 }
   
 void Triangle::getBounds(Vect4* lower, Vect4* upper) {
@@ -64,14 +64,14 @@ InterpTriangle::InterpTriangle(const Vect4& a, const Vect4& b, const Vect4& c,
   normal2 = n2;
 }
 
-Ray5Intersection InterpTriangle::intersectsUnit(const Vect4& O, const Vect4& D) const {
+Intersection InterpTriangle::intersectsUnit(const Vect4& O, const Vect4& D) const {
   Real t = dot(a - O, normal) / dot(D, normal), u, v, w;
 
   if (t > 0) {
     Vect4 P = O + t * D;
     if (computeBary(P, u, v, w))
-      return Ray5Intersection(this, t, P, u * normal0 + v * normal1 + w * normal2);
+      return Intersection(this, t, P, u * normal0 + v * normal1 + w * normal2);
   }
 
-  return Ray5Intersection();
+  return Intersection();
 }
