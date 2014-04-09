@@ -3,13 +3,17 @@
 
 #include "tokens.h"
 #include "ray5scene.h"
-
-//void parseScene(const char*, Ray5Scene*);
+#include "ray5shapes.h"
+#include "triangle.h"
 
 class Parser {
 protected:
   TokenStream ts;
 
+  Ray5Box* parseBox();
+  Ray5Sphere* parseSphere();
+  Ray5Plane* parsePlane();
+  Triangle* parseTriangle();
   Ray5Object* parseShape();
   Light* parseLight();
 

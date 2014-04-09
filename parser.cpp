@@ -160,66 +160,75 @@ void parseModifiers(TokenStream* ts, Ray5Object* obj) {
   }
 }
 
-Ray5Box* parseBox(TokenStream* ts) {
-  ts->expectToken("{");
-  Vect4 upper = parseVector(ts);
-  Vect4 lower = parseVector(ts);
+Ray5Box* Parser::parseBox() {
+  if (ts.peekToken() != "Box") return NULL;
+  else ts.getToken();
+
+  ts.expectToken("{");
+  Vect4 upper = parseVector(&ts);
+  Vect4 lower = parseVector(&ts);
   Ray5Box* box = new Ray5Box();
   box->scale((upper - lower) / 2);
   box->translate((upper + lower) / 2);
-  parseModifiers(ts, box);
-  ts->expectToken("}");
+  parseModifiers(&ts, box);
+  ts.expectToken("}");
   return box;
 }
 
-Ray5Sphere* parseSphere(TokenStream* ts) {
-  ts->expectToken("{");
-  Vect4 center = parseVector(ts);
-  Real radius = parseReal(ts);
+Ray5Sphere* Parser::parseSphere() {
+  if (ts.peekToken() != "Sphere") return NULL;
+  else ts.getToken();
+
+  ts.expectToken("{");
+  Vect4 center = parseVector(&ts);
+  Real radius = parseReal(&ts);
   Ray5Sphere* sphere = new Ray5Sphere();
   sphere->scale(Vect4(radius, radius, radius));
   sphere->translate(center);
-  parseModifiers(ts, sphere);
-  ts->expectToken("}");
+  parseModifiers(&ts, sphere);
+  ts.expectToken("}");
   return sphere;
 }
 
-Ray5Plane* parsePlane(TokenStream* ts) {
-  ts->expectToken("{");
+Ray5Plane* Parser::parsePlane() {
+  if (ts.peekToken() != "Plane") return NULL;
+  else ts.getToken();
+
+  ts.expectToken("{");
   Ray5Plane* plane = new Ray5Plane();
-  plane->A = parseVector(ts);
-  plane->N = parseVector(ts);
-  parseModifiers(ts, plane);
-  ts->expectToken("}");
+  plane->A = parseVector(&ts);
+  plane->N = parseVector(&ts);
+  parseModifiers(&ts, plane);
+  ts.expectToken("}");
   return plane;
 }
 
-Triangle* parseTriangle(TokenStream* ts) {
-  ts->expectToken("{");
-  Vect4 a = parseVector(ts);
-  Vect4 b = parseVector(ts);
-  Vect4 c = parseVector(ts);
+Triangle* Parser::parseTriangle() {
+  if (ts.peekToken() != "Triangle") return NULL;
+  else ts.getToken();
+
+  ts.expectToken("{");
+  Vect4 a = parseVector(&ts);
+  Vect4 b = parseVector(&ts);
+  Vect4 c = parseVector(&ts);
   Triangle* tri = new Triangle(a, b, c);
-  parseModifiers(ts, tri);
-  ts->expectToken("}");
+  parseModifiers(&ts, tri);
+  ts.expectToken("}");
   return tri;
 }
 
 Ray5Object* Parser::parseShape() {
-  Token token = ts.getToken();
-
-  if (token == "Box") return parseBox(&ts);
-  else if (token == "Sphere") return parseSphere(&ts);
-  else if (token == "Plane") return parsePlane(&ts);
-  else if (token == "Triangle") return parseTriangle(&ts);
-  
-  ts.ungetToken(token);
-  return NULL;
+  Ray5Object* obj;
+  if (obj = parseBox()) return obj;
+  else if (obj = parseSphere()) return obj;
+  else if (obj = parsePlane()) return obj;
+  else if (obj = parseTriangle()) return obj;
+  else return NULL;
 }
 
 Light* Parser::parseLight() {
   if (ts.peekToken() != "Light") return NULL;
-  else ts.getToken();  
+  else ts.getToken(); 
 
   ts.expectToken("{");
   Light* light = new Light();
