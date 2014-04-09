@@ -7,7 +7,7 @@ void skipLine(FILE* fp) {
   while (fgetc(fp) != '\n');
 }
 
-int readOBJ(const std::string& filename, Ray5Scene* scene) {
+int readOBJ(const std::string& filename, Scene* scene) {
   FILE* fp = fopen(filename.c_str(), "r");
   if (!fp) return -1;
 

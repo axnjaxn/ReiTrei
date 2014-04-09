@@ -54,7 +54,7 @@ inline Vect4 refract(const Vect4& D, Vect4 N, Real n) {
   return n * D + (n * c1 - c2) * N;
 }
 
-Vect4 traceRay(const Ray5Scene& scene, const Vect4& O, const Vect4& D, int nrecurse = 0) {
+Vect4 traceRay(const Scene& scene, const Vect4& O, const Vect4& D, int nrecurse = 0) {
   Vect4 color;
   
   if (nrecurse >= MAX_RECURSE) return color;
@@ -127,12 +127,12 @@ inline void segFault(int param) {
   exit(0);
 }
 
-void traceAt(const Ray5Scene& scene, Texture& screen, int r, int c) {
+void traceAt(const Scene& scene, Texture& screen, int r, int c) {
   if (settings.coherence) randomizer.reseed();
 
   Vect4 O, D, color;
   float rmag, rth, rx, ry;
-  Ray5Camera camera;
+  Camera camera;
   for (int i = 0; i < settings.nsamples; i++) {    
     if (settings.dof_range > 0.0) {
       rmag = randomizer.uniform() * settings.dof_range; 
@@ -153,12 +153,12 @@ void traceAt(const Ray5Scene& scene, Texture& screen, int r, int c) {
   screen.setColor(r, c, color / settings.nsamples);
 }
 
-void traceAt_AA(const Ray5Scene& scene, Texture& screen, int r, int c) {
+void traceAt_AA(const Scene& scene, Texture& screen, int r, int c) {
   if (settings.coherence) randomizer.reseed();
 
   Vect4 O, D, color;
   float rmag, rth, rx, ry;
-  Ray5Camera camera;
+  Camera camera;
   for (int i = 0; i < settings.nsamples; i++) {    
     if (settings.dof_range > 0.0) {
       rmag = randomizer.uniform() * settings.dof_range; 
@@ -238,7 +238,7 @@ void drawRow(Texture& screen, int r) {
   }
 }
 
-void render(Ray5Scene& scene, Texture& screen, int renderno = 0, int outof = 1) {
+void render(Scene& scene, Texture& screen, int renderno = 0, int outof = 1) {
   char titlebuf[200];
   if (settings.show_preview) {
     sprintf(titlebuf, "%s", TITLE);
@@ -389,7 +389,7 @@ int main(int argc, char* argv[]) {
   
   randomizer.timeSeed();
 
-  Ray5Scene& scene = *Ray5Scene::getInstance();
+  Scene& scene = *Scene::getInstance();
   Texture screen;
   int w = 300, h = 300;
   bool threads_changed = 0;

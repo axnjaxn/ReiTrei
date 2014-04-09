@@ -1,17 +1,17 @@
-#ifndef _BPJ_REITREI5_CAMERA_H
-#define _BPJ_REITREI5_CAMERA_H
+#ifndef _BPJ_REITREI_CAMERA_H
+#define _BPJ_REITREI_CAMERA_H
 
 #include "object.h"
 #include <cmath>
 
-class Ray5Camera : public Object {
+class Camera : public Object {
 public:
   Real cellw, cellh;
   int pxw, pxh;
 
   virtual Intersection intersectsUnit(const Vect4& O, const Vect4& D) const {return Intersection();}//Useless, but necessary override.
 
-  Ray5Camera() {setScreen(100, 100, 1, 1, PI / 2);}
+  Camera() {setScreen(100, 100, 1, 1, PI / 2);}
 
   void setScreen(int pxw, int pxh, Real xrange, Real yrange, Real fov) {
     this->pxw = pxw;

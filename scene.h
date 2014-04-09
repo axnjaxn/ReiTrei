@@ -1,23 +1,23 @@
-#ifndef _BPJ_REITREI5_SCENE_H
-#define _BPJ_REITREI5_SCENE_H
+#ifndef _BPJ_REITREI_SCENE_H
+#define _BPJ_REITREI_SCENE_H
 
 #include <cstdio>
 #include <vector>
-#include "ray5camera.h"
+#include "camera.h"
 #include "light.h"
 #include "grid.h"
 
 //uf Why have I made this a singleton class?
 
-class Ray5Scene {
+class Scene {
 private:
-  Ray5Scene() { }
-  Ray5Scene(const Ray5Scene&) { }
-  ~Ray5Scene() {
+  Scene() { }
+  Scene(const Scene&) { }
+  ~Scene() {
     objects.release();
     for (int i = 0; i < lights.size(); i++) delete lights[i];
   }
-  Ray5Scene& operator=(const Ray5Scene&) {return *this;}
+  Scene& operator=(const Scene&) {return *this;}
 
 protected:
   ObjectSet objects;
@@ -25,11 +25,11 @@ protected:
   Grid grid;
 
 public:
-  Ray5Camera camera;
+  Camera camera;
   Vect4 bgcolor;
   
-  static Ray5Scene* getInstance() {
-    static Ray5Scene scene;
+  static Scene* getInstance() {
+    static Scene scene;
     return &scene;
   }
 

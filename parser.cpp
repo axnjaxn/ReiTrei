@@ -271,13 +271,13 @@ bool Parser::parsedMacro() {
   return 1;
 }
 
-bool Parser::parsedShape(Ray5Scene* scene) {
+bool Parser::parsedShape(Scene* scene) {
   Object* obj = parseShape();
   if (obj) scene->addObject(obj);
   return obj;
 }
 
-bool Parser::parsedMesh(Ray5Scene* scene) {
+bool Parser::parsedMesh(Scene* scene) {
   if (ts.peekToken() == "Obj") {
     ts.getToken();
     ts.ungetToken(Token("teapot.obj"));//uf we have issues loading this
@@ -289,13 +289,13 @@ bool Parser::parsedMesh(Ray5Scene* scene) {
   else return 0;
 }
 
-bool Parser::parsedLight(Ray5Scene* scene) {
+bool Parser::parsedLight(Scene* scene) {
   Light* light = parseLight();
   if (light) scene->addLight(light);
   return light;
 }
 
-bool Parser::parsedBG(Ray5Scene* scene) {
+bool Parser::parsedBG(Scene* scene) {
   if (ts.peekToken() != "BGColor") return 0;
   
   ts.getToken();
@@ -303,7 +303,7 @@ bool Parser::parsedBG(Ray5Scene* scene) {
   return 1;
 }
 
-bool Parser::parsedCamera(Ray5Scene* scene) {
+bool Parser::parsedCamera(Scene* scene) {
   if (ts.peekToken() != "Camera") return 0;
   else ts.getToken();
 
@@ -313,7 +313,7 @@ bool Parser::parsedCamera(Ray5Scene* scene) {
   return 1;
 }
 
-bool Parser::parsedSceneItem(Ray5Scene* scene) {
+bool Parser::parsedSceneItem(Scene* scene) {
   return (parsedMacro()
 	  || parsedShape(scene) 
 	  || parsedMesh(scene)
@@ -322,7 +322,7 @@ bool Parser::parsedSceneItem(Ray5Scene* scene) {
 	  || parsedCamera(scene));
 }
 
-void Parser::parseInto(const char* filename, Ray5Scene* scene) {
+void Parser::parseInto(const char* filename, Scene* scene) {
   if (ts.open(filename)) {
     throw ParseError("Couldn't open scene file.");
   }
