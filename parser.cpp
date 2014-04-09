@@ -211,7 +211,18 @@ Triangle* Parser::parseTriangle() {
   Vect4 a = parseVector(&ts);
   Vect4 b = parseVector(&ts);
   Vect4 c = parseVector(&ts);
-  Triangle* tri = new Triangle(a, b, c);
+
+  Triangle* tri;
+  if (ts.peekToken() == "<") {
+    //This triangle has normal vectors too!
+    Vect4 n0 = parseVector(&ts);
+    Vect4 n1 = parseVector(&ts);
+    Vect4 n2 = parseVector(&ts);    
+    tri = new InterpTriangle(a, b, c,
+			     n0, n1, n2);
+  }
+  else tri = new Triangle(a, b, c);
+
   parseModifiers(&ts, tri);
   ts.expectToken("}");
   return tri;
