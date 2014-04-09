@@ -50,7 +50,7 @@ public:
 
   Intersection intersects(const Vect4& O, const Vect4& D) const;
   virtual Intersection intersectsUnit(const Vect4& O, const Vect4& D) const = 0;
-  virtual inline bool infBounds() {return 0;}
+  virtual inline bool infBounds() const {return 0;}
   virtual void getBounds(Vect4* lower, Vect4* upper);
 
   inline void scale(const Vect4& v) {

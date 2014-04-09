@@ -4,7 +4,7 @@
 #include "object.h"
 #include <cmath>
 
-class Ray5Sphere : public Object {
+class Sphere : public Object {
 public:
   virtual Intersection intersectsUnit(const Vect4& O, const Vect4& D) const {
     Real discriminant = dot(D, O) * dot(D, O) - dot(D, D) * (dot(O, O) - 1);
@@ -20,7 +20,7 @@ public:
   }  
 };
 
-class Ray5Box : public Object {
+class Box : public Object {
 public:
   virtual Intersection intersectsUnit(const Vect4& O, const Vect4& D) const {
     Real Tmin[3], Tmax[3];
@@ -63,12 +63,12 @@ public:
   }
 };
 
-class Ray5Plane : public Object {
+class Plane : public Object {
 public:
   Vect4 A, N;
-  Ray5Plane() : Object() {N = Vect4(0, 1, 0);}
+  Plane() : Object() {N = Vect4(0, 1, 0);}
 
-  virtual bool infBounds() {return 1;}
+  inline virtual bool infBounds() const {return 1;}
   virtual Intersection intersectsUnit(const Vect4& O, const Vect4& D) const {
     Real t = dot(A - O, N) / dot(D, N);
 
@@ -76,5 +76,9 @@ public:
     else return Intersection();
   }
 };
+
+typedef Sphere Ray5Sphere;
+typedef Box Ray5Box;
+typedef Plane Ray5Plane;
 
 #endif
