@@ -1,6 +1,4 @@
 #include "parser.h"
-#include "ray5shapes.h"
-#include "triangle.h"
 #include "mesh.h"
 
 /*

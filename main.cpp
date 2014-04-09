@@ -4,7 +4,6 @@
 
 #include "renderqueue.h"
 #include "parser.h"
-#include "ray5shapes.h"
 #include "randomizer.h"
 #include <string>
 #include <vector> 

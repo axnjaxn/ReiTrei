@@ -3,7 +3,7 @@
 
 #include "tokens.h"
 #include "ray5scene.h"
-#include "ray5shapes.h"
+#include "shapes.h"
 #include "triangle.h"
 
 class Parser {

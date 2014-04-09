@@ -1,7 +1,7 @@
 #ifndef _BPJ_REITREI_GRID_H
 #define _BPJ_REITREI_GRID_H
 
-#include "ray5shapes.h"
+#include "shapes.h"
 #include <cstdio>
 
 class Grid {  

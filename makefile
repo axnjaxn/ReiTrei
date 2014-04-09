@@ -27,6 +27,7 @@ OBJECT_FILES = \
 	mat4.o \
 	randomizer.o \
 	object.o \
+	shapes.o \
 	triangle.o \
 	mesh.o \
 	grid.o \

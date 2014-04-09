@@ -1,5 +1,5 @@
-#ifndef _BPJ_REITREI5_SHAPES_H
-#define _BPJ_REITREI5_SHAPES_H
+#ifndef _BPJ_REITREI_SHAPES_H
+#define _BPJ_REITREI_SHAPES_H
 
 #include "object.h"
 #include <cmath>
