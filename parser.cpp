@@ -218,8 +218,7 @@ Triangle* Parser::parseTriangle() {
     Vect4 n0 = parseVector(&ts);
     Vect4 n1 = parseVector(&ts);
     Vect4 n2 = parseVector(&ts);    
-    tri = new InterpTriangle(a, b, c,
-			     n0, n1, n2);
+    tri = new InterpTriangle(a, b, c, n0, n1, n2);//uf test this
   }
   else tri = new Triangle(a, b, c);
 
@@ -254,14 +253,6 @@ Light* Parser::parseLight() {
   }
   ts.expectToken("}");
   return light;
-}
-
-Ray5Camera parseCamera(TokenStream* ts) {
-  ts->expectToken("{");
-  Ray5Camera camera;
-  parseModifiers(ts, &camera); 
-  ts->expectToken("}");
-  return camera;
 }
 
 bool Parser::parsedMacro() {
@@ -318,9 +309,11 @@ bool Parser::parsedBG(Ray5Scene* scene) {
 
 bool Parser::parsedCamera(Ray5Scene* scene) {
   if (ts.peekToken() != "Camera") return 0;
+  else ts.getToken();
 
-  ts.getToken();
-  scene->camera = parseCamera(&ts);
+  ts.expectToken("{");
+  parseModifiers(&ts, &scene->camera); 
+  ts.expectToken("}");
   return 1;
 }
 
