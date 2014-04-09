@@ -10,6 +10,19 @@ class Parser {
 protected:
   TokenStream ts;
 
+  Real parseNumber();
+  Real parseTerm();
+  Real parseReal();
+
+  Real parseAngle();
+
+  Vect4 parseTriplet();
+  Vect4 parseVectorTerm();
+  Vect4 parseVector();
+
+  Ray5Material parseMaterial();
+  void parseModifiers(Ray5Object* obj);
+
   Ray5Box* parseBox();
   Ray5Sphere* parseSphere();
   Ray5Plane* parsePlane();

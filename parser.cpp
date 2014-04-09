@@ -7,16 +7,14 @@
  * Parser
  */
 
-Real parseReal(TokenStream*);
+Real Parser::parseNumber() {
+  Token token = ts.getToken();
 
-Real parseNumber(TokenStream* ts) {
-  Token token = ts->getToken();
-
-  if (token == "-") return -parseNumber(ts);
-  else if (token == "+") return parseNumber(ts);
+  if (token == "-") return -parseNumber();
+  else if (token == "+") return parseNumber();
   else if (token == "(") {
-    Real r = parseReal(ts);
-    ts->expectToken(")");
+    Real r = parseReal();
+    ts.expectToken(")");
     return r;
   }
   
@@ -25,136 +23,136 @@ Real parseNumber(TokenStream* ts) {
   for (int i = 0; token[i]; i++)
     if (token[i] == '.') {
       if (!haspt) haspt = 1;
-      else throw ParseError("_Real_", token, ts->lineNumber());
+      else throw ParseError("_Real_", token, ts.lineNumber());
     }
-    else if (!isdigit(token[i])) throw ParseError("_Real_", token, ts->lineNumber());
+    else if (!isdigit(token[i])) throw ParseError("_Real_", token, ts.lineNumber());
 
   Real r;
   sscanf(token.c_str(), "%lf", &r);
   return r;
 }
 
-Real parseTerm(TokenStream* ts) {
-  Real r = parseNumber(ts);
+Real Parser::parseTerm() {
+  Real r = parseNumber();
   for (;;) {
-    Token token = ts->getToken();
-    if (token == "*" && ts->peekToken() != "<") r = r * parseNumber(ts);
-    else if (token == "/") r = r / parseNumber(ts);
+    Token token = ts.getToken();
+    if (token == "*" && ts.peekToken() != "<") r = r * parseNumber();
+    else if (token == "/") r = r / parseNumber();
     else {
-      ts->ungetToken(token);
+      ts.ungetToken(token);
       break;
     }
   }
   return r;
 }
 
-Real parseReal(TokenStream* ts) {
-  Real r = parseTerm(ts);
+Real Parser::parseReal() {
+  Real r = parseTerm();
   for (;;) {
-    Token token = ts->getToken();
-    if (token == "+") r = r + parseTerm(ts);
-    else if (token == "-") r = r - parseTerm(ts);
+    Token token = ts.getToken();
+    if (token == "+") r = r + parseTerm();
+    else if (token == "-") r = r - parseTerm();
     else {
-      ts->ungetToken(token);
+      ts.ungetToken(token);
       break;
     }
   }
   return r;
 }
 
-Real parseAngle(TokenStream* ts) {
-  return PI * parseReal(ts) / 180.0;
+Real Parser::parseAngle() {
+  return PI * parseReal() / 180.0;
 }
 
-Vect4 parseTriplet(TokenStream* ts) {
-  ts->expectToken("<");
+Vect4 Parser::parseTriplet() {
+  ts.expectToken("<");
   Vect4 v;
-  v[0] = parseReal(ts);
-  ts->expectToken(",");
-  v[1] = parseReal(ts);
-  ts->expectToken(",");
-  v[2] = parseReal(ts);
-  ts->expectToken(">");
+  v[0] = parseReal();
+  ts.expectToken(",");
+  v[1] = parseReal();
+  ts.expectToken(",");
+  v[2] = parseReal();
+  ts.expectToken(">");
   return v;
 }
 
-Vect4 parseVectorTerm(TokenStream* ts) {
+Vect4 Parser::parseVectorTerm() {
   Real coef = 1.0;
   Vect4 v;
-  if (ts->peekToken() != "<") {
-    coef = parseReal(ts);
-    ts->expectToken("*");
+  if (ts.peekToken() != "<") {
+    coef = parseReal();
+    ts.expectToken("*");
   }
-  v = parseTriplet(ts);
+  v = parseTriplet();
   for (;;) {
-    Token token = ts->peekToken();
+    Token token = ts.peekToken();
     if (token == "*") {
-      ts->getToken();
-      coef = coef * parseNumber(ts);
+      ts.getToken();
+      coef = coef * parseNumber();
     }
     else if (token == "/") {
-      ts->getToken();
-      coef = coef / parseNumber(ts);
+      ts.getToken();
+      coef = coef / parseNumber();
     }
     else break;
   }
   return coef * v;
 }
 
-Vect4 parseVector(TokenStream* ts) {
-  Vect4 v = parseVectorTerm(ts);
+Vect4 Parser::parseVector() {
+  Vect4 v = parseVectorTerm();
   for (;;) {
-    Token token = ts->getToken();
-    if (token == "+") v = v + parseVectorTerm(ts);
-    else if (token == "-") v = v - parseVectorTerm(ts);
+    Token token = ts.getToken();
+    if (token == "+") v = v + parseVectorTerm();
+    else if (token == "-") v = v - parseVectorTerm();
     else {
-      ts->ungetToken(token);
+      ts.ungetToken(token);
       break;
     }
   }
   return v;
 }
 
-Ray5Material parseMaterial(TokenStream* ts) {
+Ray5Material Parser::parseMaterial() {
   Ray5Material material;
-  ts->expectToken("{");
+  ts.expectToken("{");
   for (;;) {
-    Token token = ts->getToken();
+    Token token = ts.getToken();
     if (token == "shadowless") material.shadowless = 1;
     else if (token == "twosided") material.twosided = 1;
-    else if (token == "ambient") material.ambient = parseVector(ts);
-    else if (token == "diffuse") material.diffuse = parseVector(ts);
-    else if (token == "reflective") material.reflective = parseVector(ts);
+    else if (token == "ambient") material.ambient = parseVector();
+    else if (token == "diffuse") material.diffuse = parseVector();
+    else if (token == "reflective") material.reflective = parseVector();
     else if (token == "refractive") {
-      material.refractive = parseVector(ts);
-      material.refractive_index = parseReal(ts);
+      material.refractive = parseVector();
+      material.refractive_index = parseReal();
     }
-    else if (token == "specular") material.specular = parseReal(ts);
-    else if (token == "shininess") material.shininess = parseReal(ts);
+    else if (token == "specular") material.specular = parseReal();
+    else if (token == "shininess") material.shininess = parseReal();
     else {
-      ts->ungetToken(token);
+      ts.ungetToken(token);
       break;
     }
   }
-  ts->expectToken("}");
+  ts.expectToken("}");
   return material;
 }
 
-void parseModifiers(TokenStream* ts, Ray5Object* obj) {
+void Parser::parseModifiers(Ray5Object* obj) {
   for (;;) {
-    Token token = ts->getToken();
-    if (token == "translate") obj->translate(parseVector(ts));
-    else if (token == "scale") obj->scale(parseVector(ts));
+    Token token = ts.getToken();
+    if (token == "translate") obj->translate(parseVector());
+    else if (token == "scale") obj->scale(parseVector());
     else if (token == "rotate") {
-      token = ts->getToken();
-      if (token == "x") obj->xrotate(-parseAngle(ts));
-      else if (token == "y") obj->yrotate(-parseAngle(ts));
-      else if (token == "z") obj->zrotate(-parseAngle(ts));
-      else throw ParseError("_Axis_", token, ts->lineNumber());
+      token = ts.getToken();
+      if (token == "x") obj->xrotate(-parseAngle());
+      else if (token == "y") obj->yrotate(-parseAngle());
+      else if (token == "z") obj->zrotate(-parseAngle());
+      else throw ParseError("_Axis_", token, ts.lineNumber());
     }
-    else if (token == "material") obj->material = parseMaterial(ts);
+    else if (token == "material") obj->material = parseMaterial();
     else {
-      ts->ungetToken(token);
+      ts.ungetToken(token);
       break;
     }
   }
@@ -165,12 +163,12 @@ Ray5Box* Parser::parseBox() {
   else ts.getToken();
 
   ts.expectToken("{");
-  Vect4 upper = parseVector(&ts);
-  Vect4 lower = parseVector(&ts);
+  Vect4 upper = parseVector();
+  Vect4 lower = parseVector();
   Ray5Box* box = new Ray5Box();
   box->scale((upper - lower) / 2);
   box->translate((upper + lower) / 2);
-  parseModifiers(&ts, box);
+  parseModifiers(box);
   ts.expectToken("}");
   return box;
 }
@@ -180,12 +178,12 @@ Ray5Sphere* Parser::parseSphere() {
   else ts.getToken();
 
   ts.expectToken("{");
-  Vect4 center = parseVector(&ts);
-  Real radius = parseReal(&ts);
+  Vect4 center = parseVector();
+  Real radius = parseReal();
   Ray5Sphere* sphere = new Ray5Sphere();
   sphere->scale(Vect4(radius, radius, radius));
   sphere->translate(center);
-  parseModifiers(&ts, sphere);
+  parseModifiers(sphere);
   ts.expectToken("}");
   return sphere;
 }
@@ -196,9 +194,9 @@ Ray5Plane* Parser::parsePlane() {
 
   ts.expectToken("{");
   Ray5Plane* plane = new Ray5Plane();
-  plane->A = parseVector(&ts);
-  plane->N = parseVector(&ts);
-  parseModifiers(&ts, plane);
+  plane->A = parseVector();
+  plane->N = parseVector();
+  parseModifiers(plane);
   ts.expectToken("}");
   return plane;
 }
@@ -208,21 +206,21 @@ Triangle* Parser::parseTriangle() {
   else ts.getToken();
 
   ts.expectToken("{");
-  Vect4 a = parseVector(&ts);
-  Vect4 b = parseVector(&ts);
-  Vect4 c = parseVector(&ts);
+  Vect4 a = parseVector();
+  Vect4 b = parseVector();
+  Vect4 c = parseVector();
 
   Triangle* tri;
   if (ts.peekToken() == "<") {
     //This triangle has normal vectors too!
-    Vect4 n0 = parseVector(&ts);
-    Vect4 n1 = parseVector(&ts);
-    Vect4 n2 = parseVector(&ts);    
+    Vect4 n0 = parseVector();
+    Vect4 n1 = parseVector();
+    Vect4 n2 = parseVector();    
     tri = new InterpTriangle(a, b, c, n0, n1, n2);//uf test this
   }
   else tri = new Triangle(a, b, c);
 
-  parseModifiers(&ts, tri);
+  parseModifiers(tri);
   ts.expectToken("}");
   return tri;
 }
@@ -242,12 +240,12 @@ Light* Parser::parseLight() {
 
   ts.expectToken("{");
   Light* light = new Light();
-  light->position = parseVector(&ts);
-  light->color = parseVector(&ts);
+  light->position = parseVector();
+  light->color = parseVector();
   while (ts.peekToken() != "}") {
     Token token = ts.getToken();
-    if (token == "intensity") light->intensity = parseReal(&ts);
-    else if (token == "radius") light->radius = parseReal(&ts);    
+    if (token == "intensity") light->intensity = parseReal();
+    else if (token == "radius") light->radius = parseReal();    
     else if (token == "falloff") light->falloff = 1;
     else throw ParseError("_LightProperty_", token, ts.lineNumber());
   }
@@ -303,7 +301,7 @@ bool Parser::parsedBG(Ray5Scene* scene) {
   if (ts.peekToken() != "BGColor") return 0;
   
   ts.getToken();
-  scene->bgcolor = parseVector(&ts);
+  scene->bgcolor = parseVector();
   return 1;
 }
 
@@ -312,7 +310,7 @@ bool Parser::parsedCamera(Ray5Scene* scene) {
   else ts.getToken();
 
   ts.expectToken("{");
-  parseModifiers(&ts, &scene->camera); 
+  parseModifiers(&scene->camera); 
   ts.expectToken("}");
   return 1;
 }
