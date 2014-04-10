@@ -7,12 +7,13 @@ void skipLine(FILE* fp) {
   while (fgetc(fp) != '\n');
 }
 
-int readOBJ(const std::string& filename, Scene* scene) {
+ObjectSet readOBJ(const std::string& filename) {
   FILE* fp = fopen(filename.c_str(), "r");
-  if (!fp) return -1;
+  //uf throw exception
 
   std::vector<Vect4> vertices;
   std::vector<Vect4> normals;
+  ObjectSet set;
 
   while (!feof(fp)) {
     char buf[256];
@@ -40,11 +41,17 @@ int readOBJ(const std::string& filename, Scene* scene) {
 					       normals[a], normals[b], normals[c]);
       tri->material.diffuse = Vect4(1.0, 1.0, 1.0);
       tri->material.twosided = 1;
-      scene->addObject(tri);
+      set.add(tri);
     }
-    else printf("Don't know what's happening here: %s\n", buf);
+    else printf("Don't know what's happening here: %s\n", buf);//uf exception
   }
   
   fclose(fp);
+  return set;
+}
+
+int readOBJ(const std::string& filename, Scene* scene) {
+  ObjectSet set = readOBJ(filename);
+  for (int i = 0; i < set.count(); i++) scene->addObject(set[i]);
   return 0;
 }
