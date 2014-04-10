@@ -137,23 +137,7 @@ Material Parser::parseMaterial() {
 }
 
 void Parser::parseModifiers(Object* obj) {
-  for (;;) {
-    Token token = ts.getToken();
-    if (token == "translate") obj->translate(parseVector());
-    else if (token == "scale") obj->scale(parseVector());
-    else if (token == "rotate") {
-      token = ts.getToken();
-      if (token == "x") obj->xrotate(-parseAngle());
-      else if (token == "y") obj->yrotate(-parseAngle());
-      else if (token == "z") obj->zrotate(-parseAngle());
-      else throw ParseError("_Axis_", token, ts.lineNumber());
-    }
-    else if (token == "material") obj->material = parseMaterial();
-    else {
-      ts.ungetToken(token);
-      break;
-    }
-  }
+  while (parsedModifier(obj) || parsedMaterial(&obj->material));
 }
 
 Box* Parser::parseBox() {
@@ -269,6 +253,40 @@ bool Parser::parsedMacro() {
 
   ts.addMacro(macro);
   return 1;
+}
+
+bool Parser::parsedMaterialProperty(Material* mat) {
+  return 0;
+}
+
+bool Parser::parsedMaterial(Material* mat) {
+  if (ts.peekToken() != "material") return 0;
+  else ts.getToken();
+
+  *mat = parseMaterial();
+  return 1;
+}
+
+bool Parser::parsedModifier(Modifier* mod) {
+    Token token = ts.getToken();
+
+    if (token == "translate") 
+      mod->translate(parseVector());
+    else if (token == "scale") 
+      mod->scale(parseVector());
+    else if (token == "rotate") {
+      token = ts.getToken();
+      if (token == "x") mod->xrotate(-parseAngle());
+      else if (token == "y") mod->yrotate(-parseAngle());
+      else if (token == "z") mod->zrotate(-parseAngle());
+      else throw ParseError("_Axis_", token, ts.lineNumber());
+    }
+    else {
+      ts.ungetToken(token);
+      return 0;
+    }  
+
+    return 1;
 }
 
 bool Parser::parsedShape(Scene* scene) {

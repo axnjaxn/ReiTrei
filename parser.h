@@ -31,6 +31,9 @@ protected:
   Light* parseLight();
 
   bool parsedMacro();
+  bool parsedMaterialProperty(Material* mat);
+  bool parsedMaterial(Material* mat);
+  bool parsedModifier(Modifier* mod);
   bool parsedShape(Scene* scene);
   bool parsedMesh(Scene* scene);
   bool parsedLight(Scene* scene);
