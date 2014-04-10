@@ -280,10 +280,8 @@ bool Parser::parsedShape(Scene* scene) {
 bool Parser::parsedMesh(Scene* scene) {
   if (ts.peekToken() == "Obj") {
     ts.getToken();
-    ts.ungetToken(Token("teapot.obj"));//uf we have issues loading this
     printf("Attempting to load %s\n", ts.peekToken().c_str());
     readOBJ(ts.getToken().c_str(), scene);
-    ts.getToken();
     return 1;
   }
   else return 0;

@@ -65,7 +65,7 @@ void TokenStream::readToken() {
   //General tokens
   for (int i = 0; i < 1024; i++) {
     next = fgetc(fp);
-    if (isspace(next) || isenclosure(next) || isseparator(next)) {
+    if (isspace(next) || isenclosure(next) || isseparator(next) || feof(fp)) {
       ungetc(next, fp);
       break;
     }
