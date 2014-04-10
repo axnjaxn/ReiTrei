@@ -38,21 +38,11 @@ class Intersection {
   inline bool nearerThan(const Intersection& hit) {return (t > 0 && (hit.t < 0 || t < hit.t));}
 };
 
-class Object {
+class Modifier {
 protected:
   Mat4 M, N;
 
 public:
-  Material material;
-  
-  inline Object() {M = N = Mat4::identity();}
-  inline virtual ~Object() { }
-
-  Intersection intersects(const Vect4& O, const Vect4& D) const;
-  virtual Intersection intersectsUnit(const Vect4& O, const Vect4& D) const = 0;
-  virtual inline bool infBounds() const {return 0;}
-  virtual void getBounds(Vect4* lower, Vect4* upper);
-
   inline void scale(const Vect4& v) {
     M = Mat4::scaling(v) * M;
     N = N * Mat4::scaling(v.reciprocal());
@@ -73,6 +63,23 @@ public:
     M = Mat4::translation(v) * M;
     N = N * Mat4::translation(-v);
   }
+  inline void applyModifier(const Modifier& m) {
+    M = m.M * M;
+    N = N * m.N;
+  }
+};
+
+class Object : public Modifier {
+public:
+  Material material;
+  
+  inline Object() {M = N = Mat4::identity();}
+  inline virtual ~Object() { }
+
+  Intersection intersects(const Vect4& O, const Vect4& D) const;
+  virtual Intersection intersectsUnit(const Vect4& O, const Vect4& D) const = 0;
+  virtual inline bool infBounds() const {return 0;}
+  virtual void getBounds(Vect4* lower, Vect4* upper);
 };
 
 class ObjectSet {
