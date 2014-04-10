@@ -43,6 +43,8 @@ protected:
   Mat4 M, N;
 
 public:
+  inline Modifier() {M = N = Mat4::identity();}
+
   inline void scale(const Vect4& v) {
     M = Mat4::scaling(v) * M;
     N = N * Mat4::scaling(v.reciprocal());
@@ -73,7 +75,7 @@ class Object : public Modifier {
 public:
   Material material;
   
-  inline Object() {M = N = Mat4::identity();}
+  inline Object() : Modifier() { }
   inline virtual ~Object() { }
 
   Intersection intersects(const Vect4& O, const Vect4& D) const;
