@@ -4,6 +4,7 @@
 #include "scene.h"
 #include <string>
 
+ObjectSet readOBJ(const std::string& filename);
 int readOBJ(const std::string& filename, Scene* scene);
 
 #endif

@@ -290,13 +290,21 @@ bool Parser::parsedShape(Scene* scene) {
 }
 
 bool Parser::parsedMesh(Scene* scene) {
-  if (ts.peekToken() == "Obj") {
-    ts.getToken();
-    printf("Attempting to load %s\n", ts.peekToken().c_str());
-    readOBJ(ts.getToken().c_str(), scene);
-    return 1;
+  if (ts.peekToken() != "OBJ") return 0;
+  else ts.getToken();
+  
+  ts.expectToken("{");
+  ObjectSet set = readOBJ(ts.getToken());
+  Modifier mod;
+  Material mat;
+  while (parsedModifier(&mod) || parsedMaterial(&mat));
+  for (int i = 0; i < set.count(); i++) {
+    set[i]->applyModifier(mod);
+    set[i]->material = mat;
+    scene->addObject(set[i]);
   }
-  else return 0;
+  ts.expectToken("}");
+  return 1;
 }
 
 bool Parser::parsedLight(Scene* scene) {

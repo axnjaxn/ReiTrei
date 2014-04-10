@@ -39,8 +39,6 @@ ObjectSet readOBJ(const std::string& filename) {
       a--; b--; c--;
       InterpTriangle* tri = new InterpTriangle(vertices[a], vertices[b], vertices[c],
 					       normals[a], normals[b], normals[c]);
-      tri->material.diffuse = Vect4(1.0, 1.0, 1.0);
-      tri->material.twosided = 1;
       set.add(tri);
     }
     else printf("Don't know what's happening here: %s\n", buf);//uf exception
