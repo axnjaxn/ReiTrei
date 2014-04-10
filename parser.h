@@ -20,7 +20,6 @@ protected:
   Vect4 parseVectorTerm();
   Vect4 parseVector();
 
-  Material parseMaterial();
   void parseModifiers(Object* obj);
 
   Box* parseBox();

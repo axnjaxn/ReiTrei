@@ -111,31 +111,6 @@ Vect4 Parser::parseVector() {
   return v;
 }
 
-Material Parser::parseMaterial() {
-  Material material;
-  ts.expectToken("{");
-  for (;;) {
-    Token token = ts.getToken();
-    if (token == "shadowless") material.shadowless = 1;
-    else if (token == "twosided") material.twosided = 1;
-    else if (token == "ambient") material.ambient = parseVector();
-    else if (token == "diffuse") material.diffuse = parseVector();
-    else if (token == "reflective") material.reflective = parseVector();
-    else if (token == "refractive") {
-      material.refractive = parseVector();
-      material.refractive_index = parseReal();
-    }
-    else if (token == "specular") material.specular = parseReal();
-    else if (token == "shininess") material.shininess = parseReal();
-    else {
-      ts.ungetToken(token);
-      break;
-    }
-  }
-  ts.expectToken("}");
-  return material;
-}
-
 void Parser::parseModifiers(Object* obj) {
   while (parsedModifier(obj) || parsedMaterial(&obj->material));
 }
@@ -256,14 +231,33 @@ bool Parser::parsedMacro() {
 }
 
 bool Parser::parsedMaterialProperty(Material* mat) {
-  return 0;
+  Token token = ts.getToken();
+  if (token == "shadowless") mat->shadowless = 1;
+  else if (token == "twosided") mat->twosided = 1;
+  else if (token == "ambient") mat->ambient = parseVector();
+  else if (token == "diffuse") mat->diffuse = parseVector();
+  else if (token == "reflective") mat->reflective = parseVector();
+  else if (token == "refractive") {
+    mat->refractive = parseVector();
+    mat->refractive_index = parseReal();
+  }
+  else if (token == "specular") mat->specular = parseReal();
+  else if (token == "shininess") mat->shininess = parseReal();
+  else {
+    ts.ungetToken(token);
+    return 0;
+  }
+
+  return 1;
 }
 
 bool Parser::parsedMaterial(Material* mat) {
   if (ts.peekToken() != "material") return 0;
   else ts.getToken();
 
-  *mat = parseMaterial();
+  ts.expectToken("{");
+  while (parsedMaterialProperty(mat));
+  ts.expectToken("}");
   return 1;
 }
 
