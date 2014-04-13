@@ -4,7 +4,7 @@ Intersection Object::intersects(const Vect4& O, const Vect4& D) const {
   Intersection result = intersectsUnit(transformPoint(N, O), transformDirection(N, D));
   if (result.t > 0) {
     result.P = transformPoint(M, result.P);
-    result.N = transformDirection(N.transpose(), result.N);
+    result.N = transformDirection(N.transpose(), result.N).unit();
   }
   return result;
 }
