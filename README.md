@@ -1,7 +1,7 @@
 ReiTrei
 =======
 
-ReiTrei v1.1b1
+ReiTrei v1.1b2
 
 ReiTrei is a ray tracer, a program for rendering 3D scenes by simulating the path light takes as it enters a camera at different angles. ReiTrei has a number of interesting features: soft shadows, focal blur, and its own scene description language.
 
