@@ -363,6 +363,7 @@ void printUsage() {
   printf("\t--no-aa: Turn off anti-aliasing\n");
   printf("\t--aa-threshold: Set threshold (1-norm) for anti-aliasing\n");
   printf("\t--output filename: Set filename of rendered bitmap\n");
+  printf("\t--no-output: Suppress file output\n");
 }
 
 void drawPattern(Texture& screen) {
@@ -434,6 +435,9 @@ int main(int argc, char* argv[]) {
     else if (!strcmp(argv[i], "--output") || !strcmp(argv[i], "-o")) {
       output = argv[++i];
     }
+    else if (!strcmp(argv[i], "--no-output")) {
+      output = "";
+    }
     else {
       if (filename.empty()) {
 	filename = argv[i];
@@ -446,10 +450,10 @@ int main(int argc, char* argv[]) {
   }
 
   if (settings.show_preview) {
-    if (SDL_Init(SDL_INIT_VIDEO) < 0) return 1;
+    if (SDL_Init(SDL_INIT_VIDEO) < 0) return -1;
   }
   else {
-    if (SDL_Init(0) < 0) return 1;
+    if (SDL_Init(0) < 0) return -1;
   }
   atexit(SDL_Quit);
 
@@ -506,7 +510,8 @@ int main(int argc, char* argv[]) {
   printf("\tTotal time elapsed: %.3fs\n", 0.001 * (SDL_GetTicks() - started));
   fflush(0);
 
-  screen.save_filename(output);
+  if (output != "") 
+    screen.save_filename(output);
 
   if (settings.show_preview) {
     SDL_Event event;
