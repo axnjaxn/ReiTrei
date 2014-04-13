@@ -54,6 +54,50 @@ Intersection Box::intersectsUnit(const Vect4& O, const Vect4& D) const {
   return Intersection(this, t, P, N);
 }
 
+Intersection Cone::intersectsUnit(const Vect4& O, const Vect4& D) const {
+  Intersection best, hit;
+  Real t;
+  Vect4 N;
+  //Test to see if the caps are hit
+  if (has_caps && dot(D, Vect4(0, 1, 0)) != 0.0) {
+    N = Vect4(0, 1, 0);
+    t = dot(N - O, N) / dot(D, N);
+    hit = Intersection(this, t, O + t * D, N);
+    if (t >= 0 && sqDistance(hit.P, N) < 1.0) best = hit;
+    
+    N = Vect4(0, -1, 0);
+    t = dot(N - O, N) / dot(D, N);
+    hit = Intersection(this, t, O + t * D, N);
+    if (t >= 0 && sqDistance(hit.P, N) < 1.0 && hit.nearerThan(best))
+      best = hit;
+  }
+
+  Vect4 Oxz(O[0], 0, O[2]);
+  Vect4 Dxz(D[0], 0, D[2]);
+  Vect4 P;
+
+  Real a = dot(Dxz, Dxz);
+  Real b = 2 * dot(Oxz, Dxz);
+  Real c = dot(Oxz, Oxz) - 1;
+  Real discriminant = b * b - 4 * a * c;
+  if (discriminant < 0.0) return best;
+  discriminant = sqrt(discriminant);
+
+  t = (-b + discriminant) / (2 * a);
+  P = O + t * D;
+  N = Vect4(P[0], 0, P[2]);
+  hit = Intersection(this, t, P, N);
+  if (t >= 0 && P[1] >= -1 && P[1] <= 1 && hit.nearerThan(best)) best = hit;
+
+  t = (-b - discriminant) / (2 * a);
+  P = O + t * D;
+  N = Vect4(P[0], 0, P[2]);
+  hit = Intersection(this, t, P, N);
+  if (t >= 0 && P[1] >= -1 && P[1] <= 1 && hit.nearerThan(best)) best = hit;
+
+  return best;
+}
+
 Intersection Plane::intersectsUnit(const Vect4& O, const Vect4& D) const {
   Real t = dot(A - O, N) / dot(D, N);
 

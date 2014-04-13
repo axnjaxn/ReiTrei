@@ -145,6 +145,17 @@ Sphere* Parser::parseSphere() {
   return sphere;
 }
 
+Cone* Parser::parseCone() {
+  if (ts.peekToken() != "Cone") return NULL;
+  else ts.getToken();
+
+  ts.expectToken("{");
+  Cone* cone = new Cone();
+  parseModifiers(cone);
+  ts.expectToken("}");
+  return cone;
+}
+
 Plane* Parser::parsePlane() {
   if (ts.peekToken() != "Plane") return NULL;
   else ts.getToken();
@@ -186,6 +197,7 @@ Object* Parser::parseShape() {
   Object* obj;
   if (obj = parseBox()) return obj;
   else if (obj = parseSphere()) return obj;
+  else if (obj = parseCone()) return obj;
   else if (obj = parsePlane()) return obj;
   else if (obj = parseTriangle()) return obj;
   else return NULL;

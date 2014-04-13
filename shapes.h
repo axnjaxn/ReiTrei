@@ -13,6 +13,15 @@ public:
   virtual Intersection intersectsUnit(const Vect4& O, const Vect4& D) const;
 };
 
+class Cone : public Object {
+public:
+  bool has_caps;
+
+  Cone() : Object() {has_caps = 1;}
+
+  virtual Intersection intersectsUnit(const Vect4& O, const Vect4& D) const;
+};
+
 class Plane : public Object {
 public:
   Vect4 A, N;

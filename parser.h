@@ -24,6 +24,7 @@ protected:
 
   Box* parseBox();
   Sphere* parseSphere();
+  Cone* parseCone();
   Plane* parsePlane();
   Triangle* parseTriangle();
   Object* parseShape();
