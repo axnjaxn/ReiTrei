@@ -151,7 +151,12 @@ Cone* Parser::parseCone() {
 
   ts.expectToken("{");
   Cone* cone = new Cone();
-  parseModifiers(cone);
+  do {
+    if (ts.peekToken() == "nocaps") {
+      ts.getToken();
+      cone->has_caps = 0;
+    }
+  } while (parsedModifier(cone) || parsedMaterial(&cone->material));
   ts.expectToken("}");
   return cone;
 }
