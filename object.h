@@ -11,12 +11,12 @@ typedef enum {
 
 class Material {
  public:
-  bool shadowless, twosided;
+  bool invisible, shadowless, twosided;
   Vect4 ambient, reflective, refractive, diffuse;
   Real specular, shininess, refractive_index;
 
   Material() {
-    shadowless = twosided = 0;
+    invisible = shadowless = twosided = 0;
     specular = shininess = 0.0;
     refractive_index = 1.0;
   }

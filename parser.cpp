@@ -249,7 +249,8 @@ bool Parser::parsedMacro() {
 
 bool Parser::parsedMaterialProperty(Material* mat) {
   Token token = ts.getToken();
-  if (token == "shadowless") mat->shadowless = 1;
+  if (token == "invisible") mat->invisible = 1;
+  else if (token == "shadowless") mat->shadowless = 1;
   else if (token == "twosided") mat->twosided = 1;
   else if (token == "ambient") mat->ambient = parseVector();
   else if (token == "diffuse") mat->diffuse = parseVector();

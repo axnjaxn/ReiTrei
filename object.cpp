@@ -50,7 +50,7 @@ Intersection ObjectSet::intersect(const Vect4& O, const Vect4& D, TraceMode mode
   for (int i = 0; i < count(); i++) {
     next = objects[i]->intersects(O, D);
     if (next.nearerThan(nearest)) {
-      if (mode == TRACE_NORMAL 
+      if ((mode == TRACE_NORMAL  && !objects[i]->material.invisible)
 	  || (mode == TRACE_SHADOW && !objects[i]->material.shadowless)) nearest = next;
     }
   }
