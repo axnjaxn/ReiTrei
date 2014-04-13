@@ -2,11 +2,16 @@
 #include <cmath>
 
 Intersection Sphere::intersectsUnit(const Vect4& O, const Vect4& D) const {
-  Real discriminant = dot(D, O) * dot(D, O) - dot(D, D) * (dot(O, O) - 1);
-  if (discriminant < 0) return Intersection();
+  Real a = dot(D, D) / 2;
+  Real b = dot(D, O);
+  Real c = (dot(O, O) - 1) / 2;
 
-  Real t1 = (dot(-D, O) + sqrt(discriminant)) / dot(D, D);
-  Real t2 = (dot(-D, O) - sqrt(discriminant)) / dot(D, D);
+  Real discriminant = b * b - 4 * a * c;
+  if (discriminant < 0) return Intersection();
+  else discriminant = sqrt(discriminant);
+
+  Real t1 = (-b + discriminant) / (2 * a);
+  Real t2 = (-b - discriminant) / (2 * a);
   Real t = (t1 > 0 && (t2 <= 0 || t1 < t2))? t1 : t2;
   if (t <= 0) return Intersection();
 
