@@ -293,6 +293,11 @@ bool Parser::parsedModifier(Modifier* mod) {
       else if (token == "z") mod->zrotate(-parseAngle());
       else throw ParseError("_Axis_", token, ts.lineNumber());
     }
+    else if (token == "pinch") {
+      Real m = parseReal();
+      Real n = parseReal();
+      mod->pinch(m, n);
+    }
     else {
       ts.ungetToken(token);
       return 0;

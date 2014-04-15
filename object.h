@@ -65,6 +65,12 @@ public:
     M = Mat4::translation(v) * M;
     N = N * Mat4::translation(-v);
   }
+  inline void pinch(Real m, Real n) {
+    if (m == 0) m = EPS;
+    if (n == 0) n = EPS;
+    M = Mat4::pinch(m, n) * M;
+    N = N * Mat4::pinch(1 / m, 1 / n);
+  }
   inline void applyModifier(const Modifier& m) {
     M = m.M * M;
     N = N * m.N;

@@ -200,3 +200,11 @@ Mat4 Mat4::scaling(Real sx, Real sy, Real sz) {
   result.at(2, 2) = sz;
   return result;
 }
+
+Mat4 Mat4::pinch(Real m, Real n) {
+  Mat4 result;
+  result.at(0, 0) = result.at(2, 2) = m + n;
+  result.at(1, 1) = result.at(3, 3) = m * m + n * n;
+  result.at(1, 3) = result.at(3, 1) = m * m - n * n;
+  return result;
+}

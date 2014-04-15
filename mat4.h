@@ -77,6 +77,7 @@ public:
   static Mat4 zrotation(Real);
   static Mat4 translation(Real, Real, Real);
   static Mat4 scaling(Real, Real, Real);
+  static Mat4 pinch(Real, Real);
 
   inline static Mat4 translation(const Vect4& v) {return translation(v[0], v[1], v[2]);}
   inline static Mat4 scaling(const Vect4& v) {return scaling(v[0], v[1], v[2]);}
