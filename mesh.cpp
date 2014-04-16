@@ -48,8 +48,3 @@ ObjectSet readOBJ(const std::string& filename) {
   return set;
 }
 
-int readOBJ(const std::string& filename, Scene* scene) {
-  ObjectSet set = readOBJ(filename);
-  for (int i = 0; i < set.count(); i++) scene->addObject(set[i]);
-  return 0;
-}
