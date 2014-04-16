@@ -3,25 +3,11 @@ ReiTrei
 
 ReiTrei v1.1b3
 
+Release Notes: https://github.com/axnjaxn/ReiTrei/wiki/ReiTrei-1.1-Release-Notes
+
 ReiTrei is a ray tracer, a program for rendering 3D scenes by simulating the path light takes as it enters a camera at different angles. ReiTrei has a number of interesting features: soft shadows, focal blur, and its own scene description language.
 
 See the wiki at https://github.com/axnjaxn/ReiTrei/wiki for documentation of the scene file format and command line arguments.
-
-Beta Information
-----------------
-
-I've added a number of features for the beta, but haven't finished fully documenting them. Those are:
-
-* pinch operator (not totally finished)
-* invisible objects
-* cones and the nocaps operator
-* no-output mode
-* meshes with materials and modifiers from OBJ files
-* improved the parser and tokenizer
-* renamed a bunch of stuff
-* added Triangle and InterpTriangle
-* added imageMagick
-* fixed specular lighting and added CLI point-light command
 
 Compilation
 -----------
