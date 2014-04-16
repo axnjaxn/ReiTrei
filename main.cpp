@@ -467,7 +467,7 @@ int main(int argc, char* argv[]) {
     parser.parseInto(filename.c_str(), &scene);
   }
   catch (std::exception& e) {
-    printf("%s\n", e.what());
+    fprintf(stderr, "%s\n", e.what());
     return 1;
   }
   scene.init();

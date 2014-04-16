@@ -370,7 +370,6 @@ void Parser::parseInto(const char* filename, Scene* scene) {
   else {
     while (!ts.eof() && (ts.peekToken() != "EOF")) 
       if (!parsedSceneItem(scene)) {
-	printf("%d\n", ts.lineNumber());
 	throw ParseError("_SceneItem_", ts.getToken(), ts.lineNumber());
       }
     ts.close();
