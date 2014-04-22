@@ -7,7 +7,6 @@ EXT =
 ifndef MINGW
 LFLAGS += 
 DFLAGS += 
-OBJECT_FILES += zipreader.o
 else
 LFLAGS += -lmingw32 -mwindows -lSDL2main -static-libgcc -static-libstdc++
 DFLAGS += -DMINGW -DNO_STDIO_REDIRECT
@@ -36,6 +35,7 @@ OBJECT_FILES = \
 	texture.o \
 	pixelrenderer.o \
 	renderqueue.o \
+	trace.o \
 	main.o
 
 all: $(APP)
@@ -53,3 +53,6 @@ clean:
 
 run: $(APP) tricol.ray
 	./$(APP) tricol.ray --point-lights
+
+test: $(APP) scenes/pinch.ray
+	./$(APP) scenes/pinch.ray --no-aa
