@@ -1,4 +1,3 @@
-#define MAX_RECURSE 10
 #define TITLE "ReiTrei"
 //#define NO_GRID
 
@@ -16,6 +15,7 @@ public:
   int nsamples;
   int nrenders;
   int nshadows;
+  int recurse_depth;
   bool coherence;
   bool point_lights;
   float dof_range;
@@ -25,6 +25,7 @@ public:
   RenderSettings() {
     show_preview = 1;
     nworkers = nsamples = nrenders = nshadows = 1;
+    recurse_depth = 10;
     coherence = point_lights = 0;
     dof_range = 0.0;
     aa_enabled = 1;
@@ -57,7 +58,7 @@ inline Vect4 refract(const Vect4& D, Vect4 N, Real n) {
 Vect4 traceRay(const Scene& scene, const Vect4& O, const Vect4& D, int nrecurse = 0) {
   Vect4 color;
   
-  if (nrecurse >= MAX_RECURSE) return color;
+  if (nrecurse >= settings.recurse_depth) return color;
  
   Intersection nearest = scene.intersect(O, D);
 
@@ -357,6 +358,7 @@ void printUsage() {
   printf("\t--renders : Turn on multirendering for statistical effects\n");
   printf("\t--samples : Turn on multisampling for statistical effects\n");
   printf("\t--shadows : Set soft-shadow sampling rate\n");
+  printf("\t--recursion-depth: Set the maximum depth for reflection / refraction\n");
   printf("\t--dof-degrees degrees: Allow DOF by rotating around the focal point\n");
   printf("\t--coherence: Turn on coherent rendering mode\n");
   printf("\t--point-lights: Force all light sources to behave as point lights\n");
@@ -411,6 +413,9 @@ int main(int argc, char* argv[]) {
     }
     else if (!strcmp(argv[i], "--shadows")) {
       sscanf(argv[++i], "%d", &settings.nshadows);
+    }
+    else if (!strcmp(argv[i], "--recursion-depth")) {
+      sscanf(argv[++i], "%d", &settings.recurse_depth);
     }
     else if (!strcmp(argv[i], "--coherent")) {
       settings.coherence = 1;
