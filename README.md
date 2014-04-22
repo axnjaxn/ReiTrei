@@ -1,7 +1,7 @@
 ReiTrei
 =======
 
-ReiTrei v1.1b3
+ReiTrei v1.1
 
 Release Notes: https://github.com/axnjaxn/ReiTrei/wiki/ReiTrei-1.1-Release-Notes
 
@@ -25,4 +25,4 @@ Dependencies
 ------------
 
 SDL 2.0
-libMagick++ (optional)
+libMagick++ (optional: adds png, jpg, gif support among other things)
