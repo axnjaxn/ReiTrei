@@ -363,6 +363,12 @@ bool Parser::parsedSceneItem(Scene* scene) {
 	  || parsedCamera(scene));
 }
 
+void Parser::setConstant(const std::string& name, const std::string&  value) {
+  Macro macro(name);
+  macro.addToken(value);
+  ts.addMacro(macro);
+}
+
 void Parser::parseInto(const char* filename, Scene* scene) {
   if (ts.open(filename)) {
     throw ParseError("Couldn't open scene file.");

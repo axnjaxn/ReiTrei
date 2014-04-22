@@ -43,6 +43,7 @@ protected:
   bool parsedSceneItem(Scene* scene);
 
 public:  
+  void setConstant(const std::string& name, const std::string& value);
   void parseInto(const char* filename, Scene* scene);
 };
 
