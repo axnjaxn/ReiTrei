@@ -47,6 +47,9 @@ Intersection Triangle::intersectsUnit(const Vect4& O, const Vect4& D) const {
 }
   
 void Triangle::getBounds(Vect4* lower, Vect4* upper) {
+  Vect4 a = transformPoint(M, this->a);
+  Vect4 b = transformPoint(M, this->b);
+  Vect4 c = transformPoint(M, this->c);
   *lower = *upper = a;
   for (int i = 0; i < 3; i++) {
     if (b[i] < (*lower)[i]) (*lower)[i] = b[i];
