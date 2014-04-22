@@ -62,9 +62,9 @@ void Triangle::getBounds(Vect4* lower, Vect4* upper) {
 InterpTriangle::InterpTriangle(const Vect4& a, const Vect4& b, const Vect4& c,
 			       const Vect4& n, const Vect4& n1, const Vect4& n2)
   : Triangle(a, b, c) {
-  normal0 = n;
-  normal1 = n1;
-  normal2 = n2;
+  normal0 = n.unit();
+  normal1 = n1.unit();
+  normal2 = n2.unit();
 }
 
 Intersection InterpTriangle::intersectsUnit(const Vect4& O, const Vect4& D) const {
