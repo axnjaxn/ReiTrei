@@ -2,6 +2,7 @@
 #include "triangle.h"
 #include <cstdio>
 #include <cstring>
+#include <stdexcept>
 
 void skipLine(FILE* fp) {
   while (fgetc(fp) != '\n');
@@ -9,7 +10,9 @@ void skipLine(FILE* fp) {
 
 ObjectSet readOBJ(const std::string& filename) {
   FILE* fp = fopen(filename.c_str(), "r");
-  //uf throw exception
+  if (!fp) {
+    throw std::runtime_error("Could not open OBJ file");
+  }
 
   std::vector<Vect4> vertices;
   std::vector<Vect4> normals;
@@ -41,7 +44,7 @@ ObjectSet readOBJ(const std::string& filename) {
 					       normals[a], normals[b], normals[c]);
       set.add(tri);
     }
-    else printf("Don't know what's happening here: %s\n", buf);//uf exception
+    else throw std::runtime_error("Could not interpret OBJ file.");
   }
   
   fclose(fp);
