@@ -320,7 +320,39 @@ bool Parser::parsedMesh(Scene* scene) {
   ObjectSet set = readOBJ(ts.getToken());
   Modifier mod;
   Material mat;
-  while (parsedModifier(&mod) || parsedMaterial(&mat));
+  do {
+    Token token = ts.peekToken();
+    printf("%s\n", token.c_str());
+    if (token.substr(0, 4) == "unit") {
+      bool x = 0, y = 0, z = 0;
+      for (int i = 4; i < token.size(); i++)
+	if (token[i] == 'x' && !x) x = 1;
+	else if (token[i] == 'y' && !y) y = 1;
+	else if (token[i] == 'z' && !z) z = 1;
+	else {
+	  x = y = z = 0;
+	  break;
+	}
+      if (x || y || z) {
+	ts.getToken();
+	Vect4 lower, upper;
+	set.getBounds(&lower, &upper);
+	Vect4 scale = Vect4(!x, !y, !z) + 2 * Vect4(x, y, z).multComp(upper - lower).reciprocal();
+	for (int i = 0; i < set.count(); i++)
+	  set[i]->scale(scale);
+	continue;
+      }
+    }
+    else if (token == "center") {
+      ts.getToken();
+      Vect4 lower, upper;
+      set.getBounds(&lower, &upper);
+      Vect4 center = (lower + upper) / 2;
+      for (int i = 0; i < set.count(); i++)
+	set[i]->translate(-center);
+      continue;      
+    }
+  } while (parsedModifier(&mod) || parsedMaterial(&mat));
   for (int i = 0; i < set.count(); i++) {
     set[i]->applyModifier(mod);
     set[i]->material = mat;
