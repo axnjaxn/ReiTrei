@@ -280,36 +280,70 @@ bool Parser::parsedMaterial(Material* mat) {
 }
 
 bool Parser::parsedModifier(Modifier* mod) {
-    Token token = ts.getToken();
+  Token token = ts.getToken();
 
-    if (token == "translate") 
-      mod->translate(parseVector());
-    else if (token == "scale") 
-      mod->scale(parseVector());
-    else if (token == "rotate") {
-      token = ts.getToken();
-      if (token == "x") mod->xrotate(-parseAngle());
-      else if (token == "y") mod->yrotate(-parseAngle());
-      else if (token == "z") mod->zrotate(-parseAngle());
-      else throw ParseError("_Axis_", token, ts.lineNumber());
-    }
-    else if (token == "pinch") {
-      Real m = parseReal();
-      Real n = parseReal();
-      mod->pinch(m, n);
-    }
-    else {
-      ts.ungetToken(token);
-      return 0;
-    }  
+  if (token == "translate") 
+    mod->translate(parseVector());
+  else if (token == "scale") 
+    mod->scale(parseVector());
+  else if (token == "rotate") {
+    token = ts.getToken();
+    if (token == "x") mod->xrotate(-parseAngle());
+    else if (token == "y") mod->yrotate(-parseAngle());
+    else if (token == "z") mod->zrotate(-parseAngle());
+    else throw ParseError("_Axis_", token, ts.lineNumber());
+  }
+  else if (token == "pinch") {
+    Real m = parseReal();
+    Real n = parseReal();
+    mod->pinch(m, n);
+  }
+  else {
+    ts.ungetToken(token);
+    return 0;
+  }  
 
-    return 1;
+  return 1;
 }
 
 bool Parser::parsedShape(Scene* scene) {
   Object* obj = parseShape();
   if (obj) scene->addObject(obj);
   return obj;
+}
+
+bool Parser::parsedSetModifiers(ObjectSet* set) {
+  Token token = ts.getToken();
+
+  if (token == "unit") {
+    Vect4 lower, upper;
+    set->getBounds(&lower, &upper);
+
+    Real scale;
+
+    token = ts.getToken();
+    if (token == "x") scale = (upper[0] - lower[0]) / 2;
+    else if (token == "y") scale = (upper[1] - lower[1]) / 2;
+    else if (token == "z") scale = (upper[2] - lower[2]) / 2;
+    else throw ParseError("_Axis_", token, ts.lineNumber());
+
+    for (int i = 0; i < set->count(); i++)
+      (*set)[i]->scale(Vect4(1, 1, 1) / scale);
+  }
+  else if (token == "center") {
+    Vect4 lower, upper;
+    set->getBounds(&lower, &upper);
+
+    Vect4 center = (lower + upper) / 2;
+    for (int i = 0; i < set->count(); i++)
+      (*set)[i]->translate(-center);
+  }
+  else {
+    ts.ungetToken(token);
+    return 0;
+  }
+
+  return 1;
 }
 
 bool Parser::parsedMesh(Scene* scene) {
@@ -321,40 +355,13 @@ bool Parser::parsedMesh(Scene* scene) {
   Modifier mod;
   Material mat;
   do {
-    Token token = ts.peekToken();
-    printf("%s\n", token.c_str());
-    if (token.substr(0, 4) == "unit") {
-      bool x = 0, y = 0, z = 0;
-      for (int i = 4; i < token.size(); i++)
-	if (token[i] == 'x' && !x) x = 1;
-	else if (token[i] == 'y' && !y) y = 1;
-	else if (token[i] == 'z' && !z) z = 1;
-	else {
-	  x = y = z = 0;
-	  break;
-	}
-      if (x || y || z) {
-	ts.getToken();
-	Vect4 lower, upper;
-	set.getBounds(&lower, &upper);
-	Vect4 scale = Vect4(!x, !y, !z) + 2 * Vect4(x, y, z).multComp(upper - lower).reciprocal();
-	for (int i = 0; i < set.count(); i++)
-	  set[i]->scale(scale);
-	continue;
-      }
-    }
-    else if (token == "center") {
-      ts.getToken();
-      Vect4 lower, upper;
-      set.getBounds(&lower, &upper);
-      Vect4 center = (lower + upper) / 2;
+    if (parsedModifier(&mod)) {
       for (int i = 0; i < set.count(); i++)
-	set[i]->translate(-center);
-      continue;      
+	set[i]->applyModifier(mod);
+      continue;
     }
-  } while (parsedModifier(&mod) || parsedMaterial(&mat));
+  } while (parsedSetModifiers(&set) || parsedMaterial(&mat));
   for (int i = 0; i < set.count(); i++) {
-    set[i]->applyModifier(mod);
     set[i]->material = mat;
     scene->addObject(set[i]);
   }

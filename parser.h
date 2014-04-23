@@ -35,6 +35,8 @@ protected:
   bool parsedMaterial(Material* mat);
   bool parsedModifier(Modifier* mod);
   bool parsedShape(Scene* scene);
+
+  bool parsedSetModifiers(ObjectSet* set);
   bool parsedMesh(Scene* scene);
   bool parsedLight(Scene* scene);
   bool parsedBG(Scene* scene);
