@@ -208,3 +208,18 @@ Mat4 Mat4::pinch(Real m, Real n) {
   result.at(1, 3) = result.at(3, 1) = m - n;
   return result;
 }
+
+Vect4 transformPoint(const Mat4& M, Vect4 v) {
+  v[3] = 1;
+  v = M * v;
+  v = v / v[3];
+  v[3] = 0;
+  return v;
+}
+
+Vect4 transformDirection(const Mat4& M, Vect4 v) {
+  v[3] = 0;
+  v = M * v;
+  v[3] = 0;
+  return v;
+}
