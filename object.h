@@ -12,7 +12,7 @@ typedef enum {
 class Material {
  public:
   bool invisible, shadowless, twosided;
-  Vect4 ambient, reflective, refractive, diffuse;
+  Vect3 ambient, reflective, refractive, diffuse;
   Real specular, shininess, refractive_index;
 
   Material() {
@@ -29,10 +29,10 @@ class Intersection {
  public:
   const Object* obj;
   Real t;
-  Vect4 P, N;
+  Vect3 P, N;
 
   Intersection() {obj = NULL; t = -1;}
-  Intersection(const Object* obj, Real t, const Vect4& P, const Vect4& N) {
+  Intersection(const Object* obj, Real t, const Vect3& P, const Vect3& N) {
     this->obj = obj; this->t = t; this->P = P; this->N = N;
   }
   inline bool nearerThan(const Intersection& hit) {return (t > 0 && (hit.t < 0 || t < hit.t));}
@@ -45,7 +45,7 @@ protected:
 public:
   inline Modifier() {M = N = Mat4::identity();}
 
-  inline void scale(const Vect4& v) {
+  inline void scale(const Vect3& v) {
     M = Mat4::scaling(v) * M;
     N = N * Mat4::scaling(v.reciprocal());
   }
@@ -61,7 +61,7 @@ public:
     M = Mat4::zrotation(th) * M;
     N = N * Mat4::zrotation(th).transpose();
   }
-  inline void translate(const Vect4& v) {
+  inline void translate(const Vect3& v) {
     M = Mat4::translation(v) * M;
     N = N * Mat4::translation(-v);
   }
@@ -84,10 +84,10 @@ public:
   inline Object() : Modifier() { }
   inline virtual ~Object() { }
 
-  Intersection intersects(const Vect4& O, const Vect4& D) const;
-  virtual Intersection intersectsUnit(const Vect4& O, const Vect4& D) const = 0;
+  Intersection intersects(const Vect3& O, const Vect3& D) const;
+  virtual Intersection intersectsUnit(const Vect3& O, const Vect3& D) const = 0;
   virtual inline bool infBounds() const {return 0;}
-  virtual void getBounds(Vect4* lower, Vect4* upper);
+  virtual void getBounds(Vect3* lower, Vect3* upper);
 };
 
 class ObjectSet {
@@ -101,8 +101,8 @@ class ObjectSet {
   inline int count() const {return objects.size();}
 
   int countBounded() const;
-  Intersection intersect(const Vect4& O, const Vect4& D, TraceMode mode = TRACE_NORMAL) const;
-  void getBounds(Vect4* L, Vect4* U) const;
+  Intersection intersect(const Vect3& O, const Vect3& D, TraceMode mode = TRACE_NORMAL) const;
+  void getBounds(Vect3* L, Vect3* U) const;
 };
 
 #endif

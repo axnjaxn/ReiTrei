@@ -37,7 +37,7 @@ Texture::~Texture() {
 Texture& Texture::operator=(const Texture& screen) {
   buffer = NULL;
   setDimensions(screen.w, screen.h);
-  memcpy(buffer, screen.buffer, w * h * sizeof(Vect4));
+  memcpy(buffer, screen.buffer, w * h * sizeof(Vect3));
   return *this;
 }
 
@@ -45,14 +45,14 @@ void Texture::setDimensions(int w, int h) {
   if (buffer) delete [] buffer;
 
   this->w = w; this->h = h;
-  buffer = new Vect4 [w * h];
+  buffer = new Vect3 [w * h];
 }
 
 Texture Texture::differenceMap() const {
   Texture map;
   map.setDimensions(w, h);
 
-  Vect4 Gx, Gy, G;
+  Vect3 Gx, Gy, G;
   for (int r = 1; r < h - 1; r++)
     for (int c = 1; c < w - 1; c++) {
       Gx = getColor(r, c + 1) - getColor(r, c - 1);
@@ -99,7 +99,7 @@ void Texture::saveBMP(const char* filename) const {
   fwrite(exthead, 1, 40, fp);
 
   //Color pixel data, bottom to top, and padded on one side
-  Vect4 color;
+  Vect3 color;
   int pad_bytes = (w * 3) % 4;
   if (pad_bytes) pad_bytes = 4 - pad_bytes;
   for (int r = h - 1; r >= 0; r--) {
@@ -128,7 +128,7 @@ void Texture::load_filename(const std::string& fn) {
   int nshifts = 0;
   for (int i = MaxRGB >> 8; i & 1; i = i >> 1) nshifts++;
   
-  Vect4 color;
+  Vect3 color;
   for (int r = 0; r < h; r++)
     for (int c = 0; c < w; c++) {
       color[0] = (packet[r * w + c].red >> nshifts) / 255.0;
@@ -152,7 +152,7 @@ void Texture::save_filename(const std::string& fn) const {
   int nshifts = 0;
   for (int i = MaxRGB >> 8; i & 1; i = i >> 1) nshifts++;
   
-  Vect4 color;
+  Vect3 color;
   for (int r = 0; r < h; r++)
     for (int c = 0; c < w; c++) {
       color = getColor(r, c);

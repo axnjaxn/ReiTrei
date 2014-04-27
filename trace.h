@@ -8,7 +8,7 @@
 
 extern RenderSettings settings;
 
-Vect4 traceRay(const Scene& scene, const Vect4& O, const Vect4& D, int nrecurse = 0);
+Vect3 traceRay(const Scene& scene, const Vect3& O, const Vect3& D, int nrecurse = 0);
 void traceAt(const Scene& scene, Texture& screen, int r, int c);
 void traceAt_AA(const Scene& scene, Texture& screen, int r, int c);
 

@@ -62,9 +62,9 @@ Real Parser::parseAngle() {
   return PI * parseReal() / 180.0;
 }
 
-Vect4 Parser::parseTriplet() {
+Vect3 Parser::parseTriplet() {
   ts.expectToken("<");
-  Vect4 v;
+  Vect3 v;
   v[0] = parseReal();
   ts.expectToken(",");
   v[1] = parseReal();
@@ -74,9 +74,9 @@ Vect4 Parser::parseTriplet() {
   return v;
 }
 
-Vect4 Parser::parseVectorTerm() {
+Vect3 Parser::parseVectorTerm() {
   Real coef = 1.0;
-  Vect4 v;
+  Vect3 v;
   if (ts.peekToken() != "<") {
     coef = parseReal();
     ts.expectToken("*");
@@ -97,8 +97,8 @@ Vect4 Parser::parseVectorTerm() {
   return coef * v;
 }
 
-Vect4 Parser::parseVector() {
-  Vect4 v = parseVectorTerm();
+Vect3 Parser::parseVector() {
+  Vect3 v = parseVectorTerm();
   for (;;) {
     Token token = ts.getToken();
     if (token == "+") v = v + parseVectorTerm();
@@ -120,8 +120,8 @@ Box* Parser::parseBox() {
   else ts.getToken();
 
   ts.expectToken("{");
-  Vect4 upper = parseVector();
-  Vect4 lower = parseVector();
+  Vect3 upper = parseVector();
+  Vect3 lower = parseVector();
   Box* box = new Box();
   box->scale((upper - lower) / 2);
   box->translate((upper + lower) / 2);
@@ -135,10 +135,10 @@ Sphere* Parser::parseSphere() {
   else ts.getToken();
 
   ts.expectToken("{");
-  Vect4 center = parseVector();
+  Vect3 center = parseVector();
   Real radius = parseReal();
   Sphere* sphere = new Sphere();
-  sphere->scale(Vect4(radius, radius, radius));
+  sphere->scale(Vect3(radius, radius, radius));
   sphere->translate(center);
   parseModifiers(sphere);
   ts.expectToken("}");
@@ -179,16 +179,16 @@ Triangle* Parser::parseTriangle() {
   else ts.getToken();
 
   ts.expectToken("{");
-  Vect4 a = parseVector();
-  Vect4 b = parseVector();
-  Vect4 c = parseVector();
+  Vect3 a = parseVector();
+  Vect3 b = parseVector();
+  Vect3 c = parseVector();
 
   Triangle* tri;
   if (ts.peekToken() == "<") {
     //This triangle has normal vectors too!
-    Vect4 n0 = parseVector();
-    Vect4 n1 = parseVector();
-    Vect4 n2 = parseVector();    
+    Vect3 n0 = parseVector();
+    Vect3 n1 = parseVector();
+    Vect3 n2 = parseVector();    
     tri = new InterpTriangle(a, b, c, n0, n1, n2);//uf test this
   }
   else tri = new Triangle(a, b, c);
@@ -316,7 +316,7 @@ bool Parser::parsedSetModifiers(ObjectSet* set) {
   Token token = ts.getToken();
 
   if (token == "unit") {
-    Vect4 lower, upper;
+    Vect3 lower, upper;
     set->getBounds(&lower, &upper);
 
     Real scale;
@@ -328,13 +328,13 @@ bool Parser::parsedSetModifiers(ObjectSet* set) {
     else throw ParseError("_Axis_", token, ts.lineNumber());
 
     for (int i = 0; i < set->count(); i++)
-      (*set)[i]->scale(Vect4(1, 1, 1) / scale);
+      (*set)[i]->scale(Vect3(1, 1, 1) / scale);
   }
   else if (token == "center") {
-    Vect4 lower, upper;
+    Vect3 lower, upper;
     set->getBounds(&lower, &upper);
 
-    Vect4 center = (lower + upper) / 2;
+    Vect3 center = (lower + upper) / 2;
     for (int i = 0; i < set->count(); i++)
       (*set)[i]->translate(-center);
   }

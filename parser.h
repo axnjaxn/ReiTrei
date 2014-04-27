@@ -16,9 +16,9 @@ protected:
 
   Real parseAngle();
 
-  Vect4 parseTriplet();
-  Vect4 parseVectorTerm();
-  Vect4 parseVector();
+  Vect3 parseTriplet();
+  Vect3 parseVectorTerm();
+  Vect3 parseVector();
 
   void parseModifiers(Object* obj);
 

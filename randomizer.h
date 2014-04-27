@@ -19,7 +19,7 @@ public:
   void advanceSeed();
 
   float uniform();
-  Vect4 randomSpherical(float radius);
+  Vect3 randomSpherical(float radius);
 };
 
 extern Randomizer randomizer;

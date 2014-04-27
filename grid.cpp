@@ -1,12 +1,12 @@
 #include "grid.h"
 
-void Grid::getGridCorners(Vect4& lower, Vect4& upper) const {
+void Grid::getGridCorners(Vect3& lower, Vect3& upper) const {
   lower = upper = corner;
   for (int i = 0; i < 3; i++)
     upper[i] += (count[i] + 1) * size[i];
 }
 
-void Grid::getCellCorners(Vect4& lower, Vect4& upper, CellNumber cell) const {
+void Grid::getCellCorners(Vect3& lower, Vect3& upper, CellNumber cell) const {
   for (int i = 0; i < 3; i++) {
     lower[i] = corner[i] + size[i] * cell[i];
     upper[i] = lower[i] + size[i];
@@ -19,7 +19,7 @@ bool Grid::isInGrid(CellNumber cell) const {
   return 1;
 }
 
-void Grid::getCellNumber(const Vect4& v, CellNumber cell) const {
+void Grid::getCellNumber(const Vect3& v, CellNumber cell) const {
   Real x;
   for (int i = 0; i < 3; i++) {
     x = v[i] - corner[i];//Translate v to grid-space
@@ -41,10 +41,10 @@ Grid::Grid(const ObjectSet& objects) {
   /*
    * Determine bounding box extrema, size, and reference corner
    */ 
-  Vect4 L, U;
+  Vect3 L, U;
   objects.getBounds(&L, &U);
-  L = L - Vect4(1, 1, 1) * EPS;
-  U = U + Vect4(1, 1, 1) * EPS;
+  L = L - Vect3(1, 1, 1) * EPS;
+  U = U + Vect3(1, 1, 1) * EPS;
   corner = L;
   size = U - L;
  
@@ -72,7 +72,7 @@ Grid::Grid(const ObjectSet& objects) {
    * Insert objects into appropriate cells
    */
 
-  Vect4 Lobj, Uobj;
+  Vect3 Lobj, Uobj;
   CellNumber lbound, ubound, cell;
   for (int i = 0; i < objects.count(); i++) {
     if (objects[i]->infBounds()) {
@@ -91,7 +91,7 @@ Grid::Grid(const ObjectSet& objects) {
   }
 }
 
-Intersection Grid::intersect(const Vect4& O, const Vect4& D, TraceMode mode) const {
+Intersection Grid::intersect(const Vect3& O, const Vect3& D, TraceMode mode) const {
   Intersection best = outer.intersect(O, D, mode), test;  
   CellNumber cell; //Current cell
   Real t0, t1;//t values for entry and exit wrt cell
@@ -114,7 +114,7 @@ Intersection Grid::intersect(const Vect4& O, const Vect4& D, TraceMode mode) con
     t1 = test.t;
   }
 
-  Vect4 lower, upper; //Cell corners
+  Vect3 lower, upper; //Cell corners
   Real t;
   int axis = 0;
   do {

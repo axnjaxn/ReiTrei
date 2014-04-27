@@ -19,10 +19,10 @@ float Randomizer::uniform() {
 #endif
 }
 
-Vect4 Randomizer::randomSpherical(float radius) {
+Vect3 Randomizer::randomSpherical(float radius) {
   Real theta = 2 * PI * uniform(), phi = PI * uniform();
   Real ct = cos(theta), st = sin(theta), cp = cos(phi), sp = sin(phi);
-  return Vect4(st * cp, st * sp, ct, 0.0) * radius;
+  return Vect3(st * cp, st * sp, ct) * radius;
 }
 
 Randomizer randomizer;

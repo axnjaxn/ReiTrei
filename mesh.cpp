@@ -14,8 +14,8 @@ ObjectSet readOBJ(const std::string& filename) {
     throw std::runtime_error("Could not open OBJ file");
   }
 
-  std::vector<Vect4> vertices;
-  std::vector<Vect4> normals;
+  std::vector<Vect3> vertices;
+  std::vector<Vect3> normals;
   ObjectSet set;
 
   while (!feof(fp)) {
@@ -27,12 +27,12 @@ ObjectSet readOBJ(const std::string& filename) {
       skipLine(fp);
     }
     else if (!strcmp(buf, "v")) {
-      Vect4 v;
+      Vect3 v;
       fscanf(fp, "%lf%lf%lf", &v[0], &v[1], &v[2]);
       vertices.push_back(v);
     }      
     else if (!strcmp(buf, "vn")) {
-      Vect4 vn;
+      Vect3 vn;
       fscanf(fp, "%lf%lf%lf", &vn[0], &vn[1], &vn[2]);
       normals.push_back(vn.unit());
     }

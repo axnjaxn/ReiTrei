@@ -6,7 +6,7 @@
 #include "parser.h"
 #include "randomizer.h"
 
-std::string toString(const Vect4& v) {
+std::string toString(const Vect3& v) {
   static char buf[256];
   sprintf(buf, "<%6.3lf, %6.3f, %6.3lf>", v[0], v[1], v[2]);
   return std::string(buf);
@@ -35,7 +35,7 @@ SDL_Window* window = NULL;
 PixelRenderer* px = NULL;
 
 void redraw(const Texture& screen) {
-  Vect4 color;
+  Vect3 color;
   for (int r = 0; r < screen.height(); r++) {
     for (int c = 0; c < screen.width(); c++) {
       color = screen.getColor(r, c);
@@ -66,7 +66,7 @@ int renderThread_AA(void* v) {
 }
 
 void drawRow(Texture& screen, int r) {
-  Vect4 color;
+  Vect3 color;
   for (int c = 0; c < screen.width(); c++) {
     color = screen.getColor(r, c);
     px->set(r, c, toByte(color[0]), toByte(color[1]), toByte(color[2]));
@@ -80,7 +80,7 @@ void render(Scene& scene, Texture& screen, int renderno = 0, int outof = 1) {
     SDL_SetWindowTitle(window, titlebuf);
   }
 
-  Vect4 color;
+  Vect3 color;
   bool exitflag = 0;
 
   int v; //Return value from threads
@@ -147,7 +147,7 @@ void render(Scene& scene, Texture& screen, int renderno = 0, int outof = 1) {
     }
     
     for (int c = 1; c < screen.width() - 1; c++) {
-      d = dot(dmap.getColor(r, c), Vect4(1, 1, 1, 0));
+      d = dot(dmap.getColor(r, c), Vect3(1, 1, 1));
       if (d > settings.aa_threshold) rq.push(r, c);
     }
 
@@ -203,7 +203,7 @@ void printUsage() {
 }
 
 void drawPattern(Texture& screen) {
-  Vect4 black(0.0, 0.0, 0.0), gray(0.125, 0.125, 0.125);
+  Vect3 black(0.0, 0.0, 0.0), gray(0.125, 0.125, 0.125);
   for (int r = 0; r < screen.height(); r++)
     for (int c = 0; c < screen.width(); c++) {
       if (((r + c) / 5) % 2) screen.setColor(r, c, gray);

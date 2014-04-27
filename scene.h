@@ -26,7 +26,7 @@ protected:
 
 public:
   Camera camera;
-  Vect4 bgcolor;
+  Vect3 bgcolor;
   
   static Scene* getInstance() {
     static Scene scene;
@@ -43,7 +43,7 @@ public:
 
   inline void init() {grid = Grid(objects);}
   
-  inline Intersection intersect(const Vect4& O, const Vect4& D, TraceMode mode = TRACE_NORMAL) const {
+  inline Intersection intersect(const Vect3& O, const Vect3& D, TraceMode mode = TRACE_NORMAL) const {
 #ifdef NO_GRID
     return objects.intersect(O, D, mode);
 #else

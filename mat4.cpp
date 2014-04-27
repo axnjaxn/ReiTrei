@@ -38,14 +38,6 @@ Mat4 Mat4::operator*(const Mat4& m) const {
   return result;
 }
 
-Vect4 Mat4::operator*(const Vect4& v) const {
-  Vect4 result;
-  for (int r = 0; r < 4; r++)
-    for (int c = 0; c < 4; c++)
-      result[r] += v[c] * at(r, c);//Test this
-  return result;
-}
-
 Mat4 Mat4::operator*(Real f) const {
   Mat4 result;
   for (int i = 0; i < 16; i++) result.entries[i] = entries[i] * f;
@@ -86,6 +78,29 @@ Mat4 Mat4::reciprocal() const {
     for (int c = 0; c < 4; c++)
       result.at(r, c) = 1.0 / at(r, c);
   return result;
+}
+
+Vect3 Mat4::mult(const Vect3& v) const {
+  Vect3 result;
+  for (int r = 0; r < 3; r++) {
+    for (int c = 0; c < 3; c++)
+      result[r] += v[c] * at(r, c);
+  }
+  return result;
+}
+
+Vect3 Mat4::mult(const Vect3& v, Real w) const {
+  Vect3 result;
+  Real W = 0.0;
+  for (int r = 0; r < 3; r++) {
+    for (int c = 0; c < 3; c++)
+      result[r] += v[c] * at(r, c);
+    result[r] += w * at(r, 3);
+  }
+  for (int c = 0; c < 3; c++)
+    W += v[c] * at(3, c);
+  W += w * at(3, 3);
+  return result / W;
 }
 
 Mat4 Mat4::identity() {
@@ -145,17 +160,10 @@ Mat4 Mat4::pinch(Real m, Real n) {
   return result;
 }
 
-Vect4 transformPoint(const Mat4& M, Vect4 v) {
-  v[3] = 1;
-  v = M * v;
-  v = v / v[3];
-  v[3] = 0;
-  return v;
+Vect3 transformPoint(const Mat4& M, Vect3 v) {
+  return M.mult(v, 1);
 }
 
-Vect4 transformDirection(const Mat4& M, Vect4 v) {
-  v[3] = 0;
-  v = M * v;
-  v[3] = 0;
-  return v;
+Vect3 transformDirection(const Mat4& M, Vect3 v) {
+  return M.mult(v);
 }

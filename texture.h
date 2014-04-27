@@ -11,7 +11,7 @@
 
 class Texture {
  protected:
-  Vect4* buffer;
+  Vect3* buffer;
   int w, h;
 
   void saveBMP(const char* filename) const;
@@ -28,8 +28,8 @@ class Texture {
   inline int height() const {return h;}
 
   void setDimensions(int w, int h);
-  inline void setColor(int r, int c, const Vect4& color) {buffer[r * w + c] = color;}
-  inline const Vect4& getColor(int r, int c) const {return buffer[r * w + c];}
+  inline void setColor(int r, int c, const Vect3& color) {buffer[r * w + c] = color;}
+  inline const Vect3& getColor(int r, int c) const {return buffer[r * w + c];}
 
   Texture differenceMap() const;
 

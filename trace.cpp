@@ -3,11 +3,11 @@
 
 RenderSettings settings;
 
-inline Vect4 reflect(const Vect4& D, Vect4 N) {
+inline Vect3 reflect(const Vect3& D, Vect3 N) {
   return (D + (2 * N * -dot(N, D))).unit();
 }
 
-inline Vect4 refract(const Vect4& D, Vect4 N, Real n) {
+inline Vect3 refract(const Vect3& D, Vect3 N, Real n) {
   Real c1 = -dot(D, N);
   if (c1 > 0) n = 1.0 / n; //This is an entrance.
   else if (abs(c1) < EPS) return D;//I don't bother with nearly parallel refraction
@@ -19,8 +19,8 @@ inline Vect4 refract(const Vect4& D, Vect4 N, Real n) {
   return n * D + (n * c1 - c2) * N;
 }
 
-Vect4 traceRay(const Scene& scene, const Vect4& O, const Vect4& D, int nrecurse) {
-  Vect4 color;
+Vect3 traceRay(const Scene& scene, const Vect3& O, const Vect3& D, int nrecurse) {
+  Vect3 color;
   
   if (nrecurse >= settings.recurse_depth) return color;
  
@@ -33,21 +33,21 @@ Vect4 traceRay(const Scene& scene, const Vect4& O, const Vect4& D, int nrecurse)
 
   //Reflective lighting
   if (nonzero(nearest.obj->material.reflective)) {
-    Vect4 _D = reflect(D, nearest.N);
-    Vect4 _O = nearest.P + EPS * _D;
+    Vect3 _D = reflect(D, nearest.N);
+    Vect3 _O = nearest.P + EPS * _D;
     color += nearest.obj->material.reflective.multComp(traceRay(scene, _O, _D, nrecurse + 1));
   }
 
   //Refractive lighting
   if (nonzero(nearest.obj->material.refractive)) {
-    Vect4 _D = refract(D, nearest.N, nearest.obj->material.refractive_index);
-    Vect4 _O = nearest.P + EPS * _D;
+    Vect3 _D = refract(D, nearest.N, nearest.obj->material.refractive_index);
+    Vect3 _O = nearest.P + EPS * _D;
     color += nearest.obj->material.refractive.multComp(traceRay(scene, _O, _D, nrecurse + 1));
   }
 
   //Lighting-dependent color
   for (int l = 0; l < scene.countLights(); l++) {
-    Vect4 lv, shadow_ray;
+    Vect3 lv, shadow_ray;
     Real diffuse_power = 0.0, specular_power = 0.0, coef;
     for (int s = 0; s < settings.nshadows; s++) {
       if (settings.point_lights)
@@ -61,7 +61,7 @@ Vect4 traceRay(const Scene& scene, const Vect4& O, const Vect4& D, int nrecurse)
 
       //Specular
       if (nearest.obj->material.specular > 0 && nearest.obj->material.shininess > 0) {
-	Vect4 R = reflect(D, nearest.N);
+	Vect3 R = reflect(D, nearest.N);
 	coef = dot(shadow_ray, R);
 
 	if (scene.getLight(l)->falloff) coef /= lv.sqLength();
@@ -89,7 +89,7 @@ Vect4 traceRay(const Scene& scene, const Vect4& O, const Vect4& D, int nrecurse)
 void traceAt(const Scene& scene, Texture& screen, int r, int c) {
   if (settings.coherence) randomizer.reseed();
 
-  Vect4 O, D, color;
+  Vect3 O, D, color;
   float rmag, rth, rx, ry;
   Camera camera;
   for (int i = 0; i < settings.nsamples; i++) {    
@@ -115,7 +115,7 @@ void traceAt(const Scene& scene, Texture& screen, int r, int c) {
 void traceAt_AA(const Scene& scene, Texture& screen, int r, int c) {
   if (settings.coherence) randomizer.reseed();
 
-  Vect4 O, D, color;
+  Vect3 O, D, color;
   float rmag, rth, rx, ry;
   Camera camera;
   for (int i = 0; i < settings.nsamples; i++) {    

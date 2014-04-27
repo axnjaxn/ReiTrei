@@ -1,7 +1,7 @@
 #include "shapes.h"
 #include <cmath>
 
-Intersection Sphere::intersectsUnit(const Vect4& O, const Vect4& D) const {
+Intersection Sphere::intersectsUnit(const Vect3& O, const Vect3& D) const {
   Real a = dot(D, D) / 2;
   Real b = dot(D, O);
   Real c = (dot(O, O) - 1) / 2;
@@ -15,11 +15,11 @@ Intersection Sphere::intersectsUnit(const Vect4& O, const Vect4& D) const {
   Real t = (t1 > 0 && (t2 <= 0 || t1 < t2))? t1 : t2;
   if (t <= 0) return Intersection();
 
-  Vect4 P = O + t * D;
+  Vect3 P = O + t * D;
   return Intersection(this, t, P, P);
 }  
 
-Intersection Box::intersectsUnit(const Vect4& O, const Vect4& D) const {
+Intersection Box::intersectsUnit(const Vect3& O, const Vect3& D) const {
   Real Tmin[3], Tmax[3];
   for (int i = 0; i < 3; i++)
     if (D[i] > 0) {
@@ -50,8 +50,8 @@ Intersection Box::intersectsUnit(const Vect4& O, const Vect4& D) const {
   Real t = (t0 > 0 && (t1 <= 0 || t0 < t1))? t0 : t1;
   if (t <= 0) return Intersection();
 
-  Vect4 P = O + t * D;
-  Vect4 N;
+  Vect3 P = O + t * D;
+  Vect3 N;
   for (int i = 0; i < 3; i++)
     if (P[i] >= 1 - EPS) N[i] = 1;
     else if (P[i] <= -1 + EPS) N[i] = -1;
@@ -59,27 +59,27 @@ Intersection Box::intersectsUnit(const Vect4& O, const Vect4& D) const {
   return Intersection(this, t, P, N);
 }
 
-Intersection Cone::intersectsUnit(const Vect4& O, const Vect4& D) const {
+Intersection Cone::intersectsUnit(const Vect3& O, const Vect3& D) const {
   Intersection best, hit;
   Real t;
-  Vect4 N;
+  Vect3 N;
   //Test to see if the caps are hit
-  if (has_caps && dot(D, Vect4(0, 1, 0)) != 0.0) {
-    N = Vect4(0, 1, 0);
+  if (has_caps && dot(D, Vect3(0, 1, 0)) != 0.0) {
+    N = Vect3(0, 1, 0);
     t = dot(N - O, N) / dot(D, N);
     hit = Intersection(this, t, O + t * D, N);
     if (t >= 0 && sqDistance(hit.P, N) < 1.0) best = hit;
     
-    N = Vect4(0, -1, 0);
+    N = Vect3(0, -1, 0);
     t = dot(N - O, N) / dot(D, N);
     hit = Intersection(this, t, O + t * D, N);
     if (t >= 0 && sqDistance(hit.P, N) < 1.0 && hit.nearerThan(best))
       best = hit;
   }
 
-  Vect4 Oxz(O[0], 0, O[2]);
-  Vect4 Dxz(D[0], 0, D[2]);
-  Vect4 P;
+  Vect3 Oxz(O[0], 0, O[2]);
+  Vect3 Dxz(D[0], 0, D[2]);
+  Vect3 P;
 
   Real a = dot(Dxz, Dxz);
   Real b = 2 * dot(Oxz, Dxz);
@@ -90,20 +90,20 @@ Intersection Cone::intersectsUnit(const Vect4& O, const Vect4& D) const {
 
   t = (-b + discriminant) / (2 * a);
   P = O + t * D;
-  N = Vect4(P[0], 0, P[2]);
+  N = Vect3(P[0], 0, P[2]);
   hit = Intersection(this, t, P, N);
   if (t >= 0 && P[1] >= -1 && P[1] <= 1 && hit.nearerThan(best)) best = hit;
 
   t = (-b - discriminant) / (2 * a);
   P = O + t * D;
-  N = Vect4(P[0], 0, P[2]);
+  N = Vect3(P[0], 0, P[2]);
   hit = Intersection(this, t, P, N);
   if (t >= 0 && P[1] >= -1 && P[1] <= 1 && hit.nearerThan(best)) best = hit;
 
   return best;
 }
 
-Intersection Plane::intersectsUnit(const Vect4& O, const Vect4& D) const {
+Intersection Plane::intersectsUnit(const Vect3& O, const Vect3& D) const {
   Real t = dot(A - O, N) / dot(D, N);
 
   if (t > 0) return Intersection(this, t, O + t * D, N);
