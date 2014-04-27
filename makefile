@@ -23,6 +23,7 @@ endif
 APP = $(APPNAME)$(EXT)
 
 OBJECT_FILES = \
+	vect.o \
 	mat4.o \
 	randomizer.o \
 	object.o \
