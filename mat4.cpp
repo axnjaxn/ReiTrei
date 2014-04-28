@@ -159,11 +159,3 @@ Mat4 Mat4::pinch(Real m, Real n) {
   result.at(1, 3) = result.at(3, 1) = m - n;
   return result;
 }
-
-Vect3 transformPoint(const Mat4& M, Vect3 v) {
-  return M.mult(v, 1);
-}
-
-Vect3 transformDirection(const Mat4& M, Vect3 v) {
-  return M.mult(v);
-}

@@ -1,24 +1,36 @@
 #include "object.h"
 
+Vect3 Modifier::pointToObject(const Vect3& v) const {return N.mult(v, 1);}
+
+Vect3 Modifier::directionToObject(const Vect3& v) const {return N.mult(v);}
+
+Vect3 Modifier::normalToObject(const Vect3& v) const {return M.transpose().mult(v).unit();}
+
+Vect3 Modifier::pointToWorld(const Vect3& v) const {return M.mult(v, 1);}
+
+Vect3 Modifier::directionToWorld(const Vect3& v) const {return M.mult(v);}
+
+Vect3 Modifier::normalToWorld(const Vect3& v) const {return N.transpose().mult(v).unit();}
+
 Intersection Object::intersects(const Vect3& O, const Vect3& D) const {
-  Intersection result = intersectsUnit(transformPoint(N, O), transformDirection(N, D));
+  Intersection result = intersectsUnit(pointToObject(O), directionToObject(D));
   if (result.t > 0) {
-    result.P = transformPoint(M, result.P);
-    result.N = transformDirection(N.transpose(), result.N).unit();
+    result.P = pointToWorld(result.P);
+    result.N = normalToWorld(result.N);
   }
   return result;
 }
 
 void Object::getBounds(Vect3* lower, Vect3* upper) {
   Vect3 corners[8];
-  corners[0] = transformPoint(M, Vect3(-1, -1, -1));
-  corners[1] = transformPoint(M, Vect3(-1, -1, 1));
-  corners[2] = transformPoint(M, Vect3(-1, 1, -1));
-  corners[3] = transformPoint(M, Vect3(-1, 1, 1));
-  corners[4] = transformPoint(M, Vect3(1, -1, -1));
-  corners[5] = transformPoint(M, Vect3(1, -1, 1));
-  corners[6] = transformPoint(M, Vect3(1, 1, -1));
-  corners[7] = transformPoint(M, Vect3(1, 1, 1));
+  corners[0] = pointToWorld(Vect3(-1, -1, -1));
+  corners[1] = pointToWorld(Vect3(-1, -1, 1));
+  corners[2] = pointToWorld(Vect3(-1, 1, -1));
+  corners[3] = pointToWorld(Vect3(-1, 1, 1));
+  corners[4] = pointToWorld(Vect3(1, -1, -1));
+  corners[5] = pointToWorld(Vect3(1, -1, 1));
+  corners[6] = pointToWorld(Vect3(1, 1, -1));
+  corners[7] = pointToWorld(Vect3(1, 1, 1));
   
   Vect3 U, L;
   U = L = corners[0];

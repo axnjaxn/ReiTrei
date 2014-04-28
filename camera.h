@@ -19,8 +19,8 @@ public:
     cellw = xrange * 2 * tan(fov / 2) / pxw;
     cellh = yrange * 2 * tan(fov / 2) / pxh;
   }
-  inline Vect3 getOrigin() const {return transformPoint(M, Vect3());}
-  inline Vect3 getDirection(Real r, Real c) const {return transformDirection(M, Vect3((c  - pxw / 2) * cellw, -(r - pxh / 2) * cellh, 1).unit()).unit();}
+  inline Vect3 getOrigin() const {return pointToWorld(Vect3());}
+  inline Vect3 getDirection(Real r, Real c) const {return directionToWorld(Vect3((c  - pxw / 2) * cellw, -(r - pxh / 2) * cellh, 1)).unit();}
 };
 
 #endif

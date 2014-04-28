@@ -48,7 +48,4 @@ public:
 
 inline Mat4 operator*(Real f, const Mat4& m) {return m * f;}
 
-Vect3 transformPoint(const Mat4& M, Vect3 v);
-Vect3 transformDirection(const Mat4& M, Vect3 v);
-
 #endif

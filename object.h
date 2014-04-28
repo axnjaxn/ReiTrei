@@ -68,13 +68,20 @@ public:
   inline void pinch(Real m, Real n) {
     if (m == 0) m = EPS;
     if (n == 0) n = EPS;
-    M = Mat4::pinch(m, n) * M;
-    N = N * Mat4::pinch(1 / m, 1 / n);
+    M = Mat4::pinch(1 / m, 1 / n) * M;
+    N = N * Mat4::pinch(m, n);
   }
   inline void applyModifier(const Modifier& m) {
     M = m.M * M;
     N = N * m.N;
   }
+
+  Vect3 pointToObject(const Vect3&) const;
+  Vect3 directionToObject(const Vect3&) const;
+  Vect3 normalToObject(const Vect3&) const;
+  Vect3 pointToWorld(const Vect3&) const;
+  Vect3 directionToWorld(const Vect3&) const;
+  Vect3 normalToWorld(const Vect3&) const;
 };
 
 class Object : public Modifier {
