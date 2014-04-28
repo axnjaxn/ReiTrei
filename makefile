@@ -54,6 +54,3 @@ clean:
 
 run: $(APP) tricol.ray
 	./$(APP) tricol.ray --point-lights
-
-test: $(APP) scenes/pinch.ray
-	./$(APP) scenes/pinch.ray --no-aa
